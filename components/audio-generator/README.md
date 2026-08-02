@@ -17,12 +17,12 @@ The generator creates constrained surprises. A human listens, rates, and decides
 
 ## What is included
 
-- 73 source WAV files: 21 beds and 52 gestures
-- `config/generator.xml`: the machine-readable source of truth
+- `config/generator.xml`: the machine-readable source of truth for 90 locally managed audio assets
 - `config/generator.xsd`: validation schema for the XML
-- `data/HPR-Audio-Generator.xlsx`: the human-facing production workbook
 - a dependency-free Python reference generator
 - tests, documentation, and empty output folders
+
+Licensed source WAV files, generated audio, and the live production workbook are intentionally excluded from this public repository.
 
 ## First run
 
@@ -41,7 +41,7 @@ Generated candidates are written to `audio/output/candidates/`. Their IDs, seeds
 ## Source of truth
 
 - Software reads `config/generator.xml`.
-- Humans review and curate in the canonical [HPR Audio Generator Google Sheet](https://docs.google.com/spreadsheets/d/1FMn9FkLIMa5SL9_ZnA9NKVo0qUYFxqDQG_-ubW_69CA/edit).
+- Humans review and curate in a private operational workbook.
 - WAV files remain immutable ingredients.
 - Generated audio is reproducible from recipe ID, generator version, and seed.
 

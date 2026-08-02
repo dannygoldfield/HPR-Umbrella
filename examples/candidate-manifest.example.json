@@ -1,0 +1,20 @@
+{
+  "plan": {
+    "candidate_id": "HPR-example-9s-VP-012-AR-009-seed-2026080201",
+    "portrait": "workspace/portraits/example.tif",
+    "grain": "workspace/grain/filmgrain.mov",
+    "duration_sec": 9,
+    "seed": 2026080201,
+    "video_preset": "VP-012",
+    "audio_recipe": "AR-009",
+    "silent_video": "workspace/output/work/HPR-example-9s-VP-012-AR-009-seed-2026080201/silent.mp4",
+    "soundtrack": "workspace/output/work/HPR-example-9s-VP-012-AR-009-seed-2026080201/soundtrack.wav",
+    "final_video": "workspace/output/candidates/HPR-example-9s-VP-012-AR-009-seed-2026080201.mp4",
+    "manifest": "workspace/output/candidates/HPR-example-9s-VP-012-AR-009-seed-2026080201.json"
+  },
+  "video_generator_version": "0.1.0",
+  "audio_generator_version": "0.3.0",
+  "audio_bed_id": "SA-B-016",
+  "audio_gesture_id": "SA-G-011",
+  "audio_music_stem_id": null
+}
