@@ -1,0 +1,28 @@
+.DS_Store
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+dist/
+build/
+
+# HPR source and generated media remain local.
+workspace/
+media/
+audio/
+output/
+*.wav
+*.mp3
+*.mp4
+*.mov
+*.prproj
+
+# Private operational data and credentials.
+*.xlsx
+*.xls
+.env
+.env.*
+!.env.example
+credentials*.json
+secrets*.json
