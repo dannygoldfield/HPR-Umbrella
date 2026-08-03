@@ -1,6 +1,6 @@
 # HPR Umbrella
 
-HPR Umbrella is the custom production system for [How People Relate](https://danielg805.sg-host.com/), a daily series of seven-, nine-, and eleven-second looping portrait videos by photographer Danny Goldfield.
+HPR Umbrella is the custom production system for [How People Relate](https://danielg805.sg-host.com/)(Temp page for future dannygoldfield.com site), a daily series of seven-, nine-, and eleven-second looping portrait videos by photographer Danny Goldfield.
 
 The system automates repetitive production steps while leaving portrait selection, movement, timing, sound, sequencing, and final approval to the artist.
 
