@@ -8,7 +8,7 @@ The system automates repetitive production steps while leaving portrait selectio
 
 ## Why it exists
 
-How People Relate draws from an archive of hundreds of thousands of photographs. Publishing a carefully considered video every day requires a system that can generate possibilities without pretending to make artistic judgments.
+How People Relate draws from an archive of many thousands of photographs. Publishing a carefully considered video every day requires a system that can generate possibilities without pretending to make artistic judgments.
 
 HPR Umbrella is centered on a Candidate Engine with focused media plugins:
 
