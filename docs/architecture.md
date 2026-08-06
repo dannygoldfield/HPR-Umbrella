@@ -1,6 +1,20 @@
 # Architecture
 
-HPR Umbrella is a modular, human-in-the-loop production system. Component boundaries prevent technical automation from quietly becoming artistic decision-making.
+HPR Umbrella is a modular, human-in-the-loop production system. The Candidate Engine is the architectural center. Media plugins make assets; the engine turns those assets into finite choices and preserves the human editorial record.
+
+## Candidate Engine
+
+The Candidate Engine owns:
+
+- the 120 archive episode slots;
+- deterministic candidate-set planning;
+- separate Visual, Audio, Pair, and Publishing banks;
+- review status, 0–5 ratings, notes, banking, rejection, and selection;
+- unique-audio retirement after final selection;
+- replaceable photo sources without losing the creative assembly;
+- provenance and regeneration instructions.
+
+It does not make artistic selections. A failed pair never implies that its visual or audio component failed.
 
 ## Audio Generator
 
@@ -33,7 +47,7 @@ Output:
 
 The Video Generator knows nothing about audio, pairing, publishing, or selection.
 
-## Candidate Generator
+## Candidate assembly
 
 Input:
 
@@ -50,7 +64,31 @@ Output:
 - assembled review MP4;
 - a combined JSON provenance manifest.
 
-The Candidate Generator validates that audio and video durations agree, coordinates generation, and muxes the result. It does not rate, rank, approve, or publish candidates.
+The Candidate Engine validates that audio and video durations agree, coordinates generation, and muxes the result. It stores ratings and decisions supplied by the artist but does not infer or automate them.
+
+## Archive production model
+
+```text
+120 archive episodes
+├── 40 × 7 seconds
+├── 40 × 9 seconds
+└── 40 × 11 seconds
+
+Visual bank: 5 candidates per episode = 600
+Audio bank: 50 per duration = 150
+Pair bank: 10 options after each visual selection
+Publishing bank: 120 final slots, each requiring unique audio
+```
+
+Now mode is a future input mode and is outside the current production build.
+
+## Replaceable photo source
+
+An episode owns the creative assembly, not a particular export of the photograph. Replacing a photo increments its revision and marks visual/final renders stale while preserving the selected motion recipe, duration, audio, optional text treatment, and publication metadata.
+
+## Text Plugin boundary
+
+Text remains a nondestructive optional layer. The initial treatment is a minimal “How People Relate” identity element considered only after the audio-video master is selected. Channel-specific necessity remains an editorial decision.
 
 ## Human boundary
 

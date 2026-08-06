@@ -10,21 +10,24 @@ The system automates repetitive production steps while leaving portrait selectio
 
 How People Relate draws from an archive of hundreds of thousands of photographs. Publishing a carefully considered video every day requires a system that can generate possibilities without pretending to make artistic judgments.
 
-HPR Umbrella separates that work into three focused components:
+HPR Umbrella is centered on a Candidate Engine with focused media plugins:
 
 | Component | Responsibility | Does not decide |
 | --- | --- | --- |
-| [Audio Generator](components/audio-generator/) | Builds reproducible, loop-ready soundtracks from constrained recipes | Which soundtrack is right |
-| [Video Generator](components/video-generator/) | Builds silent, loop-safe vertical videos from portrait photographs | Which movement best serves a portrait |
-| [Candidate Generator](components/candidate-generator/) | Coordinates audio and video, creates review candidates, and records provenance | Which candidate becomes the published work |
+| [Candidate Engine](components/candidate-generator/) | Plans finite option sets, maintains separate banks, coordinates plugins, and records human decisions | Which candidate becomes the published work |
+| [Audio Plugin](components/audio-generator/) | Builds reproducible, loop-ready soundtracks from constrained recipes | Which soundtrack is right |
+| [Video Plugin](components/video-generator/) | Builds silent, loop-safe vertical videos from portrait photographs | Which movement best serves a portrait |
+| Text Plugin | Adds optional nondestructive identity treatments after a pair is selected | Whether text is needed for a channel |
 
 ## How the system works
 
 ```mermaid
 flowchart LR
-    P[Portrait archive] --> V[Video Generator]
-    A[Private audio library] --> G[Audio Generator]
-    V --> C[Candidate Generator]
+    P[Portrait archive] --> C[Candidate Engine]
+    A[Private audio library] --> C
+    C --> V[Video Plugin]
+    C --> G[Audio Plugin]
+    V --> C
     G --> C
     C --> R[Review candidates]
     R --> H[Human selection]
@@ -37,9 +40,10 @@ Each candidate can be recreated from its portrait, duration, presets, recipes, g
 
 - **Audio Generator:** implemented with deterministic recipes for 7-, 9-, and 11-second loops.
 - **Video Generator:** implemented with 31 loop-safe motion presets for 1080 × 1920 video.
-- **Candidate Generator:** implemented for deterministic batch planning, coordinated generation, audio/video assembly, and JSON provenance manifests.
+- **Candidate Engine:** now implements the 120-episode archive production plan, separate Audio/Visual/Pair/Publishing banks, deterministic option sets, independent component review fields, and replaceable photo sources.
 - **Human review:** deliberately remains outside the automated decision path.
-- **Text Generator:** excluded from this version of the Umbrella.
+- **Text Plugin:** deferred until selected audio-video masters are ready.
+- **Now mode:** explicitly deferred; the archive workflow is the production focus.
 
 Portraits, licensed audio, generated videos, workbooks, and private production data are intentionally excluded from this public repository.
 
@@ -74,6 +78,19 @@ python -m hpr_candidate_generator.cli plan \
 ```
 
 Production rendering requires Python 3.11 or newer, FFmpeg, and the locally managed portrait, grain, and licensed audio libraries. See [Workflow](docs/workflow.md) for setup and use.
+
+## Plan the 120-video archive production run
+
+Prepare a CSV with `portrait_id,path` columns and exactly 120 selected portraits, then run:
+
+```bash
+hpr-candidate archive-plan \
+  --portraits-csv workspace/archive-portraits.csv \
+  --seed 2026080601 \
+  --output workspace/archive-production
+```
+
+The dry run creates 120 episode records, 600 visual options, 150 unique audio plans, an empty Pair bank awaiting visual selections, and 120 Publishing slots.
 
 ## Documentation
 

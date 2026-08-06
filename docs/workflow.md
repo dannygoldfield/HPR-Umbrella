@@ -29,7 +29,63 @@ workspace/
 
 The audio configuration records the expected paths and metadata for licensed local assets.
 
-## 3. Plan candidates
+## 3. Prepare the archive portrait manifest
+
+Create `workspace/archive-portraits.csv` with exactly 120 rows:
+
+```csv
+portrait_id,path
+POR-001,workspace/portraits/portrait-001.tif
+POR-002,workspace/portraits/portrait-002.tif
+```
+
+The portrait is replaceable later. `portrait_id` identifies the editorial source; the path identifies its current rendered export.
+
+## 4. Plan the complete production run
+
+```bash
+hpr-candidate archive-plan \
+  --portraits-csv workspace/archive-portraits.csv \
+  --seed 2026080601 \
+  --output workspace/archive-production
+```
+
+This is a dry run. It writes separate JSONL banks and a summary before rendering media:
+
+```text
+archive-production/
+  archive-production-plan.json
+  banks/
+    episodes.jsonl
+    visual.jsonl
+    audio.jsonl
+    pair.jsonl
+    publishing.jsonl
+```
+
+The initial Pair bank is empty. Pair candidates are created only after a visual is selected.
+
+## 5. Visual review
+
+Render five restrained motion candidates for each portrait. Review in finite sets. Cull first, then rate survivors. A 5 means bankable or publishable; rejection is 0 and remains distinct from a low survivor rating.
+
+## 6. Audio bank
+
+Generate 50 unique tracks at each duration using the successful existing audio methods and source library. Audio remains independently reviewable and bankable.
+
+## 7. Pair review
+
+After selecting one visual for an episode, surface 10 compatible audio options. Record visual, audio, and pair ratings separately. Rejected combinations return unselected components to their banks. Selecting a final pair retires its audio from future final use.
+
+## 8. Last look and photo replacement
+
+If skin tone, color, or another photographic issue is discovered, replace the source export. Preserve the selected motion recipe, duration, audio, optional text treatment, and publication metadata. Rerender only the visual and dependent final master.
+
+## 9. Text and publishing
+
+Consider the optional “How People Relate” treatment only after the audio-video master is selected. Store published masters and metadata permanently. Disposable low-rated renders may be regenerated from their records.
+
+## Legacy single-candidate planning
 
 Planning creates deterministic IDs and output paths without rendering:
 
@@ -47,7 +103,7 @@ hpr-candidate plan \
 The selected audio recipe must have the same duration as the candidate.
 If no audio recipe is supplied, the Candidate Generator chooses the default seamless ambient recipe for 7, 9, or 11 seconds.
 
-## 4. Generate candidates
+## Legacy generation
 
 After local media is available, replace `plan` with `generate`. For every seed, the Candidate Generator:
 
@@ -56,11 +112,11 @@ After local media is available, replace `plan` with `generate`. For every seed, 
 3. muxes the streams without re-encoding the picture;
 4. writes an MP4 and adjacent JSON manifest.
 
-## 5. Review and select
+## Review boundary
 
 Generated candidates enter a human review queue. Approval is an explicit artistic decision and is never inferred from a score or analytic signal.
 
-## 6. Publish, observe, and refine
+## Publish, observe, and refine
 
 Publishing and analytics remain downstream of candidate creation. Observations can change future constraints, but they do not retroactively decide which work was artistically successful.
 
