@@ -29,6 +29,7 @@ from hpr_video_generator.infinity_background import (
     prepare_layered_working_sources,
     render_background_intermediate,
     render_composite_candidate,
+    resolve_font_file,
 )
 
 
@@ -97,6 +98,20 @@ def render_experiment(
         sources.subject_pixels,
         sources.subject_alpha,
     )
+    font_record = None
+    if background_config.font:
+        font_path = resolve_font_file(
+            background_config.font["family"],
+            background_config.font.get("style", "Regular"),
+        )
+        context["fontPath"] = str(font_path)
+        font_record = {
+            "family": background_config.font["family"],
+            "style": background_config.font.get("style", "Regular"),
+            "localFile": str(font_path.resolve()),
+            "localFileSha256": _sha256(font_path),
+            "repositoryPolicy": "The locally licensed font file is not copied into the repository.",
+        }
     development_recipe = development_config.recipes[development_recipe_id]
     frames = duration_sec * video_config.fps
     focal = base_manifest["field"]["focalPoint"]
@@ -112,6 +127,8 @@ def render_experiment(
 
     rendered = []
     for recipe in background_config.recipes.values():
+        recipe_uses_typography = recipe.effect.startswith("number_")
+        recipe_font_record = font_record if recipe_uses_typography else None
         candidate_seed = _seed(
             background_config.experiment_id,
             base_candidate["revision_id"],
@@ -169,6 +186,8 @@ def render_experiment(
                 "backgroundDescription": recipe.description,
                 "backgroundStrength": recipe.strength,
                 "backgroundSpeed": recipe.speed,
+                "backgroundParameters": recipe.parameters,
+                "backgroundTypography": recipe_font_record,
                 "backgroundVisibilityBoost": recipe.visibility_boost,
                 "backgroundPerceptualFloor": recipe.perceptual_floor,
                 "backgroundConfigVersion": background_config.version,
@@ -182,7 +201,11 @@ def render_experiment(
                 "imageOnly": True,
                 "audio": "none",
                 "grain": "none",
-                "text": "none",
+                "text": (
+                    "background single digits only; no editorial text"
+                    if recipe_uses_typography
+                    else "none"
+                ),
                 "geometry": {
                     "fixed": True,
                     "subjectPositionChange": 0,
@@ -254,7 +277,7 @@ def render_experiment(
         "candidateCount": len(rendered),
         "grain": "none",
         "audio": "none",
-        "text": "none",
+        "text": "background single digits in four candidates; no editorial text",
         "subjectGeometry": "fixed",
         "candidates": rendered,
     }

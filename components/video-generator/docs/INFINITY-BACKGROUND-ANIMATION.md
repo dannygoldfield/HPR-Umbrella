@@ -55,6 +55,12 @@ codes on the uncovered background at peak activity. The sparse geometry option
 is intentionally localized; the other six affect broad areas. This is a
 calibration round, so an option may be conspicuously too strong.
 
+Human review nevertheless found only one of the seven effects visibly distinct,
+and even that one was weak. The analytic floors measured pixel change but did
+not prove that a viewer could recognize a coherent event. `IBV` is therefore a
+second failed creative test and remains available as evidence; it is not a
+candidate-final round.
+
 | ID | Treatment | Boundary being tested |
 | --- | --- | --- |
 | `IBV-001` | Visible momentum wake | Directional warmth behind the gesture |
@@ -64,6 +70,35 @@ calibration round, so an option may be conspicuously too strong.
 | `IBV-005` | Visible residual gesture | Remembered movement versus echo effect |
 | `IBV-006` | Visible incomplete geometry | Relational graphic versus explanatory diagram |
 | `IBV-007` | Visible borrowed-color field | Chromatic atmosphere versus tinted backdrop |
+
+## Sketch-directed concept round
+
+The `infinity-background-concepts-v12` round replaces abstract tonal variants
+with seven explicit spatial constructions derived from Danny's Photoshop
+sketches. These are not seven strengths of one effect. Each tests a different
+idea and must be recognizable in an ordinary mobile-size frame before artistic
+subtlety is considered.
+
+| ID | Construction | What changes behind the subject |
+| --- | --- | --- |
+| `IBC-001` | Deep number field | Individual digits at several apparent depths recede toward a vanishing area. |
+| `IBC-002` | Side-entering numbers | Digits enter from both side edges and diminish into depth. |
+| `IBC-003` | Evasive number corridor | Larger digits curve around the pose and disappear behind the isolated subject. |
+| `IBC-004` | Moving gradient curtain | A broad, low-contrast tonal curtain crosses the light field and returns. |
+| `IBC-005` | Sliding panel | A legible vertical edge carries a two-dimensional panel across the background. |
+| `IBC-006` | Hinged perspective door | A plane stays fixed to its left hinge while its far edge contracts away from the viewer. |
+| `IBC-007` | Number doorway | Two perspective panels open to reveal a receding numerical field. |
+
+The digits are the separate characters `1` through `9` and `0`, not multi-digit
+numbers, set in Brandon Grotesque Regular. The renderer resolves the locally
+licensed Adobe font by its internal family and style name. It records that name
+and a local provenance hash in each private render manifest but never copies the
+font file into the repository.
+
+This round deliberately permits obvious graphic structure. A successful test
+can later be softened; another imperceptible test cannot be meaningfully judged.
+The subject remains in front of every construction, so its transparency creates
+the apparent occlusion without moving or warping the person.
 
 Every candidate uses the identical `PDE-002` recipe, seed, focal point, and
 264-frame development timeline. The subject is composited from its unmatted
@@ -79,6 +114,9 @@ cutout halo.
 - Fixed subject position, scale, rotation, and geometry
 - Exact matching first and last procedural background frames
 - No grain, audio, text, camera motion, displacement, or facial deformation
+
+For `IBC`, “text” means no caption or editorial copy. Single digits are treated
+as background graphic material and are explicitly recorded as typography.
 
 Reject an option if it reads as a themed poster, explanatory diagram, sticker,
 spotlight, conventional motion trail, smoke, water, or a demonstration of the

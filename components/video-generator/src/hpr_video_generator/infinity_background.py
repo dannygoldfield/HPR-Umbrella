@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 from io import BytesIO
 import hashlib
 import json
@@ -9,7 +10,7 @@ from pathlib import Path
 import subprocess
 from typing import Any
 
-from PIL import Image, ImageCms, ImageDraw, ImageFilter
+from PIL import Image, ImageCms, ImageDraw, ImageFilter, ImageFont
 
 from .color_pipeline import (
     srgb_profile_bytes,
@@ -29,6 +30,13 @@ EFFECTS = {
     "residual_gesture",
     "incomplete_geometry",
     "borrowed_color_field",
+    "number_depth_field",
+    "number_side_streams",
+    "number_evasive_corridor",
+    "gradient_curtain",
+    "sliding_panel",
+    "hinged_door",
+    "number_doorway",
 }
 
 
@@ -49,6 +57,7 @@ class InfinityBackgroundRecipe:
     speed: float
     visibility_boost: float
     perceptual_floor: dict[str, float]
+    parameters: dict[str, Any]
     description: str
 
 
@@ -59,6 +68,7 @@ class InfinityBackgroundConfig:
     working_width: int
     working_height: int
     base_portrait_treatment: dict[str, Any]
+    font: dict[str, str]
     principle: str
     recipes: dict[str, InfinityBackgroundRecipe]
 
@@ -109,6 +119,7 @@ def load_infinity_background_config(path: Path) -> InfinityBackgroundConfig:
                     )
                 ),
             },
+            parameters=dict(item.get("parameters", {})),
             description=item["description"],
         )
         if recipe.effect not in EFFECTS:
@@ -134,9 +145,46 @@ def load_infinity_background_config(path: Path) -> InfinityBackgroundConfig:
         working_width=int(payload["workingWidth"]),
         working_height=int(payload["workingHeight"]),
         base_portrait_treatment=payload["basePortraitTreatment"],
+        font=dict(payload.get("font", {})),
         principle=payload["principle"],
         recipes=recipes,
     )
+
+
+def resolve_font_file(
+    family: str,
+    style: str,
+    search_roots: list[Path] | None = None,
+) -> Path:
+    """Resolve a locally licensed font by its internal family and style names."""
+    roots = search_roots or [
+        Path.home() / "Library/Fonts",
+        Path("/Library/Fonts"),
+        Path("/System/Library/Fonts"),
+        Path.home()
+        / "Library/Application Support/Adobe/CoreSync/plugins/livetype/.r",
+    ]
+    wanted_family = family.casefold().strip()
+    wanted_style = style.casefold().strip()
+    matches: list[Path] = []
+    for root in roots:
+        if not root.is_dir():
+            continue
+        for path in sorted(root.rglob("*")):
+            if not path.is_file() or path.suffix.casefold() not in {".otf", ".ttf", ".ttc"}:
+                continue
+            try:
+                found_family, found_style = ImageFont.truetype(str(path), 12).getname()
+            except (OSError, ValueError):
+                continue
+            if found_family.casefold().strip() != wanted_family:
+                continue
+            if found_style.casefold().strip() == wanted_style:
+                return path
+            matches.append(path)
+    if matches:
+        return matches[0]
+    raise FileNotFoundError(f"Could not resolve local font: {family} {style}")
 
 
 def _profile_description(profile: bytes) -> str:
@@ -531,6 +579,92 @@ def _mix_color(base: Any, color: Any, amount: Any) -> Any:
     return base * (1.0 - opacity) + np.asarray(color, dtype=np.float32) * opacity
 
 
+@lru_cache(maxsize=128)
+def _font(font_path: str, size: int) -> ImageFont.FreeTypeFont:
+    return ImageFont.truetype(font_path, max(1, size))
+
+
+def _stable_fraction(key: str) -> float:
+    value = int(hashlib.sha256(key.encode("utf-8")).hexdigest()[:8], 16)
+    return value / 0xFFFFFFFF
+
+
+def _polygon_mask(width: int, height: int, points: list[tuple[float, float]], feather: float = 0.0) -> Any:
+    np = _numpy()
+    scale = 4
+    image = Image.new("L", (width * scale, height * scale), 0)
+    draw = ImageDraw.Draw(image)
+    draw.polygon(
+        [(round(px * width * scale), round(py * height * scale)) for px, py in points],
+        fill=255,
+    )
+    image = image.resize((width, height), Image.Resampling.LANCZOS)
+    if feather > 0:
+        image = image.filter(ImageFilter.GaussianBlur(radius=feather))
+    return np.asarray(image, dtype=np.float32) / 255.0
+
+
+def _number_field_mask(
+    recipe: InfinityBackgroundRecipe,
+    fraction: float,
+    context: dict[str, Any],
+    *,
+    mode: str,
+) -> Any:
+    """Draw a deterministic, loop-safe field of individual single digits."""
+    np = _numpy()
+    height, width = context["alpha"].shape
+    scale = 3
+    image = Image.new("L", (width * scale, height * scale), 0)
+    draw = ImageDraw.Draw(image)
+    parameters = recipe.parameters
+    count = int(parameters.get("digitCount", 24))
+    minimum_size = float(parameters.get("minimumSize", 16.0))
+    maximum_size = float(parameters.get("maximumSize", 92.0))
+    vanish_x = float(parameters.get("vanishingX", 0.52))
+    vanish_y = float(parameters.get("vanishingY", 0.48))
+    font_path = str(context.get("fontPath", ""))
+    if not font_path:
+        raise ValueError(f"{recipe.id} requires a resolved fontPath in the background context")
+    digits = "1234567890"
+    for index in range(count):
+        prefix = f"{recipe.id}:{index}"
+        phase_offset = _stable_fraction(prefix + ":phase")
+        travel = (fraction * recipe.speed + phase_offset) % 1.0
+        depth = 0.5 - 0.5 * math.cos(2.0 * math.pi * travel)
+        side = -1.0 if index % 2 == 0 else 1.0
+        row = _stable_fraction(prefix + ":row")
+        if mode == "depth":
+            near_x = 0.05 + 0.90 * _stable_fraction(prefix + ":x")
+            near_y = 0.04 + 0.92 * row
+        elif mode == "sides":
+            near_x = -0.10 if side < 0 else 1.10
+            near_y = 0.02 + 0.96 * row
+        else:
+            # A curved corridor leaves breathing room around the central pose.
+            near_x = 0.02 if side < 0 else 0.98
+            near_y = 0.05 + 0.90 * row
+            corridor = math.sin(math.pi * depth) * (0.09 + 0.05 * _stable_fraction(prefix + ":curve"))
+            near_x += -corridor if side < 0 else corridor
+        x = vanish_x * (1.0 - depth) + near_x * depth
+        y = vanish_y * (1.0 - depth) + near_y * depth
+        size = minimum_size + (maximum_size - minimum_size) * (depth ** 1.18)
+        opacity = 40 + round(200 * (0.18 + 0.82 * depth) ** 1.25)
+        digit = digits[index % len(digits)]
+        typeface = _font(font_path, round(size * scale))
+        bbox = draw.textbbox((0, 0), digit, font=typeface)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        draw.text(
+            (round(x * width * scale - text_width / 2), round(y * height * scale - text_height / 2 - bbox[1])),
+            digit,
+            font=typeface,
+            fill=max(0, min(255, opacity)),
+        )
+    image = image.resize((width, height), Image.Resampling.LANCZOS)
+    return np.asarray(image, dtype=np.float32) / 255.0
+
+
 def background_visibility_metrics(pixels: Any, base: Any) -> dict[str, float]:
     """Measure effect visibility in familiar 8-bit display-code distances."""
     np = _numpy()
@@ -694,6 +828,68 @@ def background_effect_frame(
         )
         frame = _mix_color(base, context["skinColor"], skin_field * strength * 0.72)
         frame = _mix_color(frame, context["darkColor"] * 0.55 + base.mean(axis=(0, 1)) * 0.45, dark_field * strength * 0.48)
+    elif recipe.effect in {
+        "number_depth_field",
+        "number_side_streams",
+        "number_evasive_corridor",
+    }:
+        number_mode = {
+            "number_depth_field": "depth",
+            "number_side_streams": "sides",
+            "number_evasive_corridor": "corridor",
+        }[recipe.effect]
+        numbers = _number_field_mask(recipe, fraction, context, mode=number_mode)
+        number_color = np.asarray(recipe.parameters.get("color", [0.46, 0.45, 0.43]), dtype=np.float32)
+        frame = _mix_color(base, number_color, numbers * recipe.strength * recipe.visibility_boost)
+    elif recipe.effect == "gradient_curtain":
+        center = -0.20 + 1.40 * (0.5 - 0.5 * math.cos(2.0 * math.pi * fraction))
+        width_scale = float(recipe.parameters.get("bandWidth", 0.34))
+        leading = np.exp(-0.5 * ((x - center) / width_scale) ** 2)
+        trailing = np.exp(-0.5 * ((x - (center - 0.32)) / (width_scale * 1.4)) ** 2)
+        curtain = np.clip(leading * 0.9 + trailing * 0.42, 0.0, 1.0)
+        curtain_color = np.asarray(recipe.parameters.get("color", [0.73, 0.70, 0.65]), dtype=np.float32)
+        frame = _mix_color(base, curtain_color, curtain * recipe.strength * recipe.visibility_boost)
+    elif recipe.effect == "sliding_panel":
+        travel = 0.5 - 0.5 * math.cos(2.0 * math.pi * fraction)
+        edge = -0.08 + 0.86 * travel
+        feather = float(recipe.parameters.get("feather", 0.015))
+        exponent = np.clip((x - edge) / max(feather, 0.003), -60.0, 60.0)
+        panel = 1.0 / (1.0 + np.exp(exponent))
+        panel_color = np.asarray(recipe.parameters.get("color", [0.78, 0.76, 0.72]), dtype=np.float32)
+        frame = _mix_color(base, panel_color, panel * recipe.strength * recipe.visibility_boost)
+    elif recipe.effect == "hinged_door":
+        openness = 0.5 - 0.5 * math.cos(2.0 * math.pi * fraction)
+        far_x = 1.04 - 0.56 * openness
+        inset = 0.42 * openness
+        door = _polygon_mask(
+            base.shape[1],
+            base.shape[0],
+            [(0.0, 0.0), (far_x, inset), (far_x, 1.0 - inset), (0.0, 1.0)],
+            feather=float(recipe.parameters.get("featherPixels", 0.7)),
+        )
+        door_color = np.asarray(recipe.parameters.get("color", [0.76, 0.74, 0.70]), dtype=np.float32)
+        frame = _mix_color(base, door_color, door * recipe.strength * recipe.visibility_boost)
+    elif recipe.effect == "number_doorway":
+        openness = 0.5 - 0.5 * math.cos(2.0 * math.pi * fraction)
+        numbers = _number_field_mask(recipe, fraction, context, mode="depth")
+        number_color = np.asarray(recipe.parameters.get("numberColor", [0.43, 0.42, 0.40]), dtype=np.float32)
+        frame = _mix_color(base, number_color, numbers * recipe.strength * 1.15)
+        left_edge = 0.50 - 0.40 * openness
+        right_edge = 0.50 + 0.40 * openness
+        inset = 0.18 * openness
+        left = _polygon_mask(
+            base.shape[1], base.shape[0],
+            [(0.0, 0.0), (left_edge, inset), (left_edge, 1.0 - inset), (0.0, 1.0)],
+            feather=0.6,
+        )
+        right = _polygon_mask(
+            base.shape[1], base.shape[0],
+            [(right_edge, inset), (1.0, 0.0), (1.0, 1.0), (right_edge, 1.0 - inset)],
+            feather=0.6,
+        )
+        doors = np.clip(left + right, 0.0, 1.0)
+        door_color = np.asarray(recipe.parameters.get("doorColor", [0.82, 0.80, 0.76]), dtype=np.float32)
+        frame = _mix_color(frame, door_color, doors * recipe.strength * recipe.visibility_boost)
     else:  # pragma: no cover - configuration validation prevents this
         raise ValueError(recipe.effect)
 

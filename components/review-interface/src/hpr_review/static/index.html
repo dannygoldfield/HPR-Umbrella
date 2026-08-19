@@ -88,6 +88,7 @@
             <dt>Visibility boost</dt><dd id="backgroundVisibilityBoost">—</dd>
             <dt>Peak mean change</dt><dd id="backgroundMeanDelta">—</dd>
             <dt>Active background</dt><dd id="backgroundActiveArea">—</dd>
+            <dt>Typography</dt><dd id="backgroundTypography">—</dd>
             <dt>Subject</dt><dd id="backgroundSubjectTreatment">PDE-002 unchanged</dd>
           </dl>
         </div>
@@ -166,9 +167,11 @@
       if(infinityBackground)return infinityBackground;
       const infinityVisibility=({'IBV-001':'Visible momentum wake','IBV-002':'Visible emulsion bloom','IBV-003':'Visible floating print','IBV-004':'Visible negative-space aperture','IBV-005':'Visible residual gesture','IBV-006':'Visible incomplete geometry','IBV-007':'Visible borrowed-color field'})[id];
       if(infinityVisibility)return infinityVisibility;
+      const infinityConcept=({'IBC-001':'Deep number field','IBC-002':'Side-entering numbers','IBC-003':'Evasive number corridor','IBC-004':'Moving gradient curtain','IBC-005':'Sliding panel','IBC-006':'Hinged perspective door','IBC-007':'Number doorway'})[id];
+      if(infinityConcept)return infinityConcept;
       return id;
     }
-    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration'})[id]||id; }
+    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions'})[id]||id; }
     async function loadTelemetry(c){
       const token=++telemetryToken; telemetry=null; $('diagnostics').hidden=true; $('whiteBalanceDiagnostics').hidden=true; $('developmentDiagnostics').hidden=true; $('developmentSettings').hidden=true; $('backgroundSettings').hidden=true;
       $('temperatureSlider').value=0; $('tintSlider').value=0; $('temperatureValue').textContent='0.00'; $('tintValue').textContent='0.00';
@@ -201,6 +204,7 @@
           const visibility=manifest.backgroundTelemetry?.perceptualVisibility||{};
           $('backgroundMeanDelta').textContent=visibility.meanDelta8Bit===undefined?'—':`${Number(visibility.meanDelta8Bit).toFixed(1)} of 255`;
           $('backgroundActiveArea').textContent=visibility.activePixelsAbove3Percent===undefined?'—':`${Number(visibility.activePixelsAbove3Percent).toFixed(1)}%`;
+          const type=manifest.backgroundTypography; $('backgroundTypography').textContent=type?`${type.family} ${type.style}`:'None';
           $('backgroundSubjectTreatment').textContent=`${manifest.basePortraitTreatment?.developmentRecipeId||'PDE-002'} unchanged`;
           $('backgroundSettings').hidden=false; $('diagnostics').hidden=false;
         }
@@ -263,6 +267,7 @@
       allCandidates=data.candidates; if(!allCandidates.length)throw new Error('No visual candidates are registered.');
       const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
       const choices=[];
+      if(experiments.includes('infinity-background-concepts-v12'))choices.push(['infinity-background-concepts-v12','Infinity Backgrounds — sketch directions']);
       if(experiments.includes('infinity-background-visibility-v11'))choices.push(['infinity-background-visibility-v11','Infinity Backgrounds — visible calibration']);
       if(experiments.includes('infinity-background-v10'))choices.push(['infinity-background-v10','Infinity Backgrounds — subtle concepts']);
       if(experiments.includes('portrait-development-settlement-v9'))choices.push(['portrait-development-settlement-v9','Portrait Development — 65% landing']);

@@ -150,6 +150,16 @@ Updated: 2026-08-19
   8-bit display-code terms. Rendering stops when a minimum is missed. All seven
   passed those gates plus the 11-second, 264-frame, BT.709, fixed-geometry, and
   decoded loop-closure audits. The Registry now contains 128 visuals.
+- Human review found the v11 visibility-calibration round creatively
+  unsuccessful: only one of seven effects was visible, and that one was weak.
+  The metrics proved pixel change but not a recognizable visual event. V11 is
+  retained unchanged as failed research evidence.
+- Infinity sketch-directed round v12 translates Danny's reference sketches into
+  seven different spatial constructions: three Brandon Grotesque number fields,
+  a moving gradient curtain, a sliding panel, a hinged perspective door, and a
+  number doorway. All hold `PDE-002`, the isolated subject, and the supplied
+  light background constant. The seven 11-second candidates are registered as
+  `IBC-001`–`IBC-007`; the Registry now contains 135 visual candidates.
 
 ## Earlier implemented work
 
@@ -162,9 +172,9 @@ Updated: 2026-08-19
 
 ## Next production work
 
-1. Review `IBV-001`–`IBV-007` at normal phone size. Identify concepts worth
-   refining and use any obviously excessive candidate to establish the upper
-   visibility boundary; the supplied still background remains a valid choice.
+1. Review `IBC-001`–`IBC-007` at normal phone size. Judge the idea and its
+   motion separately from strength. The supplied still background remains a
+   valid choice.
 2. Freeze `PDE-002` as the portrait-surface treatment for 10000 and NYChildren;
    freeze Infinity after its background decision.
 3. Continue using embedded-profile 16-bit TIFF as the preferred portrait

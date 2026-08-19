@@ -3,9 +3,9 @@ from tempfile import TemporaryDirectory
 import io
 import json
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
-from PIL import Image
+from PIL import Image, ImageFont
 
 from hpr_video_generator.config import load_config
 from hpr_video_generator.development import (
@@ -24,6 +24,7 @@ from hpr_video_generator.infinity_background import (
     build_infinity_background_filter,
     load_infinity_background_config,
     require_perceptual_visibility,
+    resolve_font_file,
 )
 
 
@@ -68,6 +69,9 @@ class DevelopmentTests(unittest.TestCase):
         )
         self.infinity_visibility_config = load_infinity_background_config(
             ROOT / "config/infinity-background-visibility-recipes.json"
+        )
+        self.infinity_concept_config = load_infinity_background_config(
+            ROOT / "config/infinity-background-concept-recipes.json"
         )
 
     def test_pilot_has_five_fixed_geometry_recipes(self) -> None:
@@ -487,6 +491,78 @@ class DevelopmentTests(unittest.TestCase):
                 require_perceptual_visibility(
                     recipe,
                     {key: 0.0 for key in recipe.perceptual_floor},
+                )
+
+    def test_infinity_concept_round_implements_the_seven_sketch_directions(self) -> None:
+        self.assertEqual(
+            "infinity-background-concepts-v12",
+            self.infinity_concept_config.experiment_id,
+        )
+        self.assertEqual(
+            [f"IBC-{index:03d}" for index in range(1, 8)],
+            list(self.infinity_concept_config.recipes),
+        )
+        self.assertEqual(
+            {"family": "Brandon Grotesque", "style": "Regular"},
+            self.infinity_concept_config.font,
+        )
+        self.assertEqual(
+            {
+                "number_depth_field",
+                "number_side_streams",
+                "number_evasive_corridor",
+                "gradient_curtain",
+                "sliding_panel",
+                "hinged_door",
+                "number_doorway",
+            },
+            {recipe.effect for recipe in self.infinity_concept_config.recipes.values()},
+        )
+        self.assertTrue(
+            all(recipe.parameters for recipe in self.infinity_concept_config.recipes.values())
+        )
+
+    def test_font_resolver_uses_internal_family_and_style_names(self) -> None:
+        with TemporaryDirectory() as directory:
+            font_file = Path(directory) / "licensed-font.otf"
+            font_file.touch()
+            fake_font = Mock()
+            fake_font.getname.return_value = ("Brandon Grotesque", "Regular")
+            with patch(
+                "hpr_video_generator.infinity_background.ImageFont.truetype",
+                return_value=fake_font,
+            ):
+                resolved = resolve_font_file(
+                    "Brandon Grotesque", "Regular", [Path(directory)]
+                )
+            self.assertEqual(font_file, resolved)
+
+    def test_infinity_concept_frames_are_visible_and_mathematically_loop_safe(self) -> None:
+        import numpy as np
+
+        height, width = 192, 108
+        background = np.full((height, width, 3), 62000, dtype=np.uint16)
+        subject = np.zeros((height, width, 3), dtype=np.uint16)
+        subject[:, :, 0] = 42000
+        subject[:, :, 1] = 30000
+        subject[:, :, 2] = 24000
+        alpha = np.zeros((height, width), dtype=np.uint16)
+        alpha[28:170, 24:91] = 65535
+        context = build_background_context(background, subject, alpha)
+        context["fontPath"] = "test-font.otf"
+        with patch(
+            "hpr_video_generator.infinity_background._font",
+            side_effect=lambda _path, size: ImageFont.load_default(size=size),
+        ):
+            for recipe in self.infinity_concept_config.recipes.values():
+                first = background_effect_frame(recipe, 0.0, context)
+                middle = background_effect_frame(recipe, 0.5, context)
+                last = background_effect_frame(recipe, 1.0, context)
+                self.assertTrue(np.array_equal(first, last), recipe.id)
+                self.assertGreater(
+                    background_visibility_metrics(middle, first)["meanDelta8Bit"],
+                    0.25,
+                    recipe.id,
                 )
 
     def test_infinity_background_filter_preserves_subject_geometry(self) -> None:

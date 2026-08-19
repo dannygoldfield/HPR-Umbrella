@@ -13,3 +13,10 @@ The default configuration reproduces the original restrained `INF` round. Pass
 for the separately versioned `IBV` calibration round. That configuration adds
 per-recipe perceptual floors; rendering stops if a background is mathematically
 different but too weak to meet its declared display-scale visibility target.
+
+Pass
+`--background-config components/video-generator/config/infinity-background-concept-recipes.json`
+for the sketch-directed `IBC` round. It resolves Brandon Grotesque Regular from
+the local font installation and renders three number-space ideas, a gradient
+curtain, a sliding panel, a hinged door, and a number doorway. The font file is
+not copied into the repository.
