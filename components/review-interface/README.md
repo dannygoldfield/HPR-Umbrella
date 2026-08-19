@@ -5,12 +5,12 @@ only on the local computer and writes every human decision directly to the
 SQLite Registry. JSON manifests remain provenance records, not forms Danny has
 to edit.
 
-The active review family is the seven-candidate, sketch-directed Infinity
-concept round, `IBC-001`–`IBC-007`. Every candidate holds the five-star
-`PDE-002` subject treatment, subject geometry, light background foundation,
-timing, and delivery format constant. Only the separately supplied Background
-layer changes. Both earlier Infinity rounds, the 65% landing round, and all
-earlier research sets remain available unchanged.
+The active review family is the seven-candidate Infinity flat-field round,
+`IBF-001`–`IBF-007`. Every candidate holds the five-star `PDE-002` subject
+treatment, subject geometry, light background foundation, timing, and delivery
+format constant. Number size and opacity stay fixed throughout each video, so
+the digits have no z-axis motion. All earlier Infinity and portrait-development
+sets remain available unchanged.
 
 The visual-review screen provides looping video, 1–5 rating, reject, notes,
 selection, render/review status, and a provenance link. Episode is explicitly
@@ -48,12 +48,12 @@ pause, speed, feather, and patch values for every development candidate. This
 makes it possible to compare prior rounds or request an interpolated setting
 between two tests without estimating from memory.
 
-For the active Infinity set, compare deep number field, side-entering numbers,
-evasive number corridor, moving gradient curtain, sliding panel, hinged
-perspective door, and number doorway. The diagnostic card names the effect,
-states its intent, identifies Brandon Grotesque where used, and confirms that
-`PDE-002` remains unchanged. Grain, audio, and editorial text are absent. The
-card also shows peak mean 8-bit display-code change and active background area.
+For the active Infinity set, compare dense varied-size 2D drift, dense same-size
+2D plane, orderly 2D separation, a visible gradient curtain, a full-width
+sliding panel, an eleven-second hinged door, and a dense 2D number wipe. The
+diagnostic card names the effect, states its intent, identifies Brandon
+Grotesque where used, and distinguishes continuous loops from intentional abrupt
+resets. `PDE-002` remains unchanged; grain, audio, and editorial text are absent.
 
 ## Start it
 

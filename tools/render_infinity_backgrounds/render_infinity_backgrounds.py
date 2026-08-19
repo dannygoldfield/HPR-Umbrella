@@ -127,7 +127,7 @@ def render_experiment(
 
     rendered = []
     for recipe in background_config.recipes.values():
-        recipe_uses_typography = recipe.effect.startswith("number_")
+        recipe_uses_typography = "number" in recipe.effect
         recipe_font_record = font_record if recipe_uses_typography else None
         candidate_seed = _seed(
             background_config.experiment_id,
@@ -186,6 +186,7 @@ def render_experiment(
                 "backgroundDescription": recipe.description,
                 "backgroundStrength": recipe.strength,
                 "backgroundSpeed": recipe.speed,
+                "backgroundLoopBehavior": recipe.loop_behavior,
                 "backgroundParameters": recipe.parameters,
                 "backgroundTypography": recipe_font_record,
                 "backgroundVisibilityBoost": recipe.visibility_boost,
@@ -197,7 +198,7 @@ def render_experiment(
                 "fps": video_config.fps,
                 "frames": frames,
                 "seed": candidate_seed,
-                "loopSafe": True,
+                "loopSafe": recipe.loop_behavior == "continuous",
                 "imageOnly": True,
                 "audio": "none",
                 "grain": "none",
@@ -279,6 +280,7 @@ def render_experiment(
         "audio": "none",
         "text": "background single digits in four candidates; no editorial text",
         "subjectGeometry": "fixed",
+        "loopBehavior": "per candidate; continuous or intentional hard reset",
         "candidates": rendered,
     }
     (output_root / "experiment-summary.json").write_text(

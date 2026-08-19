@@ -20,3 +20,10 @@ for the sketch-directed `IBC` round. It resolves Brandon Grotesque Regular from
 the local font installation and renders three number-space ideas, a gradient
 curtain, a sliding panel, a hinged door, and a number doorway. The font file is
 not copied into the repository.
+
+Pass
+`--background-config components/video-generator/config/infinity-background-flat-recipes.json`
+for the review-driven `IBF` round. Its number fields are strictly two
+dimensional: digit size and opacity remain fixed while only x-y position moves.
+The last two recipes intentionally hard-reset at replay; the other five close
+continuously.

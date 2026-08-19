@@ -100,6 +100,29 @@ can later be softened; another imperceptible test cannot be meaningfully judged.
 The subject remains in front of every construction, so its transparency creates
 the apparent occlusion without moving or warping the person.
 
+## Flat-field response round
+
+Review of `IBC-001`–`IBC-007` established a useful direction and a firm
+correction: digits should be read as a two-dimensional graphic system, not as
+objects traveling toward or away from the viewer. The
+`infinity-background-flat-fields-v13` round therefore removes every number
+z-axis cue. Each digit receives its size and opacity once; neither value changes
+during the video. No digit is emphasized to match the `26` on the hand prop.
+
+| ID | Construction | Review note translated into motion |
+| --- | --- | --- |
+| `IBF-001` | Dense varied-size 2D drift | Many more digits; evenly distributed fixed sizes; slow independent x-y drift. |
+| `IBF-002` | Dense same-size 2D plane | One fixed digit size; the entire flat field moves slowly in and out of frame. |
+| `IBF-003` | Orderly 2D separation field | A larger, orderly field separates laterally around the subject without scaling. |
+| `IBF-004` | Visible 2D gradient curtain | A stronger two-tone gradient crosses the full background and returns. |
+| `IBF-005` | Full-width sliding panel | The panel enters from the right, reaches the opposite edge, and returns with easing over 11 seconds. |
+| `IBF-006` | Eleven-second hinged door | One door opens for the full video, disappears, then deliberately resets at the loop. |
+| `IBF-007` | Dense 2D number wipe | A right-to-left panel erases a very dense flat field, followed by a deliberate loop reset. |
+
+The first five options remain continuous loops. The last two explicitly test an
+abrupt replay cue requested in review; their manifests use
+`intentional_hard_reset` rather than falsely describing them as seamless.
+
 Every candidate uses the identical `PDE-002` recipe, seed, focal point, and
 264-frame development timeline. The subject is composited from its unmatted
 16-bit layer rather than extracted from a flattened video, preventing a pale

@@ -73,6 +73,9 @@ class DevelopmentTests(unittest.TestCase):
         self.infinity_concept_config = load_infinity_background_config(
             ROOT / "config/infinity-background-concept-recipes.json"
         )
+        self.infinity_flat_config = load_infinity_background_config(
+            ROOT / "config/infinity-background-flat-recipes.json"
+        )
 
     def test_pilot_has_five_fixed_geometry_recipes(self) -> None:
         self.assertEqual("portrait-development-pilot-v5", self.development_config.experiment_id)
@@ -559,6 +562,68 @@ class DevelopmentTests(unittest.TestCase):
                 middle = background_effect_frame(recipe, 0.5, context)
                 last = background_effect_frame(recipe, 1.0, context)
                 self.assertTrue(np.array_equal(first, last), recipe.id)
+                self.assertGreater(
+                    background_visibility_metrics(middle, first)["meanDelta8Bit"],
+                    0.25,
+                    recipe.id,
+                )
+
+    def test_infinity_flat_round_removes_number_depth_and_records_resets(self) -> None:
+        self.assertEqual(
+            "infinity-background-flat-fields-v13",
+            self.infinity_flat_config.experiment_id,
+        )
+        self.assertEqual(
+            [f"IBF-{index:03d}" for index in range(1, 8)],
+            list(self.infinity_flat_config.recipes),
+        )
+        number_effects = {
+            recipe.effect
+            for recipe in self.infinity_flat_config.recipes.values()
+            if "number" in recipe.effect
+        }
+        self.assertEqual(
+            {
+                "flat_number_drift",
+                "flat_number_grid",
+                "flat_number_separation",
+                "flat_number_wipe",
+            },
+            number_effects,
+        )
+        self.assertFalse(any("depth" in effect for effect in number_effects))
+        self.assertEqual(
+            {"IBF-006", "IBF-007"},
+            {
+                recipe.id
+                for recipe in self.infinity_flat_config.recipes.values()
+                if recipe.loop_behavior == "intentional_hard_reset"
+            },
+        )
+
+    def test_infinity_flat_fields_keep_size_fixed_and_follow_loop_contract(self) -> None:
+        import numpy as np
+
+        height, width = 192, 108
+        background = np.full((height, width, 3), 62000, dtype=np.uint16)
+        subject = np.zeros((height, width, 3), dtype=np.uint16)
+        subject[:, :, :] = [42000, 30000, 24000]
+        alpha = np.zeros((height, width), dtype=np.uint16)
+        alpha[28:170, 24:91] = 65535
+        context = build_background_context(background, subject, alpha)
+        context["fontPath"] = "test-font.otf"
+        with patch(
+            "hpr_video_generator.infinity_background._font",
+            side_effect=lambda _path, size: ImageFont.load_default(size=size),
+        ):
+            for recipe in self.infinity_flat_config.recipes.values():
+                first = background_effect_frame(recipe, 0.0, context)
+                middle = background_effect_frame(recipe, 0.5, context)
+                last = background_effect_frame(recipe, 1.0, context)
+                if recipe.loop_behavior == "continuous":
+                    self.assertTrue(np.array_equal(first, last), recipe.id)
+                else:
+                    self.assertFalse(np.array_equal(first, last), recipe.id)
                 self.assertGreater(
                     background_visibility_metrics(middle, first)["meanDelta8Bit"],
                     0.25,

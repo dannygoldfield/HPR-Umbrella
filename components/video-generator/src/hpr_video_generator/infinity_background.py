@@ -37,6 +37,13 @@ EFFECTS = {
     "sliding_panel",
     "hinged_door",
     "number_doorway",
+    "flat_number_drift",
+    "flat_number_grid",
+    "flat_number_separation",
+    "gradient_curtain_2d",
+    "sliding_panel_full",
+    "hinged_door_one_way",
+    "flat_number_wipe",
 }
 
 
@@ -57,6 +64,7 @@ class InfinityBackgroundRecipe:
     speed: float
     visibility_boost: float
     perceptual_floor: dict[str, float]
+    loop_behavior: str
     parameters: dict[str, Any]
     description: str
 
@@ -119,6 +127,7 @@ def load_infinity_background_config(path: Path) -> InfinityBackgroundConfig:
                     )
                 ),
             },
+            loop_behavior=item.get("loopBehavior", "continuous"),
             parameters=dict(item.get("parameters", {})),
             description=item["description"],
         )
@@ -134,6 +143,8 @@ def load_infinity_background_config(path: Path) -> InfinityBackgroundConfig:
             )
         if any(value < 0 for value in recipe.perceptual_floor.values()):
             raise ValueError(f"{recipe.id} perceptual floors cannot be negative")
+        if recipe.loop_behavior not in {"continuous", "intentional_hard_reset"}:
+            raise ValueError(f"{recipe.id} has an unsupported loopBehavior")
         if recipe.id in recipes:
             raise ValueError(f"Duplicate Infinity background recipe: {recipe.id}")
         recipes[recipe.id] = recipe
@@ -665,6 +676,71 @@ def _number_field_mask(
     return np.asarray(image, dtype=np.float32) / 255.0
 
 
+def _flat_number_field_mask(
+    recipe: InfinityBackgroundRecipe,
+    fraction: float,
+    context: dict[str, Any],
+    *,
+    mode: str,
+) -> Any:
+    """Draw a dense 2D field whose digit sizes never imply depth."""
+    np = _numpy()
+    height, width = context["alpha"].shape
+    scale = 3
+    image = Image.new("L", (width * scale, height * scale), 0)
+    draw = ImageDraw.Draw(image)
+    parameters = recipe.parameters
+    columns = int(parameters.get("columns", 9))
+    rows = int(parameters.get("rows", 15))
+    minimum_size = float(parameters.get("minimumSize", 24.0))
+    maximum_size = float(parameters.get("maximumSize", minimum_size))
+    opacity = int(parameters.get("opacity", 150))
+    font_path = str(context.get("fontPath", ""))
+    if not font_path:
+        raise ValueError(f"{recipe.id} requires a resolved fontPath in the background context")
+    digits = "1234567890"
+    cycle = 2.0 * math.pi * (fraction % 1.0) * recipe.speed
+    for row in range(rows):
+        for column in range(columns):
+            index = row * columns + column
+            prefix = f"{recipe.id}:{index}"
+            base_x = (column + 0.5) / columns
+            base_y = (row + 0.5) / rows
+            if mode == "varied":
+                base_x += (_stable_fraction(prefix + ":jx") - 0.5) * 0.55 / columns
+                base_y += (_stable_fraction(prefix + ":jy") - 0.5) * 0.55 / rows
+                x = base_x + 0.075 * math.sin(cycle + _stable_fraction(prefix + ":px") * 2.0 * math.pi)
+                y = base_y + 0.035 * math.cos(cycle + _stable_fraction(prefix + ":py") * 2.0 * math.pi)
+                size = minimum_size + (maximum_size - minimum_size) * _stable_fraction(prefix + ":size")
+            elif mode == "uniform":
+                x = base_x + 0.12 * math.sin(cycle)
+                y = base_y + 0.045 * math.cos(cycle)
+                size = minimum_size
+            else:
+                separation = 0.18 * (0.5 - 0.5 * math.cos(cycle))
+                x = base_x + (-separation if base_x < 0.5 else separation)
+                y = base_y + 0.018 * math.sin(cycle)
+                size = minimum_size + (maximum_size - minimum_size) * (
+                    (row + column) % 5
+                ) / 4.0
+            digit = digits[(index + int(parameters.get("digitOffset", 0))) % len(digits)]
+            typeface = _font(font_path, round(size * scale))
+            bbox = draw.textbbox((0, 0), digit, font=typeface)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+            draw.text(
+                (
+                    round(x * width * scale - text_width / 2),
+                    round(y * height * scale - text_height / 2 - bbox[1]),
+                ),
+                digit,
+                font=typeface,
+                fill=max(0, min(255, opacity)),
+            )
+    image = image.resize((width, height), Image.Resampling.LANCZOS)
+    return np.asarray(image, dtype=np.float32) / 255.0
+
+
 def background_visibility_metrics(pixels: Any, base: Any) -> dict[str, float]:
     """Measure effect visibility in familiar 8-bit display-code distances."""
     np = _numpy()
@@ -890,6 +966,104 @@ def background_effect_frame(
         doors = np.clip(left + right, 0.0, 1.0)
         door_color = np.asarray(recipe.parameters.get("doorColor", [0.82, 0.80, 0.76]), dtype=np.float32)
         frame = _mix_color(frame, door_color, doors * recipe.strength * recipe.visibility_boost)
+    elif recipe.effect in {
+        "flat_number_drift",
+        "flat_number_grid",
+        "flat_number_separation",
+    }:
+        flat_mode = {
+            "flat_number_drift": "varied",
+            "flat_number_grid": "uniform",
+            "flat_number_separation": "separation",
+        }[recipe.effect]
+        numbers = _flat_number_field_mask(recipe, fraction, context, mode=flat_mode)
+        number_color = np.asarray(
+            recipe.parameters.get("color", [0.48, 0.47, 0.45]),
+            dtype=np.float32,
+        )
+        frame = _mix_color(
+            base,
+            number_color,
+            numbers * recipe.strength * recipe.visibility_boost,
+        )
+    elif recipe.effect == "gradient_curtain_2d":
+        travel = 0.5 - 0.5 * math.cos(2.0 * math.pi * fraction)
+        center = 1.18 - 1.36 * travel
+        band_width = float(recipe.parameters.get("bandWidth", 0.24))
+        band = np.exp(-0.5 * ((x - center) / band_width) ** 2)
+        shoulder = np.exp(-0.5 * ((x - (center + 0.30)) / (band_width * 1.7)) ** 2)
+        color_a = np.asarray(
+            recipe.parameters.get("colorA", [0.69, 0.67, 0.63]),
+            dtype=np.float32,
+        )
+        color_b = np.asarray(
+            recipe.parameters.get("colorB", [0.86, 0.83, 0.78]),
+            dtype=np.float32,
+        )
+        frame = _mix_color(
+            base,
+            color_b,
+            shoulder * recipe.strength * recipe.visibility_boost * 0.72,
+        )
+        frame = _mix_color(
+            frame,
+            color_a,
+            band * recipe.strength * recipe.visibility_boost,
+        )
+    elif recipe.effect == "sliding_panel_full":
+        travel = math.sin(math.pi * fraction) ** 2
+        edge = 1.08 - 1.16 * travel
+        feather = float(recipe.parameters.get("feather", 0.010))
+        exponent = np.clip((edge - x) / max(feather, 0.003), -60.0, 60.0)
+        panel = 1.0 / (1.0 + np.exp(exponent))
+        panel_color = np.asarray(
+            recipe.parameters.get("color", [0.77, 0.75, 0.71]),
+            dtype=np.float32,
+        )
+        frame = _mix_color(
+            base,
+            panel_color,
+            panel * recipe.strength * recipe.visibility_boost,
+        )
+    elif recipe.effect == "hinged_door_one_way":
+        openness = min(1.0, max(0.0, fraction * recipe.speed))
+        far_x = 1.04 - 1.01 * openness
+        inset = 0.485 * openness
+        door = _polygon_mask(
+            base.shape[1],
+            base.shape[0],
+            [(0.0, 0.0), (far_x, inset), (far_x, 1.0 - inset), (0.0, 1.0)],
+            feather=float(recipe.parameters.get("featherPixels", 0.6)),
+        )
+        door_color = np.asarray(
+            recipe.parameters.get("color", [0.75, 0.73, 0.69]),
+            dtype=np.float32,
+        )
+        frame = _mix_color(
+            base,
+            door_color,
+            door * recipe.strength * recipe.visibility_boost,
+        )
+    elif recipe.effect == "flat_number_wipe":
+        numbers = _flat_number_field_mask(recipe, fraction, context, mode="varied")
+        number_color = np.asarray(
+            recipe.parameters.get("numberColor", [0.55, 0.54, 0.52]),
+            dtype=np.float32,
+        )
+        frame = _mix_color(
+            base,
+            number_color,
+            numbers * recipe.strength * recipe.visibility_boost,
+        )
+        edge = 1.06 - 1.12 * fraction
+        feather = float(recipe.parameters.get("feather", 0.010))
+        exponent = np.clip((edge - x) / max(feather, 0.003), -60.0, 60.0)
+        panel = 1.0 / (1.0 + np.exp(exponent))
+        panel_color = np.asarray(
+            recipe.parameters.get("panelColor", [0.55, 0.54, 0.52]),
+            dtype=np.float32,
+        )
+        frame = frame * (1.0 - panel[:, :, None]) + panel_color * panel[:, :, None]
     else:  # pragma: no cover - configuration validation prevents this
         raise ValueError(recipe.effect)
 
@@ -956,7 +1130,11 @@ def render_background_intermediate(
         for frame_index in range(frames):
             fraction = frame_index / max(frames - 1, 1)
             pixels = background_effect_frame(recipe, fraction, context)
-            if frame_index == frames - 1 and first_bytes is not None:
+            if (
+                recipe.loop_behavior == "continuous"
+                and frame_index == frames - 1
+                and first_bytes is not None
+            ):
                 frame_bytes = first_bytes
                 pixels = np.frombuffer(frame_bytes, dtype="<u2").reshape(height, width, 3)
             else:
@@ -986,12 +1164,14 @@ def render_background_intermediate(
         raise
     if return_code:
         raise subprocess.CalledProcessError(return_code, command)
-    if first_bytes != last_bytes:
+    first_last_identical = first_bytes == last_bytes
+    if recipe.loop_behavior == "continuous" and not first_last_identical:
         raise AssertionError(f"{recipe.id} background does not close exactly")
     perceptual_visibility = background_visibility_metrics(peak_pixels, base_u16)
     require_perceptual_visibility(recipe, perceptual_visibility)
     return {
-        "firstLastBackgroundIdentical": True,
+        "firstLastBackgroundIdentical": first_last_identical,
+        "loopBehavior": recipe.loop_behavior,
         "backgroundFrameSha256": hashlib.sha256(first_bytes or b"").hexdigest(),
         "perceptualVisibility": perceptual_visibility,
         "perceptualMinimums": recipe.perceptual_floor,

@@ -160,6 +160,13 @@ Updated: 2026-08-19
   number doorway. All hold `PDE-002`, the isolated subject, and the supplied
   light background constant. The seven 11-second candidates are registered as
   `IBC-001`–`IBC-007`; the Registry now contains 135 visual candidates.
+- V12 review established that the numbers must remain two-dimensional; z-axis
+  travel is rejected. The v13 response round adds two dense flat number fields
+  (varied fixed sizes and one uniform size), an orderly lateral-separation
+  field, a visibly stronger gradient, a full-width sliding panel, an
+  eleven-second one-way door, and a dense number wipe. No digit is coordinated
+  with the `26` prop. `IBF-006` and `IBF-007` intentionally reset abruptly at
+  replay; the other five are continuous. The Registry now contains 142 visuals.
 
 ## Earlier implemented work
 
@@ -172,9 +179,10 @@ Updated: 2026-08-19
 
 ## Next production work
 
-1. Review `IBC-001`–`IBC-007` at normal phone size. Judge the idea and its
-   motion separately from strength. The supplied still background remains a
-   valid choice.
+1. Review `IBF-001`–`IBF-007` at normal phone size. For the first three, judge
+   density, fixed size, order, and x-y movement; reject any remaining illusion
+   of depth. For the last two, judge whether the abrupt replay creates useful
+   rewatch energy or merely feels broken.
 2. Freeze `PDE-002` as the portrait-surface treatment for 10000 and NYChildren;
    freeze Infinity after its background decision.
 3. Continue using embedded-profile 16-bit TIFF as the preferred portrait
