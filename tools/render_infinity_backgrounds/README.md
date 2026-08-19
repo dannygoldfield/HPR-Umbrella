@@ -7,3 +7,9 @@ working copies of the named `Subject` and `Background` layers.
 
 Every candidate is silent, image-only, 11 seconds, 24 fps, 1080 × 1920,
 fixed-geometry, and loop-safe. Grain and audio remain deferred.
+
+The default configuration reproduces the original restrained `INF` round. Pass
+`--background-config components/video-generator/config/infinity-background-visibility-recipes.json`
+for the separately versioned `IBV` calibration round. That configuration adds
+per-recipe perceptual floors; rendering stops if a background is mathematically
+different but too weak to meet its declared display-scale visibility target.

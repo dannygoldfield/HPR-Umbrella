@@ -33,6 +33,38 @@ LittleCMS 16-bit conversion to sRGB as the portrait-development pipeline.
 | `INF-006` | Incomplete geometry | Sparse arcs, points, and relationships appear without explaining themselves. |
 | `INF-007` | Borrowed-color field | Large atmospheric regions borrow restrained skin and clothing colors. |
 
+## Visibility-calibration round
+
+The first `INF` render proved that seven files could be technically different
+while remaining perceptually identical at the 280-pixel review size. Several
+delivered backgrounds changed by an average of only one or two 8-bit display
+codes. The original unit test also used a one-code threshold in 16-bit space,
+which established mathematical non-identity rather than visible difference.
+
+`infinity-background-visibility-v11` preserves those seven concepts under new
+`IBV` identifiers so the failed round remains reproducible. Every recipe now
+declares a visibility boost and three minimum display-scale measures:
+
+- mean RGB change in familiar 8-bit code values;
+- 95th-percentile RGB change;
+- percentage of background pixels whose mean RGB change exceeds three codes.
+
+The renderer refuses a candidate before compositing if any declared minimum is
+missed. The seven delivered candidates span approximately 2.2–17.0 mean 8-bit
+codes on the uncovered background at peak activity. The sparse geometry option
+is intentionally localized; the other six affect broad areas. This is a
+calibration round, so an option may be conspicuously too strong.
+
+| ID | Treatment | Boundary being tested |
+| --- | --- | --- |
+| `IBV-001` | Visible momentum wake | Directional warmth behind the gesture |
+| `IBV-002` | Visible emulsion bloom | Broad overlapping photographic density |
+| `IBV-003` | Visible floating print | Dimensional shadow versus cutout artifact |
+| `IBV-004` | Visible negative-space aperture | Portrait vignette versus spotlight |
+| `IBV-005` | Visible residual gesture | Remembered movement versus echo effect |
+| `IBV-006` | Visible incomplete geometry | Relational graphic versus explanatory diagram |
+| `IBV-007` | Visible borrowed-color field | Chromatic atmosphere versus tinted backdrop |
+
 Every candidate uses the identical `PDE-002` recipe, seed, focal point, and
 264-frame development timeline. The subject is composited from its unmatted
 16-bit layer rather than extracted from a flattened video, preventing a pale

@@ -47,6 +47,8 @@ class InfinityBackgroundRecipe:
     effect: str
     strength: float
     speed: float
+    visibility_boost: float
+    perceptual_floor: dict[str, float]
     description: str
 
 
@@ -93,14 +95,34 @@ def load_infinity_background_config(path: Path) -> InfinityBackgroundConfig:
             effect=item["effect"],
             strength=float(item["strength"]),
             speed=float(item["speed"]),
+            visibility_boost=float(item.get("visibilityBoost", 1.0)),
+            perceptual_floor={
+                "meanDelta8Bit": float(
+                    item.get("perceptualFloor", {}).get("meanDelta8Bit", 0.0)
+                ),
+                "p95Delta8Bit": float(
+                    item.get("perceptualFloor", {}).get("p95Delta8Bit", 0.0)
+                ),
+                "activePixelsAbove3Percent": float(
+                    item.get("perceptualFloor", {}).get(
+                        "activePixelsAbove3Percent", 0.0
+                    )
+                ),
+            },
             description=item["description"],
         )
         if recipe.effect not in EFFECTS:
             raise ValueError(f"{recipe.id} has an unsupported effect: {recipe.effect}")
-        if not 0 < recipe.strength <= 0.25:
-            raise ValueError(f"{recipe.id} strength must be greater than 0 and at most 0.25")
+        if not 0 < recipe.strength <= 0.45:
+            raise ValueError(f"{recipe.id} strength must be greater than 0 and at most 0.45")
         if recipe.speed <= 0:
             raise ValueError(f"{recipe.id} speed must be greater than zero")
+        if not 1.0 <= recipe.visibility_boost <= 3.0:
+            raise ValueError(
+                f"{recipe.id} visibilityBoost must be between 1.0 and 3.0"
+            )
+        if any(value < 0 for value in recipe.perceptual_floor.values()):
+            raise ValueError(f"{recipe.id} perceptual floors cannot be negative")
         if recipe.id in recipes:
             raise ValueError(f"Duplicate Infinity background recipe: {recipe.id}")
         recipes[recipe.id] = recipe
@@ -387,14 +409,19 @@ def _oriented_gaussian(
     )
 
 
-def _geometry_masks(width: int, height: int) -> list[Any]:
+def _geometry_masks(
+    width: int,
+    height: int,
+    *,
+    line_scale: float = 1.0,
+) -> list[Any]:
     np = _numpy()
     scale = 2
     masks = []
     for group in range(3):
         image = Image.new("L", (width * scale, height * scale), 0)
         draw = ImageDraw.Draw(image)
-        line_width = max(2, round(width * 0.004 * scale))
+        line_width = max(2, round(width * 0.004 * scale * line_scale))
         if group == 0:
             draw.arc(
                 (
@@ -441,10 +468,12 @@ def _geometry_masks(width: int, height: int) -> list[Any]:
             ):
                 x = int(point_x * width * scale)
                 y = int(point_y * height * scale)
-                r = max(2, int(radius * width * scale))
+                r = max(2, int(radius * width * scale * line_scale**0.65))
                 draw.ellipse((x - r, y - r, x + r, y + r), fill=255)
         image = image.resize((width, height), Image.Resampling.LANCZOS)
-        image = image.filter(ImageFilter.GaussianBlur(radius=0.35))
+        image = image.filter(
+            ImageFilter.GaussianBlur(radius=0.35 * min(line_scale, 2.0))
+        )
         masks.append(np.asarray(image, dtype=np.float32) / 255.0)
     return masks
 
@@ -485,18 +514,52 @@ def build_background_context(
         "alpha": alpha,
         "alphaSoft": _blur_mask(alpha, max(2.0, width * 0.028)),
         "alphaGhost": _blur_mask(alpha, max(1.0, width * 0.012)),
+        "alphaShadowBold": _blur_mask(alpha, max(3.0, width * 0.050)),
+        "alphaGhostBold": _blur_mask(alpha, max(2.0, width * 0.026)),
         "x": x,
         "y": y,
         "skinColor": np.asarray(skin_color, dtype=np.float32),
         "darkColor": np.asarray(dark_color, dtype=np.float32),
         "geometryMasks": _geometry_masks(width, height),
+        "geometryMasksBold": _geometry_masks(width, height, line_scale=6.5),
     }
 
 
 def _mix_color(base: Any, color: Any, amount: Any) -> Any:
     np = _numpy()
-    opacity = np.clip(amount, 0.0, 0.35)[:, :, None]
+    opacity = np.clip(amount, 0.0, 0.50)[:, :, None]
     return base * (1.0 - opacity) + np.asarray(color, dtype=np.float32) * opacity
+
+
+def background_visibility_metrics(pixels: Any, base: Any) -> dict[str, float]:
+    """Measure effect visibility in familiar 8-bit display-code distances."""
+    np = _numpy()
+    delta = np.abs(
+        np.asarray(pixels, dtype=np.float32) - np.asarray(base, dtype=np.float32)
+    ) / 257.0
+    pixel_delta = delta.mean(axis=2)
+    return {
+        "meanDelta8Bit": round(float(delta.mean()), 3),
+        "p95Delta8Bit": round(float(np.percentile(delta, 95)), 3),
+        "activePixelsAbove3Percent": round(
+            float(np.mean(pixel_delta > 3.0) * 100.0), 3
+        ),
+    }
+
+
+def require_perceptual_visibility(
+    recipe: InfinityBackgroundRecipe,
+    metrics: dict[str, float],
+) -> None:
+    failures = [
+        f"{key} {metrics[key]:.3f} < {minimum:.3f}"
+        for key, minimum in recipe.perceptual_floor.items()
+        if metrics[key] < minimum
+    ]
+    if failures:
+        raise ValueError(
+            f"{recipe.id} failed perceptual visibility: " + "; ".join(failures)
+        )
 
 
 def background_effect_frame(
@@ -511,21 +574,31 @@ def background_effect_frame(
     envelope = math.sin(math.pi * max(0.0, min(1.0, fraction))) ** 2
     phase = 2.0 * math.pi * fraction * recipe.speed
     strength = recipe.strength * envelope
-    warm_neutral = context["skinColor"] * 0.42 + np.asarray(
+    boost = recipe.visibility_boost
+    emphasis = min(1.0, max(0.0, boost - 1.0))
+    restrained_warm = context["skinColor"] * 0.42 + np.asarray(
         [0.88, 0.86, 0.82], dtype=np.float32
     ) * 0.58
-    quiet_dark = context["darkColor"] * 0.30 + np.asarray(
+    assertive_warm = context["skinColor"] * 0.52 + np.asarray(
+        [0.72, 0.66, 0.58], dtype=np.float32
+    ) * 0.48
+    warm_neutral = restrained_warm * (1.0 - emphasis) + assertive_warm * emphasis
+    restrained_dark = context["darkColor"] * 0.30 + np.asarray(
         [0.50, 0.49, 0.47], dtype=np.float32
     ) * 0.70
+    assertive_dark = context["darkColor"] * 0.48 + np.asarray(
+        [0.24, 0.24, 0.26], dtype=np.float32
+    ) * 0.52
+    quiet_dark = restrained_dark * (1.0 - emphasis) + assertive_dark * emphasis
 
     if recipe.effect == "momentum_wake":
         field = _oriented_gaussian(
             x,
             y,
-            center_x=0.34 + 0.035 * math.sin(phase),
-            center_y=0.50 + 0.025 * math.cos(phase),
-            radius_x=0.48,
-            radius_y=0.17,
+            center_x=0.34 + 0.035 * boost * math.sin(phase),
+            center_y=0.50 + 0.025 * boost * math.cos(phase),
+            radius_x=0.48 * min(boost, 1.40),
+            radius_y=0.17 * min(boost, 1.75),
             angle=-0.42,
         )
         frame = _mix_color(base, warm_neutral, field * strength)
@@ -540,18 +613,21 @@ def background_effect_frame(
             field += weight * _oriented_gaussian(
                 x,
                 y,
-                center_x=center_x + 0.025 * math.sin(phase + offset),
-                center_y=center_y + 0.020 * math.cos(phase * 0.9 + offset),
-                radius_x=radius_x,
-                radius_y=radius_y,
+                center_x=center_x + 0.025 * boost * math.sin(phase + offset),
+                center_y=center_y + 0.020 * boost * math.cos(phase * 0.9 + offset),
+                radius_x=radius_x * min(boost, 1.35),
+                radius_y=radius_y * min(boost, 1.35),
                 angle=0.2 * math.sin(offset),
             )
         field /= max(float(field.max()), 1e-6)
         frame = _mix_color(base, warm_neutral * 0.92, field * strength)
     elif recipe.effect == "floating_print":
-        dx = int(round(7 + 3 * math.sin(phase)))
-        dy = int(round(10 + 2 * math.cos(phase)))
-        shadow = _shift_mask(context["alphaSoft"], dx, dy)
+        dx = int(round((7 + 3 * math.sin(phase)) * boost))
+        dy = int(round((10 + 2 * math.cos(phase)) * boost))
+        shadow_source = (
+            context["alphaShadowBold"] if boost > 1.2 else context["alphaSoft"]
+        )
+        shadow = _shift_mask(shadow_source, dx, dy)
         frame = _mix_color(base, quiet_dark, shadow * strength)
     elif recipe.effect == "negative_space_aperture":
         aperture = _oriented_gaussian(
@@ -566,20 +642,27 @@ def background_effect_frame(
         outer_density = np.clip(1.0 - aperture, 0.0, 1.0)
         frame = _mix_color(base, quiet_dark * 0.82 + warm_neutral * 0.18, outer_density * strength)
     elif recipe.effect == "residual_gesture":
+        ghost_source = (
+            context["alphaGhostBold"] if boost > 1.2 else context["alphaGhost"]
+        )
         ghost_a = _shift_mask(
-            context["alphaGhost"],
-            int(round(-15 - 3 * math.sin(phase))),
-            int(round(3 + 2 * math.cos(phase))),
+            ghost_source,
+            int(round((-15 - 3 * math.sin(phase)) * boost)),
+            int(round((3 + 2 * math.cos(phase)) * boost)),
         )
         ghost_b = _shift_mask(
-            context["alphaGhost"],
-            int(round(12 + 2 * math.cos(phase))),
-            int(round(-5 + 2 * math.sin(phase))),
+            ghost_source,
+            int(round((12 + 2 * math.cos(phase)) * boost)),
+            int(round((-5 + 2 * math.sin(phase)) * boost)),
         )
         ghost = np.clip(ghost_a * 0.70 + ghost_b * 0.35, 0.0, 1.0)
         frame = _mix_color(base, warm_neutral * 0.72 + quiet_dark * 0.28, ghost * strength)
     elif recipe.effect == "incomplete_geometry":
-        masks = context["geometryMasks"]
+        masks = (
+            context["geometryMasksBold"]
+            if boost > 1.2
+            else context["geometryMasks"]
+        )
         weights = [
             max(0.0, math.sin(math.pi * fraction + offset)) ** 2
             for offset in (0.0, 0.65, 1.25)
@@ -596,8 +679,8 @@ def background_effect_frame(
             y,
             center_x=0.27 + 0.04 * math.sin(phase),
             center_y=0.30 + 0.03 * math.cos(phase),
-            radius_x=0.42,
-            radius_y=0.27,
+            radius_x=0.42 * min(boost, 1.30),
+            radius_y=0.27 * min(boost, 1.30),
             angle=0.28,
         )
         dark_field = _oriented_gaussian(
@@ -605,8 +688,8 @@ def background_effect_frame(
             y,
             center_x=0.72 + 0.035 * math.cos(phase),
             center_y=0.73 + 0.025 * math.sin(phase),
-            radius_x=0.46,
-            radius_y=0.30,
+            radius_x=0.46 * min(boost, 1.30),
+            radius_y=0.30 * min(boost, 1.30),
             angle=-0.22,
         )
         frame = _mix_color(base, context["skinColor"], skin_field * strength * 0.72)
@@ -670,6 +753,9 @@ def render_background_intermediate(
     last_bytes: bytes | None = None
     timeline = []
     base = np.asarray(context["background"] * 65535.0, dtype=np.float32)
+    base_u16 = np.rint(base).astype("<u2")
+    peak_pixels = base_u16
+    peak_mean_delta = -1.0
     try:
         for frame_index in range(frames):
             fraction = frame_index / max(frames - 1, 1)
@@ -683,14 +769,17 @@ def render_background_intermediate(
                 first_bytes = frame_bytes
             last_bytes = frame_bytes
             process.stdin.write(frame_bytes)
+            mean_delta = float(
+                np.abs(pixels.astype(np.float32) - base).mean() / 65535.0
+            )
+            if mean_delta > peak_mean_delta:
+                peak_mean_delta = mean_delta
+                peak_pixels = pixels.copy()
             timeline.append(
                 {
                     "frame": frame_index,
                     "timeFraction": round(fraction, 6),
-                    "meanAbsoluteBackgroundDelta": round(
-                        float(np.abs(pixels.astype(np.float32) - base).mean() / 65535.0),
-                        6,
-                    ),
+                    "meanAbsoluteBackgroundDelta": round(mean_delta, 6),
                 }
             )
         process.stdin.close()
@@ -703,9 +792,13 @@ def render_background_intermediate(
         raise subprocess.CalledProcessError(return_code, command)
     if first_bytes != last_bytes:
         raise AssertionError(f"{recipe.id} background does not close exactly")
+    perceptual_visibility = background_visibility_metrics(peak_pixels, base_u16)
+    require_perceptual_visibility(recipe, perceptual_visibility)
     return {
         "firstLastBackgroundIdentical": True,
         "backgroundFrameSha256": hashlib.sha256(first_bytes or b"").hexdigest(),
+        "perceptualVisibility": perceptual_visibility,
+        "perceptualMinimums": recipe.perceptual_floor,
         "frameTimeline": timeline,
     }
 

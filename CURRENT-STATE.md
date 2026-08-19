@@ -138,6 +138,18 @@ Updated: 2026-08-19
   supplied light background, and omits grain, audio, and text. All seven passed
   11-second, 264-frame, BT.709, provenance, fixed-geometry, and decoded
   loop-closure audits. The Registry now contains 121 visual candidates.
+- Human review found the seven v10 backgrounds indistinguishable at the
+  mobile-sized preview. Measurement confirmed that several delivered effects
+  averaged only one or two 8-bit display-code changes. The former unit check
+  proved only non-identical pixels and was not a valid perceptual acceptance
+  test; v10 is retained as failed research evidence.
+- Infinity visibility-calibration round v11 preserves the same seven concepts
+  under `IBV-001`–`IBV-007`, increases their contrast, coverage, displacement,
+  or graphic weight, and may deliberately go too far. Every recipe declares
+  minimum mean, 95th-percentile, and active-area visibility values measured in
+  8-bit display-code terms. Rendering stops when a minimum is missed. All seven
+  passed those gates plus the 11-second, 264-frame, BT.709, fixed-geometry, and
+  decoded loop-closure audits. The Registry now contains 128 visuals.
 
 ## Earlier implemented work
 
@@ -150,9 +162,9 @@ Updated: 2026-08-19
 
 ## Next production work
 
-1. Review `INF-001`–`INF-007` at normal phone size and decide whether one
-   background treatment deserves refinement or whether the supplied light
-   background should remain still.
+1. Review `IBV-001`–`IBV-007` at normal phone size. Identify concepts worth
+   refining and use any obviously excessive candidate to establish the upper
+   visibility boundary; the supplied still background remains a valid choice.
 2. Freeze `PDE-002` as the portrait-surface treatment for 10000 and NYChildren;
    freeze Infinity after its background decision.
 3. Continue using embedded-profile 16-bit TIFF as the preferred portrait

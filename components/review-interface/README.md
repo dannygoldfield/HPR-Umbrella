@@ -5,11 +5,12 @@ only on the local computer and writes every human decision directly to the
 SQLite Registry. JSON manifests remain provenance records, not forms Danny has
 to edit.
 
-The active review family is the seven-candidate Infinity background comparison,
-`INF-001`–`INF-007`. Every candidate holds the five-star `PDE-002` subject
-treatment, subject geometry, light background foundation, timing, and delivery
-format constant. Only the separately supplied Background layer changes. The
-65% landing round and all earlier research sets remain available unchanged.
+The active review family is the seven-candidate Infinity visibility-calibration
+round, `IBV-001`–`IBV-007`. Every candidate holds the five-star `PDE-002`
+subject treatment, subject geometry, light background foundation, timing, and
+delivery format constant. Only the separately supplied Background layer
+changes. The imperceptibly restrained `INF` round, the 65% landing round, and
+all earlier research sets remain available unchanged.
 
 The visual-review screen provides looping video, 1–5 rating, reject, notes,
 selection, render/review status, and a provenance link. Episode is explicitly
@@ -51,7 +52,9 @@ For the active Infinity set, compare momentum wake, photographic emulsion bloom,
 floating photographic print, negative-space aperture, residual gesture,
 incomplete geometry, and borrowed-color field. The diagnostic card names the
 effect, states its intent, and confirms that `PDE-002` remains unchanged. Grain,
-audio, and text are absent.
+audio, and text are absent. The `IBV` card also shows the recipe's visibility
+boost, peak mean 8-bit display-code change, and active background area so a
+later refinement can be placed numerically between rounds.
 
 ## Start it
 

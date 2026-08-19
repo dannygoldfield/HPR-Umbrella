@@ -85,6 +85,9 @@
             <dt>Effect</dt><dd id="backgroundEffect">—</dd>
             <dt>Strength</dt><dd id="backgroundStrength">—</dd>
             <dt>Speed</dt><dd id="backgroundSpeed">—</dd>
+            <dt>Visibility boost</dt><dd id="backgroundVisibilityBoost">—</dd>
+            <dt>Peak mean change</dt><dd id="backgroundMeanDelta">—</dd>
+            <dt>Active background</dt><dd id="backgroundActiveArea">—</dd>
             <dt>Subject</dt><dd id="backgroundSubjectTreatment">PDE-002 unchanged</dd>
           </dl>
         </div>
@@ -161,9 +164,11 @@
       if(settlement)return settlement;
       const infinityBackground=({'INF-001':'Momentum wake','INF-002':'Photographic emulsion bloom','INF-003':'Floating photographic print','INF-004':'Negative-space aperture','INF-005':'Residual gesture','INF-006':'Incomplete geometry','INF-007':'Borrowed-color field'})[id];
       if(infinityBackground)return infinityBackground;
+      const infinityVisibility=({'IBV-001':'Visible momentum wake','IBV-002':'Visible emulsion bloom','IBV-003':'Visible floating print','IBV-004':'Visible negative-space aperture','IBV-005':'Visible residual gesture','IBV-006':'Visible incomplete geometry','IBV-007':'Visible borrowed-color field'})[id];
+      if(infinityVisibility)return infinityVisibility;
       return id;
     }
-    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — seven concepts'})[id]||id; }
+    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration'})[id]||id; }
     async function loadTelemetry(c){
       const token=++telemetryToken; telemetry=null; $('diagnostics').hidden=true; $('whiteBalanceDiagnostics').hidden=true; $('developmentDiagnostics').hidden=true; $('developmentSettings').hidden=true; $('backgroundSettings').hidden=true;
       $('temperatureSlider').value=0; $('tintSlider').value=0; $('temperatureValue').textContent='0.00'; $('tintValue').textContent='0.00';
@@ -192,6 +197,10 @@
           $('backgroundIntent').textContent=manifest.backgroundDescription||'';
           $('backgroundStrength').textContent=Number(manifest.backgroundStrength||0).toFixed(3);
           $('backgroundSpeed').textContent=Number(manifest.backgroundSpeed||0).toFixed(2);
+          $('backgroundVisibilityBoost').textContent=Number(manifest.backgroundVisibilityBoost||1).toFixed(2);
+          const visibility=manifest.backgroundTelemetry?.perceptualVisibility||{};
+          $('backgroundMeanDelta').textContent=visibility.meanDelta8Bit===undefined?'—':`${Number(visibility.meanDelta8Bit).toFixed(1)} of 255`;
+          $('backgroundActiveArea').textContent=visibility.activePixelsAbove3Percent===undefined?'—':`${Number(visibility.activePixelsAbove3Percent).toFixed(1)}%`;
           $('backgroundSubjectTreatment').textContent=`${manifest.basePortraitTreatment?.developmentRecipeId||'PDE-002'} unchanged`;
           $('backgroundSettings').hidden=false; $('diagnostics').hidden=false;
         }
@@ -254,7 +263,8 @@
       allCandidates=data.candidates; if(!allCandidates.length)throw new Error('No visual candidates are registered.');
       const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
       const choices=[];
-      if(experiments.includes('infinity-background-v10'))choices.push(['infinity-background-v10','Infinity Backgrounds — seven concepts']);
+      if(experiments.includes('infinity-background-visibility-v11'))choices.push(['infinity-background-visibility-v11','Infinity Backgrounds — visible calibration']);
+      if(experiments.includes('infinity-background-v10'))choices.push(['infinity-background-v10','Infinity Backgrounds — subtle concepts']);
       if(experiments.includes('portrait-development-settlement-v9'))choices.push(['portrait-development-settlement-v9','Portrait Development — 65% landing']);
       if(experiments.includes('portrait-development-visibility-v8'))choices.push(['portrait-development-visibility-v8','Portrait Development — visibility boundary']);
       if(experiments.includes('portrait-development-finalist-v7'))choices.push(['portrait-development-finalist-v7','Portrait Development — possible finals']);

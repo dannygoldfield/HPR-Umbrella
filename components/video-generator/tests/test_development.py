@@ -19,9 +19,11 @@ from hpr_video_generator.development import (
 )
 from hpr_video_generator.infinity_background import (
     background_effect_frame,
+    background_visibility_metrics,
     build_background_context,
     build_infinity_background_filter,
     load_infinity_background_config,
+    require_perceptual_visibility,
 )
 
 
@@ -63,6 +65,9 @@ class DevelopmentTests(unittest.TestCase):
         )
         self.infinity_background_config = load_infinity_background_config(
             ROOT / "config/infinity-background-recipes.json"
+        )
+        self.infinity_visibility_config = load_infinity_background_config(
+            ROOT / "config/infinity-background-visibility-recipes.json"
         )
 
     def test_pilot_has_five_fixed_geometry_recipes(self) -> None:
@@ -437,7 +442,7 @@ class DevelopmentTests(unittest.TestCase):
             ],
         )
 
-    def test_infinity_background_effects_are_visible_and_loop_exactly(self) -> None:
+    def test_infinity_background_effects_loop_exactly(self) -> None:
         import numpy as np
 
         height, width = 48, 27
@@ -455,11 +460,34 @@ class DevelopmentTests(unittest.TestCase):
             last = background_effect_frame(recipe, 1.0, context)
             self.assertTrue(np.array_equal(first, last), recipe.id)
             self.assertTrue(np.array_equal(first, background), recipe.id)
+            metrics = background_visibility_metrics(middle, first)
+            self.assertGreater(metrics["meanDelta8Bit"], 0.0, recipe.id)
+
+    def test_infinity_visibility_round_requires_perceptible_display_change(self) -> None:
+        self.assertEqual(
+            "infinity-background-visibility-v11",
+            self.infinity_visibility_config.experiment_id,
+        )
+        self.assertEqual(
+            [f"IBV-{index:03d}" for index in range(1, 8)],
+            list(self.infinity_visibility_config.recipes),
+        )
+        for recipe in self.infinity_visibility_config.recipes.values():
+            self.assertGreater(recipe.visibility_boost, 1.0, recipe.id)
             self.assertGreater(
-                float(np.abs(middle.astype(np.int32) - first.astype(np.int32)).mean()),
-                1.0,
+                recipe.perceptual_floor["meanDelta8Bit"], 0.0, recipe.id
+            )
+            self.assertGreater(
+                recipe.perceptual_floor["activePixelsAbove3Percent"],
+                0.0,
                 recipe.id,
             )
+            require_perceptual_visibility(recipe, recipe.perceptual_floor)
+            with self.assertRaisesRegex(ValueError, recipe.id):
+                require_perceptual_visibility(
+                    recipe,
+                    {key: 0.0 for key in recipe.perceptual_floor},
+                )
 
     def test_infinity_background_filter_preserves_subject_geometry(self) -> None:
         graph = build_infinity_background_filter(self.video_config, 135, 240)
