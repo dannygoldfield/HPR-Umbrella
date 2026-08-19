@@ -41,11 +41,15 @@ Generated candidates are written to `audio/output/candidates/`. Their IDs, seeds
 ## Source of truth
 
 - Software reads `config/generator.xml`.
-- Humans review and curate in a private operational workbook.
+- Humans author and curate recipes in the private Google Sheet Audio Recipe
+  Library and review generated candidates through the HPR review workflow.
 - WAV files remain immutable ingredients.
 - Generated audio is reproducible from recipe ID, generator version, and seed.
 
-The Google Sheet is the live operational workbook. Do not commit exported workbook copies to this repository.
+The Google Sheet is the live operational workbook. A future importer will make
+a dated, checksummed configuration snapshot for each production batch; audio
+manifests will record its snapshot ID. Danny will not manually mirror recipe
+rows into SQLite. Do not commit exported workbook copies to this repository.
 
 ## Initial goal
 

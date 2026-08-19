@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HPR Visual Review</title>
+  <style>
+    :root { color-scheme: dark; --ink:#f5f1e9; --muted:#aaa59c; --panel:#1d1c1a; --line:#3b3935; --accent:#e9a85d; --ok:#7ac99a; --danger:#ea847d; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:#11110f; color:var(--ink); font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    header { display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:1rem 1.4rem; border-bottom:1px solid var(--line); position:sticky; top:0; background:#11110ff2; z-index:2; }
+    .header-controls { display:flex; gap:.8rem; align-items:center; }
+    select { background:#292824; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:.45rem .6rem; }
+    h1 { margin:0; font-size:1.15rem; letter-spacing:.02em; }
+    main { display:grid; grid-template-columns:minmax(280px, 360px) minmax(300px, 1fr); gap:1.5rem; max-width:980px; margin:0 auto; padding:1.5rem; }
+    video { display:block; width:min(78vw, 300px); max-height:56vh; margin:0 auto; background:#000; border-radius:10px; box-shadow:0 16px 60px #0008; }
+    .visual-column { width:100%; max-width:360px; justify-self:center; align-self:start; }
+    .diagnostics { margin-top:1rem; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1rem; }
+    .diagnostics h3 { margin:0 0 .2rem; font-size:1rem; }
+    .slider-row { display:grid; grid-template-columns:7rem 1fr 3.8rem; gap:.7rem; align-items:center; margin-top:.8rem; }
+    .slider-row output { text-align:right; font-variant-numeric:tabular-nums; }
+    .diagnostics input[type="range"] { width:100%; pointer-events:none; opacity:1; }
+    .diagnostics input.temp { accent-color:#e9a85d; }
+    .diagnostics input.tint { accent-color:#d982ca; }
+    .diagnostics input.development { accent-color:#7ac99a; }
+    .diagnostic-section + .diagnostic-section { margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line); }
+    .settings-grid { grid-template-columns:8rem 1fr; margin:.7rem 0 0; gap:.25rem .7rem; font-size:.9rem; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1.25rem; align-self:start; }
+    .eyebrow,.muted { color:var(--muted); }
+    .eyebrow { text-transform:uppercase; letter-spacing:.1em; font-size:.75rem; }
+    h2 { margin:.25rem 0 .15rem; font-size:1.5rem; }
+    dl { display:grid; grid-template-columns:9rem 1fr; margin:1.2rem 0; gap:.35rem .8rem; }
+    dt { color:var(--muted); } dd { margin:0; overflow-wrap:anywhere; }
+    fieldset { border:0; padding:0; margin:1.2rem 0; }
+    legend { margin-bottom:.55rem; font-weight:650; }
+    button,.toggle { border:1px solid var(--line); background:#292824; color:var(--ink); border-radius:7px; padding:.65rem .85rem; cursor:pointer; }
+    button:hover,.toggle:hover { border-color:var(--accent); }
+    button.active { background:var(--accent); color:#17120c; border-color:var(--accent); font-weight:700; }
+    .ratings,.actions,.navigation { display:flex; flex-wrap:wrap; gap:.5rem; }
+    .ratings button { min-width:2.8rem; }
+    .toggle input { margin-right:.45rem; }
+    .toggle.reject.active { border-color:var(--danger); color:var(--danger); }
+    .toggle.select.active { border-color:var(--ok); color:var(--ok); }
+    textarea { width:100%; min-height:7rem; resize:vertical; background:#121210; color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.7rem; font:inherit; }
+    .navigation { justify-content:space-between; margin-top:1.25rem; }
+    .status { min-height:1.4rem; color:var(--ok); margin:.6rem 0 0; }
+    .provenance { color:var(--accent); }
+    kbd { border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:.05rem .3rem; color:var(--muted); }
+    @media (max-width:760px) { main { grid-template-columns:1fr; padding:.8rem; } video { width:min(76vw, 280px); max-height:52vh; } header { padding:.8rem; flex-wrap:wrap; } .header-controls { width:100%; justify-content:space-between; } dl { grid-template-columns:7rem 1fr; } }
+  </style>
+</head>
+<body>
+  <header><h1>HPR Visual Review</h1><div class="header-controls"><select id="experiment" aria-label="Review set"></select><div id="counter" class="muted">Loading…</div></div></header>
+  <main id="app" hidden>
+    <section class="visual-column">
+      <video id="video" muted loop autoplay playsinline controls></video>
+      <div id="diagnostics" class="diagnostics" hidden>
+        <div id="whiteBalanceDiagnostics" class="diagnostic-section" hidden>
+          <h3>White-balance reference</h3>
+          <div class="muted">Synchronized HPR deltas. The approved Lightroom export is 0; these are not Lightroom slider units.</div>
+          <div class="slider-row"><label for="temperatureSlider">Temperature</label><input id="temperatureSlider" class="temp" type="range" min="-10" max="10" step="0.01" value="0" aria-disabled="true" tabindex="-1"><output id="temperatureValue">0.00</output></div>
+          <div class="slider-row"><label for="tintSlider">Tint</label><input id="tintSlider" class="tint" type="range" min="-10" max="10" step="0.01" value="0" aria-disabled="true" tabindex="-1"><output id="tintValue">0.00</output></div>
+        </div>
+        <div id="developmentDiagnostics" class="diagnostic-section" hidden>
+          <h3>Portrait-development reference</h3>
+          <div class="muted">How much of the untouched finished portrait is visible. This reference stays outside the video.</div>
+          <div class="slider-row"><label for="developmentSlider">Finished image</label><input id="developmentSlider" class="development" type="range" min="0" max="100" step="0.1" value="100" aria-disabled="true" tabindex="-1"><output id="developmentValue">100%</output></div>
+          <div id="developmentRange" class="muted">Local range: 100–100%</div>
+        </div>
+        <div id="developmentSettings" class="diagnostic-section" hidden>
+          <h3>Saved animation settings</h3>
+          <div class="muted">Exact values for this candidate. Use these to choose a point between rounds.</div>
+          <dl class="settings-grid">
+            <dt>Minimum final</dt><dd id="settingMinimumFinal">—</dd>
+            <dt>Finished pause</dt><dd id="settingFinishedPause">—</dd>
+            <dt>Speed</dt><dd id="settingSpeed">—</dd>
+            <dt>Feather</dt><dd id="settingFeather">—</dd>
+            <dt>Patches</dt><dd id="settingPatches">—</dd>
+          </dl>
+        </div>
+        <div id="backgroundSettings" class="diagnostic-section" hidden>
+          <h3>Infinity background treatment</h3>
+          <div id="backgroundIntent" class="muted"></div>
+          <dl class="settings-grid">
+            <dt>Effect</dt><dd id="backgroundEffect">—</dd>
+            <dt>Strength</dt><dd id="backgroundStrength">—</dd>
+            <dt>Speed</dt><dd id="backgroundSpeed">—</dd>
+            <dt>Subject</dt><dd id="backgroundSubjectTreatment">PDE-002 unchanged</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="eyebrow" id="source"></div>
+      <h2 id="portrait"></h2>
+      <div class="muted" id="recipe"></div>
+      <dl>
+        <dt>Episode</dt><dd>Not assigned — sequencing happens after final masters</dd>
+        <dt>Portrait ID</dt><dd id="portraitId"></dd>
+        <dt>Revision</dt><dd id="revisionId"></dd>
+        <dt>Candidate</dt><dd id="visualId"></dd>
+        <dt>Comparison</dt><dd id="comparison"></dd>
+        <dt>Render</dt><dd id="renderStatus"></dd>
+        <dt>Review</dt><dd id="reviewStatus"></dd>
+        <dt>Provenance</dt><dd><a id="manifest" class="provenance" target="_blank">Open JSON manifest</a></dd>
+      </dl>
+      <fieldset><legend>Rating <span class="muted">(<kbd>1</kbd>–<kbd>5</kbd>)</span></legend><div id="ratings" class="ratings"></div></fieldset>
+      <fieldset><legend>Decision</legend><div class="actions">
+        <label id="rejectLabel" class="toggle reject"><input id="reject" type="checkbox">Reject <kbd>R</kbd></label>
+        <label id="selectLabel" class="toggle select"><input id="select" type="checkbox">Select visual <kbd>S</kbd></label>
+      </div></fieldset>
+      <label for="notes"><strong>Notes</strong></label>
+      <textarea id="notes" placeholder="What works or does not work?"></textarea>
+      <div id="saveStatus" class="status"></div>
+      <div class="navigation"><button id="previous">← Previous</button><button id="next">Next →</button></div>
+      <p class="muted"><kbd>←</kbd>/<kbd>→</kbd> navigate · <kbd>Space</kbd> play/pause · notes save automatically</p>
+    </section>
+  </main>
+  <script>
+    let allCandidates=[], candidates=[], position=0, saveTimer=null, saveSequence=0, dirty=false, telemetry=null, telemetryToken=0;
+    const $=id=>document.getElementById(id);
+    function current(){ return candidates[position]; }
+    function reviewStatus(c){ return c.selected?'selected':c.rejected?'rejected':(c.rating!==null||c.notes)?'reviewed':'unreviewed'; }
+    function render(){
+      const c=current(); if(!c) return;
+      $('counter').textContent=`${position+1} of ${candidates.length}`;
+      $('video').src=c.media_url; $('video').play().catch(()=>{});
+      loadTelemetry(c);
+      $('source').textContent=`${c.source_project_display_name} · ${c.portrait_group.replaceAll('_',' ')}`;
+      $('portrait').textContent=c.revision_filename || c.intake_filename;
+      $('recipe').textContent=`${c.motion_recipe_id} · ${c.motion_recipe_name || recipeName(c.motion_recipe_id)} · ${c.duration_sec} seconds`;
+      $('portraitId').textContent=c.portrait_id; $('revisionId').textContent=c.revision_id; $('visualId').textContent=c.visual_id;
+      $('comparison').textContent=c.comparison_label || experimentName(c.experiment_id);
+      $('renderStatus').textContent=c.render_status; $('reviewStatus').textContent=reviewStatus(c);
+      $('manifest').href=c.manifest_url;
+      [...$('ratings').children].forEach((b,i)=>b.classList.toggle('active',c.rating===i+1));
+      $('reject').checked=c.rejected; $('select').checked=c.selected; $('notes').value=c.notes;
+      $('rejectLabel').classList.toggle('active',c.rejected); $('selectLabel').classList.toggle('active',c.selected);
+      $('previous').disabled=position===0; $('next').disabled=position===candidates.length-1; $('saveStatus').textContent=''; dirty=false;
+    }
+    function recipeName(id){
+      const original=({'MR-001':'Smooth baseline','MR-002':'Variable speed','MR-003':'Brief hold','MR-004':'Two stage with near-stillness','MR-005':'Asymmetric approach and return'})[id];
+      if(original)return original;
+      if(id.endsWith('LOW-SCALE'))return 'Lower scale amplitude';
+      if(id.endsWith('HIGH-SCALE'))return 'Higher scale amplitude';
+      if(id.endsWith('HORIZONTAL'))return 'Horizontal micro-movement only';
+      if(id.endsWith('VERTICAL'))return 'Vertical micro-movement only';
+      const whiteBalance=({'WBP-001':'Accurate export reference','WBP-002':'Temperature search','WBP-003':'Tint search','WBP-004':'Sequential temperature then tint correction','WBP-005':'Coupled white-balance fine-tuning'})[id];
+      if(whiteBalance)return whiteBalance;
+      const extreme=({'WBE-001':'Accurate export reference','WBE-002':'Extreme temperature search','WBE-003':'Extreme tint search','WBE-004':'Extreme sequential temperature then tint','WBE-005':'Extreme coupled white-balance search'})[id];
+      if(extreme)return extreme;
+      const development=({'PDA-001':'Static finished portrait','PDA-002':'Global development','PDA-003':'Broad sparse activation','PDA-004':'Overlapping swells','PDA-005':'Soft diagonal sweep'})[id];
+      if(development)return development;
+      const tiffDevelopment=({'PDB-001':'Finished TIFF reference','PDB-002':'Global development — long finished rest','PDB-003':'Sparse activation — slow ease','PDB-004':'Overlapping swells — flowing ease','PDB-005':'Soft sweep — unhurried ease'})[id];
+      if(tiffDevelopment)return tiffDevelopment;
+      const finalist=({'PDC-001':'Refined sparse activation — short swing pause','PDC-002':'Refined soft sweep — short swing pause','PDC-003':'Assertive sparse activation — boundary test'})[id];
+      if(finalist)return finalist;
+      const visibility=({'PDD-001':'Daring sparse activation','PDD-002':'Daring soft sweep','PDD-003':'Full-range activation — deliberate ceiling'})[id];
+      if(visibility)return visibility;
+      const settlement=({'PDE-001':'Settled sparse activation — 65% toward visible','PDE-002':'Settled soft sweep — 65% toward visible','PDE-003':'Settled activation ceiling — 65% toward visible'})[id];
+      if(settlement)return settlement;
+      const infinityBackground=({'INF-001':'Momentum wake','INF-002':'Photographic emulsion bloom','INF-003':'Floating photographic print','INF-004':'Negative-space aperture','INF-005':'Residual gesture','INF-006':'Incomplete geometry','INF-007':'Borrowed-color field'})[id];
+      if(infinityBackground)return infinityBackground;
+      return id;
+    }
+    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — seven concepts'})[id]||id; }
+    async function loadTelemetry(c){
+      const token=++telemetryToken; telemetry=null; $('diagnostics').hidden=true; $('whiteBalanceDiagnostics').hidden=true; $('developmentDiagnostics').hidden=true; $('developmentSettings').hidden=true; $('backgroundSettings').hidden=true;
+      $('temperatureSlider').value=0; $('tintSlider').value=0; $('temperatureValue').textContent='0.00'; $('tintValue').textContent='0.00';
+      $('developmentSlider').value=100; $('developmentValue').textContent='100%'; $('developmentRange').textContent='Local range: 100–100%';
+      try {
+        const response=await fetch(c.manifest_url); if(!response.ok)throw new Error('Manifest unavailable'); const manifest=await response.json();
+        if(token!==telemetryToken)return;
+        if(manifest.diagnosticSliders?.visibleInReviewInterface){
+          telemetry={type:'whiteBalance',...manifest.diagnosticSliders,fps:manifest.fps};
+          for(const [id,key] of [['temperatureSlider','temperature'],['tintSlider','tint']]){
+            $(id).min=telemetry[key].minimum; $(id).max=telemetry[key].maximum; $(id).step=(telemetry[key].maximum-telemetry[key].minimum)>20?'0.1':'0.01';
+          }
+          $('whiteBalanceDiagnostics').hidden=false; $('diagnostics').hidden=false;
+        } else if(manifest.developmentTelemetry?.visibleInReviewInterface){
+          telemetry={type:'development',...manifest.developmentTelemetry,fps:manifest.fps};
+          const field=manifest.field||{}, pausePercent=Number(field.finishedHold||0)*100, pauseSeconds=Number(field.finishedHold||0)*Number(manifest.durationSec||0);
+          $('settingMinimumFinal').textContent=`${(Number(field.baseFinalMix||0)*100).toFixed(1)}%`;
+          $('settingFinishedPause').textContent=`${pauseSeconds.toFixed(2)} seconds (${pausePercent.toFixed(1)}%)`;
+          $('settingSpeed').textContent=Number(field.speed||0).toFixed(2);
+          $('settingFeather').textContent=Number(field.feather||0).toFixed(2);
+          $('settingPatches').textContent=String(field.patchCount??0);
+          $('developmentDiagnostics').hidden=false; $('developmentSettings').hidden=false; $('diagnostics').hidden=false;
+        }
+        if(manifest.candidateType==='visual_infinity_layered_background'){
+          $('backgroundEffect').textContent=manifest.backgroundRecipeName||manifest.backgroundEffect||'—';
+          $('backgroundIntent').textContent=manifest.backgroundDescription||'';
+          $('backgroundStrength').textContent=Number(manifest.backgroundStrength||0).toFixed(3);
+          $('backgroundSpeed').textContent=Number(manifest.backgroundSpeed||0).toFixed(2);
+          $('backgroundSubjectTreatment').textContent=`${manifest.basePortraitTreatment?.developmentRecipeId||'PDE-002'} unchanged`;
+          $('backgroundSettings').hidden=false; $('diagnostics').hidden=false;
+        }
+      } catch(error) { if(token===telemetryToken)telemetry=null; }
+    }
+    function updateTelemetry(){
+      if(telemetry?.frameTimeline?.length){
+        const frame=Math.min(telemetry.frameTimeline.length-1,Math.max(0,Math.round($('video').currentTime*telemetry.fps)));
+        const state=telemetry.frameTimeline[frame];
+        if(telemetry.type==='development'){
+          const mean=Number(state.meanFinalMix)*100, minimum=Number(state.minimumFinalMix)*100, maximum=Number(state.maximumFinalMix)*100;
+          $('developmentSlider').value=mean; $('developmentValue').textContent=`${mean.toFixed(1)}%`;
+          $('developmentRange').textContent=`Local range: ${minimum.toFixed(1)}–${maximum.toFixed(1)}%`;
+        } else {
+          const temperature=Number(state.temperatureDelta), tint=Number(state.tintDelta);
+          $('temperatureSlider').value=temperature; $('tintSlider').value=tint;
+          $('temperatureValue').textContent=`${temperature>0?'+':''}${temperature.toFixed(2)}`;
+          $('tintValue').textContent=`${tint>0?'+':''}${tint.toFixed(2)}`;
+        }
+      }
+      requestAnimationFrame(updateTelemetry);
+    }
+    function setReviewSet(value){
+      if(value==='motion-variable-pilot-v2'){
+        const variants=allCandidates.filter(c=>c.experiment_id===value), parentIds=new Set(variants.map(c=>c.parent_visual_id));
+        const variableOrder={'LOW-SCALE':1,'HIGH-SCALE':2,'HORIZONTAL':3,'VERTICAL':4};
+        candidates=[];
+        [...new Set(variants.map(c=>c.portrait_id))].forEach(portraitId=>{
+          const reference=allCandidates.find(c=>c.portrait_id===portraitId&&parentIds.has(c.visual_id));
+          if(reference){reference.comparison_label='Selected V1 reference';candidates.push(reference);}
+          const probes=variants.filter(c=>c.portrait_id===portraitId).sort((a,b)=>{
+            const aKey=Object.keys(variableOrder).find(key=>a.motion_recipe_id.endsWith(key));
+            const bKey=Object.keys(variableOrder).find(key=>b.motion_recipe_id.endsWith(key));
+            return variableOrder[aKey]-variableOrder[bKey];
+          });
+          probes.forEach(c=>c.comparison_label='New one-variable probe'); candidates.push(...probes);
+        });
+      } else if(value==='all') { allCandidates.forEach(c=>c.comparison_label=experimentName(c.experiment_id)); candidates=allCandidates; }
+      else { candidates=allCandidates.filter(c=>c.experiment_id===value); candidates.forEach(c=>c.comparison_label=experimentName(c.experiment_id)); }
+      position=0; render();
+    }
+    async function save(){
+      clearTimeout(saveTimer); dirty=false; const c=current(), sequence=++saveSequence; $('saveStatus').textContent='Saving…';
+      try { const response=await fetch(`/api/reviews/${encodeURIComponent(c.visual_id)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rating:c.rating,rejected:c.rejected,selected:c.selected,notes:c.notes})}); if(!response.ok) throw new Error((await response.json()).error); if(sequence===saveSequence) $('saveStatus').textContent='Saved'; }
+      catch(error){ $('saveStatus').textContent=`Not saved: ${error.message}`; }
+      $('reviewStatus').textContent=reviewStatus(c);
+    }
+    function queueSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(save,600); }
+    function setRating(rating){ const c=current(); c.rating=c.rating===rating?null:rating; renderControls(); save(); }
+    function renderControls(){ const c=current(); [...$('ratings').children].forEach((b,i)=>b.classList.toggle('active',c.rating===i+1)); $('reject').checked=c.rejected; $('select').checked=c.selected; $('notes').value=c.notes; $('rejectLabel').classList.toggle('active',c.rejected); $('selectLabel').classList.toggle('active',c.selected); $('reviewStatus').textContent=reviewStatus(c); }
+    function navigate(delta){ const next=Math.max(0,Math.min(candidates.length-1,position+delta)); if(next!==position){ clearTimeout(saveTimer); current().notes=$('notes').value; if(dirty)save(); position=next; render(); } }
+    for(let i=1;i<=5;i++){ const b=document.createElement('button'); b.textContent=i; b.onclick=()=>setRating(i); $('ratings').appendChild(b); }
+    $('reject').onchange=()=>{ const c=current(); c.rejected=$('reject').checked; if(c.rejected)c.selected=false; renderControls(); save(); };
+    $('select').onchange=()=>{ const c=current(); c.selected=$('select').checked; if(c.selected){c.rejected=false;allCandidates.filter(other=>other.portrait_id===c.portrait_id&&other.visual_id!==c.visual_id).forEach(other=>other.selected=false);} renderControls(); save(); };
+    $('notes').oninput=()=>{ current().notes=$('notes').value; dirty=true; queueSave(); };
+    $('previous').onclick=()=>navigate(-1); $('next').onclick=()=>navigate(1);
+    $('experiment').onchange=()=>setReviewSet($('experiment').value);
+    document.addEventListener('keydown',event=>{ if(event.target.matches('textarea,input'))return; if(event.key>='1'&&event.key<='5')setRating(Number(event.key)); else if(event.key.toLowerCase()==='r'){$('reject').click();} else if(event.key.toLowerCase()==='s'){$('select').click();} else if(event.key==='ArrowLeft')navigate(-1); else if(event.key==='ArrowRight')navigate(1); else if(event.key===' '){event.preventDefault(); const v=$('video'); v.paused?v.play():v.pause();} });
+    fetch('/api/candidates').then(r=>r.json()).then(data=>{
+      allCandidates=data.candidates; if(!allCandidates.length)throw new Error('No visual candidates are registered.');
+      const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
+      const choices=[];
+      if(experiments.includes('infinity-background-v10'))choices.push(['infinity-background-v10','Infinity Backgrounds — seven concepts']);
+      if(experiments.includes('portrait-development-settlement-v9'))choices.push(['portrait-development-settlement-v9','Portrait Development — 65% landing']);
+      if(experiments.includes('portrait-development-visibility-v8'))choices.push(['portrait-development-visibility-v8','Portrait Development — visibility boundary']);
+      if(experiments.includes('portrait-development-finalist-v7'))choices.push(['portrait-development-finalist-v7','Portrait Development — possible finals']);
+      if(experiments.includes('portrait-development-tiff-v6'))choices.push(['portrait-development-tiff-v6','Portrait Development — 11-second TIFF round']);
+      if(experiments.includes('portrait-development-pilot-v5'))choices.push(['portrait-development-pilot-v5','Portrait Development — round 1']);
+      if(experiments.includes('white-balance-extreme-v4'))choices.push(['white-balance-extreme-v4','White Balance — extreme test']);
+      if(experiments.includes('white-balance-pilot-v3'))choices.push(['white-balance-pilot-v3','White Balance — round 3']);
+      if(experiments.includes('motion-variable-pilot-v2'))choices.push(['motion-variable-pilot-v2','Motion variables — round 2']);
+      if(experiments.includes('motion-rhythm-pilot-v1'))choices.push(['motion-rhythm-pilot-v1','Original rhythm pilot']);
+      choices.push(['all','All candidates']);
+      choices.forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;$('experiment').appendChild(option);});
+      $('app').hidden=false; setReviewSet(choices[0][0]); requestAnimationFrame(updateTelemetry);
+    }).catch(error=>{$('counter').textContent=error.message;});
+  </script>
+</body>
+</html>

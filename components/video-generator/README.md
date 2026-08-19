@@ -1,17 +1,30 @@
 # HPR Video Generator
 
-An image-first, audio-independent system for generating silent, loop-safe vertical videos from portraits.
+An image-first, audio-independent system for generating silent, loop-safe
+vertical videos from portraits.
 
 The generator deliberately knows nothing about audio, pairing, publishing, or analytics. Its output becomes an eligible video pool for the future HPR Generator.
 
-## First production model
+## Active visual direction
+
+Portrait Development Animation keeps the photograph's geometry fixed while
+the untouched finished Lightroom export emerges from a deliberately
+under-resolved surrogate across the surface. Global development, a very soft
+sweep, and activation fields are implemented in the first 15-candidate pilot.
+See the complete
+[Portrait Development Animation specification](docs/PORTRAIT-DEVELOPMENT-ANIMATION.md).
+
+The older camera-motion, texture, and White Balance-only renderers remain
+reproducible research tools; they are not the active production direction.
+
+## Production format
 
 - one portrait per candidate
 - 1080 × 1920, 9:16
 - 24 frames per second
 - 7 seconds initially; 9 and 11 seconds supported
-- minimal closed-loop motion
-- subtle 35 mm film grain
+- fixed geometry with loop-safe tonal and surface development
+- grain deferred until the development behavior is approved
 - deterministic seeds and complete provenance
 
 ## Local media
@@ -25,4 +38,3 @@ python -m hpr_video_generator.cli generate --portrait media/source/portraits/bhu
 ```
 
 Generation requires FFmpeg. The program accepts a system FFmpeg or the executable supplied by the optional `imageio-ffmpeg` package.
-
