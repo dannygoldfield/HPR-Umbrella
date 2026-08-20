@@ -193,6 +193,15 @@ Updated: 2026-08-20
   `#e2ddd4` against fixed `#f7f5ef`, each in matched thin-number and broad-panel
   constructions at an explicitly recorded full color mix. All six are rendered
   and registered; the Registry now contains 170 visuals.
+- V16 review selected `IBK-001`'s subtle number contrast and found both the
+  middle and stronger broad panels successful, confirming that crisp local
+  edges need less contrast than a broad uniform field. V17 deliberately stops
+  expanding the effect menu. `IBL-001`–`IBL-003` combine the accepted subtle
+  planar number field with one, two, or three nested soft-edged organic blobs
+  moving behind it. Deterministic periodic paths and shape changes close
+  exactly; shared seeds keep number and blob geometry constant while blob count
+  changes. All three are rendered and registered; the Registry now contains 173
+  visuals.
 
 ## Earlier implemented work
 
@@ -205,10 +214,10 @@ Updated: 2026-08-20
 
 ## Next production work
 
-1. Review `IBK-001`–`IBK-006` at normal phone size and choose the lightest darker
-   endpoint that is still clearly visible in both thin numbers and the broad
-   panel. This round calibrates contrast only; do not select a shipping effect
-   from it. Use the chosen contrast interval to rebuild the creative family.
+1. Review `IBL-001`–`IBL-003` at normal phone size and choose whether one, two,
+   or three simultaneous soft blobs gives the best balance of organic motion
+   and portrait presence. Once chosen, treat the number-and-blob combination as
+   the production grammar rather than reopening the earlier effect menu.
 2. Freeze `PDE-002` as the portrait-surface treatment for 10000 and NYChildren;
    freeze Infinity after its background decision.
 3. Continue using embedded-profile 16-bit TIFF as the preferred portrait

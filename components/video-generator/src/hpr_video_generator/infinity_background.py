@@ -39,6 +39,7 @@ EFFECTS = {
     "number_doorway",
     "flat_number_drift",
     "flat_number_grid",
+    "flat_number_blobs",
     "flat_number_separation",
     "gradient_curtain_2d",
     "sliding_panel_full",
@@ -696,6 +697,7 @@ def _flat_number_field_mask(
     image = Image.new("L", (width * scale, height * scale), 0)
     draw = ImageDraw.Draw(image)
     parameters = recipe.parameters
+    number_seed = str(parameters.get("numberSeed", recipe.id))
     columns = int(parameters.get("columns", 9))
     rows = int(parameters.get("rows", 15))
     minimum_size = float(parameters.get("minimumSize", 24.0))
@@ -723,7 +725,7 @@ def _flat_number_field_mask(
     for row in range(rows):
         for column in range(columns):
             index = row * columns + column
-            prefix = f"{recipe.id}:{index}"
+            prefix = f"{number_seed}:{index}"
             if position_layout == "random":
                 base_x = _stable_fraction(prefix + ":random-x")
                 base_y = _stable_fraction(prefix + ":random-y")
@@ -776,7 +778,7 @@ def _flat_number_field_mask(
                 balanced_block = sorted(
                     digits,
                     key=lambda digit: _stable_fraction(
-                        f"{recipe.id}:digit-block:{block}:{digit}"
+                        f"{number_seed}:digit-block:{block}:{digit}"
                     ),
                 )
                 digit = balanced_block[index % len(digits)]
@@ -799,6 +801,64 @@ def _flat_number_field_mask(
             )
     image = image.resize((width, height), Image.Resampling.LANCZOS)
     return np.asarray(image, dtype=np.float32) / 255.0
+
+
+def _looping_blob_field_mask(
+    recipe: InfinityBackgroundRecipe,
+    fraction: float,
+    context: dict[str, Any],
+) -> Any:
+    """Build deterministic organic blobs whose paths and shapes close exactly."""
+    np = _numpy()
+    parameters = recipe.parameters
+    blob_count = int(parameters.get("blobCount", 1))
+    if not 1 <= blob_count <= 3:
+        raise ValueError(f"{recipe.id} blobCount must be between 1 and 3")
+    blob_seed = str(parameters.get("blobSeed", recipe.id))
+    feather = max(0.04, float(parameters.get("blobFeather", 0.18)))
+    x = context["x"]
+    y = context["y"]
+    cycle = 2.0 * math.pi * (fraction % 1.0)
+    combined = np.zeros_like(x, dtype=np.float32)
+    for index in range(blob_count):
+        prefix = f"{blob_seed}:{index}"
+        radius_x = 0.14 + 0.07 * _stable_fraction(prefix + ":radius-x")
+        radius_y = 0.12 + 0.08 * _stable_fraction(prefix + ":radius-y")
+        amplitude_x = 0.07 + 0.07 * _stable_fraction(prefix + ":amplitude-x")
+        amplitude_y = 0.05 + 0.07 * _stable_fraction(prefix + ":amplitude-y")
+        base_x = 0.30 + 0.40 * _stable_fraction(prefix + ":base-x")
+        base_y = 0.25 + 0.50 * _stable_fraction(prefix + ":base-y")
+        phase_x = 2.0 * math.pi * _stable_fraction(prefix + ":phase-x")
+        phase_y = 2.0 * math.pi * _stable_fraction(prefix + ":phase-y")
+        frequency_x = 1 + int(_stable_fraction(prefix + ":frequency-x") * 2)
+        frequency_y = 1 + int(_stable_fraction(prefix + ":frequency-y") * 2)
+        center_x = base_x + amplitude_x * math.sin(frequency_x * cycle + phase_x)
+        center_y = base_y + amplitude_y * math.cos(frequency_y * cycle + phase_y)
+        rotation = (
+            2.0 * math.pi * _stable_fraction(prefix + ":rotation")
+            + 0.24 * math.sin(cycle + phase_y)
+        )
+        cosine = math.cos(rotation)
+        sine = math.sin(rotation)
+        delta_x = x - center_x
+        delta_y = y - center_y
+        rotated_x = delta_x * cosine + delta_y * sine
+        rotated_y = -delta_x * sine + delta_y * cosine
+        normalized_x = rotated_x / radius_x
+        normalized_y = rotated_y / radius_y
+        radius = np.sqrt(normalized_x**2 + normalized_y**2)
+        angle = np.arctan2(normalized_y, normalized_x)
+        shape_phase = 2.0 * math.pi * _stable_fraction(prefix + ":shape")
+        boundary = (
+            1.0
+            + 0.13 * np.sin(3.0 * angle + shape_phase + cycle)
+            + 0.07 * np.sin(5.0 * angle - shape_phase - 2.0 * cycle)
+        )
+        distance = radius / np.maximum(boundary, 0.72)
+        exponent = np.clip((distance - 1.0) / feather, -60.0, 60.0)
+        blob = 1.0 / (1.0 + np.exp(exponent))
+        combined = 1.0 - (1.0 - combined) * (1.0 - blob)
+    return np.asarray(np.clip(combined, 0.0, 1.0), dtype=np.float32)
 
 
 def background_visibility_metrics(pixels: Any, base: Any) -> dict[str, float]:
@@ -1052,6 +1112,34 @@ def background_effect_frame(
             number_color,
             numbers * recipe.strength * recipe.visibility_boost,
             maximum_opacity=float(recipe.parameters.get("maximumMix", 0.50)),
+        )
+    elif recipe.effect == "flat_number_blobs":
+        numbers = _flat_number_field_mask(recipe, fraction, context, mode="uniform")
+        blobs = _looping_blob_field_mask(recipe, fraction, context)
+        background_color = np.asarray(
+            recipe.parameters.get("backgroundColor", [0.97, 0.96, 0.94]),
+            dtype=np.float32,
+        )
+        number_color = np.asarray(
+            recipe.parameters.get("numberColor", [0.93, 0.92, 0.89]),
+            dtype=np.float32,
+        )
+        blob_color = np.asarray(
+            recipe.parameters.get("blobColor", number_color),
+            dtype=np.float32,
+        )
+        frame = np.broadcast_to(background_color, base.shape).copy()
+        frame = _mix_color(
+            frame,
+            blob_color,
+            blobs * float(recipe.parameters.get("blobOpacity", 0.72)),
+            maximum_opacity=float(recipe.parameters.get("blobMaximumMix", 0.72)),
+        )
+        frame = _mix_color(
+            frame,
+            number_color,
+            numbers * recipe.strength * recipe.visibility_boost,
+            maximum_opacity=float(recipe.parameters.get("maximumMix", 1.0)),
         )
     elif recipe.effect == "gradient_curtain_2d":
         travel = 0.5 - 0.5 * math.cos(2.0 * math.pi * fraction)

@@ -51,3 +51,12 @@ tests `#edeae3`, `#e8e4dc`, and `#e2ddd4` in matched thin-number and broad-panel
 pairs. Each effect can raise its explicit `maximumMix` to `1.0`, bypassing the
 normal half-strength creative ceiling so the encoded result reaches the saved
 color endpoint.
+
+Pass
+`--background-config components/video-generator/config/infinity-background-number-blobs-recipes.json`
+for the three-candidate `IBL` simplification round. It combines the accepted
+subtle number field with one, two, or three nested organic blobs. Shared
+`numberSeed` and `blobSeed` values keep the comparison deterministic; changing
+those seeds per portrait will produce reproducible number arrangements and blob
+geometry for production. Every path and shape function is periodic and closes
+inside the 11-second duration.

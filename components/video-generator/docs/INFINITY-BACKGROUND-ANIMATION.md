@@ -195,6 +195,31 @@ darker endpoint instead of stopping at a half-strength interpolation. The
 number fields close continuously; the one-way panels keep the intentional hard
 reset being evaluated as a replay cue.
 
+## Simplified number-and-blob production grammar
+
+V16 review selected the subtle number contrast in `IBK-001` and found that
+broad uniform fields needed substantially more contrast. Rather than carry
+every earlier effect into production, v17 tests a single system: planar numbers
+plus organic localized activity behind them.
+
+`IBL-001`, `IBL-002`, and `IBL-003` use identical Brandon Grotesque Bold digits,
+number positions, number motion, `#edeae3` number color, `#f7f5ef` background,
+and `PDE-002` subject treatment. They contain one, two, and three blobs
+respectively. The comparison is nested: the first blob is identical in all
+three candidates, and the second remains identical when the third is added.
+
+Each blob is an irregular elliptical field with a softly feathered edge. Its
+center follows a deterministic closed two-axis path while its rotation and
+multi-lobed outline change through periodic functions. Position, outline, and
+softness therefore meet at the loop boundary without a cut. The blobs use the
+same neutral endpoint as the numbers at partial opacity, allowing full-strength
+number interiors to remain legible above them.
+
+Production can derive `numberSeed` and `blobSeed` from each portrait ID. That
+will vary digit ordering, blob position, shape, size, path, and timing across the
+first 40 portraits while preserving the selected visual grammar and making
+every result exactly reproducible.
+
 Every candidate uses the identical `PDE-002` recipe, seed, focal point, and
 264-frame development timeline. The subject is composited from its unmatted
 16-bit layer rather than extracted from a flattened video, preventing a pale
@@ -202,7 +227,7 @@ cutout halo.
 
 ## Output and safeguards
 
-- Seven silent, image-only candidates in v10–v13; eleven in v14–v15; six in v16
+- Seven silent, image-only candidates in v10–v13; eleven in v14–v15; six in v16; three in v17
 - 11 seconds, 24 fps, 264 frames, 1080 × 1920
 - 16-bit source preparation, effect generation, and compositing
 - H.264/BT.709 delivery

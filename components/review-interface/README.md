@@ -5,14 +5,12 @@ only on the local computer and writes every human decision directly to the
 SQLite Registry. JSON manifests remain provenance records, not forms Danny has
 to edit.
 
-The active review family is the six-candidate Infinity contrast calibration,
-`IBK-001`–`IBK-006`. Every candidate holds the five-star `PDE-002` subject
-treatment, subject geometry, timing, and delivery format constant. The fixed
-light field is `#f7f5ef`; matched number-field and broad-panel pairs compare
-`#edeae3`, `#e8e4dc`, and `#e2ddd4` at full color strength. This small round is
-intended to identify the least contrast that survives H.264 delivery and
-mobile-size review before the full eleven-effect family is rebuilt. All earlier
-Infinity and portrait-development sets remain available unchanged.
+The active review family is the three-candidate Infinity number-and-blob round,
+`IBL-001`–`IBL-003`. Every candidate holds the five-star `PDE-002` subject
+treatment, subject geometry, timing, number field, palette, and delivery format
+constant. The accepted subtle `#edeae3` numbers remain on `#f7f5ef`; one, two,
+or three softly feathered blobs of the same neutral move behind them. All
+earlier Infinity and portrait-development sets remain available unchanged.
 
 The visual-review screen provides looping video, 1–5 rating, reject, notes,
 selection, render/review status, and a provenance link. Episode is explicitly
@@ -50,11 +48,11 @@ pause, speed, feather, and patch values for every development candidate. This
 makes it possible to compare prior rounds or request an interpolated setting
 between two tests without estimating from memory.
 
-For the active Infinity set, compare each darker endpoint twice: first in thin
-Brandon Grotesque number shapes, then across a broad accelerating panel. Judge
-contrast visibility, not which construction should ship. The number fields
-remain planar continuous loops; the panels retain the intentional abrupt replay
-reset. `PDE-002` remains unchanged; grain, audio, and editorial text are absent.
+For the active Infinity set, compare one, two, and three blobs. The first blob
+is identical in all candidates; the second and third are added without changing
+the existing system, so blob count is the only creative variable. Number and
+blob paths, blob shapes, and softness close continuously at the loop boundary.
+`PDE-002` remains unchanged; grain, audio, and editorial text are absent.
 
 ## Start it
 
