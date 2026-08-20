@@ -79,6 +79,9 @@ class DevelopmentTests(unittest.TestCase):
         self.infinity_directed_config = load_infinity_background_config(
             ROOT / "config/infinity-background-directed-recipes.json"
         )
+        self.infinity_palette_config = load_infinity_background_config(
+            ROOT / "config/infinity-background-fixed-palette-recipes.json"
+        )
 
     def test_pilot_has_five_fixed_geometry_recipes(self) -> None:
         self.assertEqual("portrait-development-pilot-v5", self.development_config.experiment_id)
@@ -708,6 +711,90 @@ class DevelopmentTests(unittest.TestCase):
                 self.assertGreater(
                     background_visibility_metrics(middle, first)["meanDelta8Bit"],
                     0.25,
+                    recipe.id,
+                )
+
+    def test_infinity_palette_round_uses_only_the_two_requested_colors(self) -> None:
+        config = self.infinity_palette_config
+        self.assertEqual("infinity-background-fixed-palette-v15", config.experiment_id)
+        self.assertEqual(
+            [f"IBP-{index:03d}" for index in range(1, 12)],
+            list(config.recipes),
+        )
+        requested_palette = {
+            (0.941176, 0.933333, 0.913725),
+            (0.968627, 0.960784, 0.937255),
+        }
+        color_keys = {
+            "backgroundColor",
+            "color",
+            "colorA",
+            "colorB",
+            "numberColor",
+            "panelColor",
+        }
+        used_colors = {
+            tuple(value)
+            for recipe in config.recipes.values()
+            for key, value in recipe.parameters.items()
+            if key in color_keys
+        }
+        self.assertEqual(requested_palette, used_colors)
+        self.assertEqual(
+            [0.10, 0.14],
+            [config.recipes[key].speed for key in ("IBP-002", "IBP-003")],
+        )
+        self.assertTrue(config.recipes["IBP-002"].parameters["bleedEdges"])
+        self.assertTrue(config.recipes["IBP-003"].parameters["bleedEdges"])
+        self.assertEqual(
+            [1.7, 2.6],
+            [
+                config.recipes[key].parameters["easingExponent"]
+                for key in ("IBP-007", "IBP-008")
+            ],
+        )
+        self.assertEqual(4.0, config.recipes["IBP-009"].parameters["featherPixels"])
+        self.assertEqual(
+            ["random", "random"],
+            [
+                config.recipes[key].parameters["positionLayout"]
+                for key in ("IBP-010", "IBP-011")
+            ],
+        )
+        self.assertEqual(
+            ["static", "linear_right"],
+            [
+                config.recipes[key].parameters["numberMotion"]
+                for key in ("IBP-010", "IBP-011")
+            ],
+        )
+
+    def test_infinity_palette_frames_follow_the_recorded_loop_contract(self) -> None:
+        import numpy as np
+
+        height, width = 192, 108
+        background = np.full((height, width, 3), 62000, dtype=np.uint16)
+        subject = np.zeros((height, width, 3), dtype=np.uint16)
+        subject[:, :, :] = [42000, 30000, 24000]
+        alpha = np.zeros((height, width), dtype=np.uint16)
+        alpha[28:170, 24:91] = 65535
+        context = build_background_context(background, subject, alpha)
+        context["fontPath"] = "test-font.otf"
+        with patch(
+            "hpr_video_generator.infinity_background._font",
+            side_effect=lambda _path, size: ImageFont.load_default(size=size),
+        ):
+            for recipe in self.infinity_palette_config.recipes.values():
+                first = background_effect_frame(recipe, 0.0, context)
+                middle = background_effect_frame(recipe, 0.5, context)
+                last = background_effect_frame(recipe, 1.0, context)
+                if recipe.loop_behavior == "continuous":
+                    self.assertTrue(np.array_equal(first, last), recipe.id)
+                else:
+                    self.assertFalse(np.array_equal(first, last), recipe.id)
+                self.assertGreater(
+                    background_visibility_metrics(middle, first)["meanDelta8Bit"],
+                    0.10,
                     recipe.id,
                 )
 

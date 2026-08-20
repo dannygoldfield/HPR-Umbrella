@@ -707,6 +707,10 @@ def _flat_number_field_mask(
     jitter_y = float(parameters.get("jitterY", 0.0))
     coordinated_motion = bool(parameters.get("coordinatedMotion", False))
     balanced_random_digits = bool(parameters.get("balancedRandomDigits", False))
+    position_layout = str(parameters.get("positionLayout", "grid"))
+    if position_layout not in {"grid", "random"}:
+        raise ValueError(f"{recipe.id} has an unsupported positionLayout")
+    bleed_edges = bool(parameters.get("bleedEdges", False))
     travel_x = float(parameters.get("travelX", 0.12)) * recipe.speed
     travel_y = float(parameters.get("travelY", 0.045)) * recipe.speed
     linear_travel = float(parameters.get("linearTravel", 0.22)) * recipe.speed
@@ -714,8 +718,15 @@ def _flat_number_field_mask(
         for column in range(columns):
             index = row * columns + column
             prefix = f"{recipe.id}:{index}"
-            base_x = (column + 0.5) / columns
-            base_y = (row + 0.5) / rows
+            if position_layout == "random":
+                base_x = _stable_fraction(prefix + ":random-x")
+                base_y = _stable_fraction(prefix + ":random-y")
+            elif bleed_edges:
+                base_x = column / max(columns - 1, 1)
+                base_y = row / max(rows - 1, 1)
+            else:
+                base_x = (column + 0.5) / columns
+                base_y = (row + 0.5) / rows
             base_x += (_stable_fraction(prefix + ":jx") - 0.5) * jitter_x / columns
             base_y += (_stable_fraction(prefix + ":jy") - 0.5) * jitter_y / rows
             if mode == "varied":
@@ -1067,8 +1078,14 @@ def background_effect_frame(
             recipe.parameters.get("colorB", [0.86, 0.83, 0.78]),
             dtype=np.float32,
         )
+        curtain_base = base
+        if "backgroundColor" in recipe.parameters:
+            background_color = np.asarray(
+                recipe.parameters["backgroundColor"], dtype=np.float32
+            )
+            curtain_base = np.broadcast_to(background_color, base.shape).copy()
         frame = _mix_color(
-            base,
+            curtain_base,
             color_b,
             shoulder * recipe.strength * recipe.visibility_boost * 0.72,
         )
@@ -1117,8 +1134,14 @@ def background_effect_frame(
             recipe.parameters.get("color", [0.75, 0.73, 0.69]),
             dtype=np.float32,
         )
+        door_base = base
+        if "backgroundColor" in recipe.parameters:
+            background_color = np.asarray(
+                recipe.parameters["backgroundColor"], dtype=np.float32
+            )
+            door_base = np.broadcast_to(background_color, base.shape).copy()
         frame = _mix_color(
-            base,
+            door_base,
             door_color,
             door * recipe.strength * recipe.visibility_boost,
         )

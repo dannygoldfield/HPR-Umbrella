@@ -5,12 +5,14 @@ only on the local computer and writes every human decision directly to the
 SQLite Registry. JSON manifests remain provenance records, not forms Danny has
 to edit.
 
-The active review family is the eleven-candidate Infinity directed-variation
-round, `IBR-001`–`IBR-011`. Every candidate holds the five-star `PDE-002`
-subject treatment, subject geometry, timing, and delivery format constant.
+The active review family is the eleven-candidate Infinity fixed-palette round,
+`IBP-001`–`IBP-011`. Every candidate holds the five-star `PDE-002` subject
+treatment, subject geometry, timing, and delivery format constant. Every
+background graphic is restricted to `#f0eee9` and `#f7f5ef`; the two values may
+exchange roles or interpolate, but no stronger third neutral is introduced.
 Number size and opacity stay fixed throughout each video, so the digits have no
-z-axis motion. `IBF-003` was explicitly rejected and has no v14 successor. All
-earlier Infinity and portrait-development sets remain available unchanged.
+z-axis motion. All earlier Infinity and portrait-development sets remain
+available unchanged.
 
 The visual-review screen provides looping video, 1–5 rating, reject, notes,
 selection, render/review status, and a provenance link. Episode is explicitly
@@ -49,9 +51,10 @@ makes it possible to compare prior rounds or request an interpolated setting
 between two tests without estimating from memory.
 
 For the active Infinity set, compare a dense overlapping number loop, two
-coordinated column palettes, three curtain directions or palettes, two one-way
-panel lightness pairs, an accelerating hinged door, and static-versus-moving
-number wipes. The diagnostic card names the effect, states its intent,
+extra-slow edge-bleeding column treatments, three subtle curtain directions,
+two panel acceleration rhythms, a soft-edge accelerating door, and two
+irregular number wipes. In the final wipe, the numbers and wipe travel in
+opposite directions. The diagnostic card names the effect, states its intent,
 identifies Brandon Grotesque where used, and distinguishes continuous loops
 from intentional abrupt resets. `PDE-002` remains unchanged; grain, audio, and
 editorial text are absent.

@@ -36,3 +36,10 @@ number-plane speed, balanced digit populations, gradient angle and palette,
 panel lightness, door acceleration, wipe acceleration, and hard-reset behavior.
 The first three number fields and three curtain studies close continuously;
 the two panels, accelerating door, and two number wipes reset intentionally.
+
+Pass
+`--background-config components/video-generator/config/infinity-background-fixed-palette-recipes.json`
+for the eleven-candidate `IBP` correction round. Every graphic background color
+is one of the two supplied endpoints, `#f0eee9` and `#f7f5ef`. This round also
+adds frame-edge column bleed, deterministic irregular number placement, two
+panel acceleration curves, a softer door edge, and opposing number/wipe travel.

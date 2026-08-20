@@ -149,6 +149,27 @@ and easing exponents are stored in the recipe and output manifest. The first
 six candidates close continuously. `IBR-007`–`IBR-011` deliberately hard-reset
 so replay itself can be judged as a possible invitation to watch again.
 
+## Fixed-palette correction round
+
+V14 review repeatedly requested less contrast and then supplied the exact
+palette. V15 treats that palette as a constraint rather than a suggestion:
+
+- darker endpoint: `#f0eee9`
+- lighter endpoint: `#f7f5ef`
+
+Every background, digit, curtain, panel, and door color in `IBP-001`–`IBP-011`
+is one of those endpoints. Antialiasing and motion feathering may interpolate
+between them, but no third design color is permitted. The widest endpoint
+contrast is only seven 8-bit RGB code values.
+
+The remaining notes are translated directly: column motion is reduced again;
+partial columns touch every frame edge; panel variants compare 1.7- and
+2.6-power acceleration; the door feather grows from 0.6 to 4 working pixels;
+wipe numbers use deterministic random x-y placement instead of rows and
+columns; and `IBP-011` moves its number field right while the wipe travels left.
+All eleven remain 11-second, image-only, fixed-subject comparisons using the
+same `PDE-002` treatment.
+
 Every candidate uses the identical `PDE-002` recipe, seed, focal point, and
 264-frame development timeline. The subject is composited from its unmatted
 16-bit layer rather than extracted from a flattened video, preventing a pale

@@ -177,6 +177,14 @@ Updated: 2026-08-19
   render. `IBR-007`–`IBR-011` intentionally cut back to their first frame;
   `IBR-001`–`IBR-006` close continuously. All values are deterministic and
   recorded. The Registry now contains 153 visuals.
+- V14 review repeatedly requested lower contrast and established an exact
+  background palette: `#f0eee9` and `#f7f5ef`. V15 registers eleven corrected
+  candidates as `IBP-001`–`IBP-011` and permits no other graphic neutral.
+  Columns are slower and bleed beyond the frame, panels compare two accelerating
+  rhythms, the door edge is substantially softer, wipe digits abandon visible
+  rows and columns, and `IBP-011` moves its irregular number field opposite the
+  wipe. All eleven are rendered and registered; the Registry now contains 164
+  visuals.
 
 ## Earlier implemented work
 
@@ -189,11 +197,13 @@ Updated: 2026-08-19
 
 ## Next production work
 
-1. Review `IBR-001`–`IBR-011` at normal phone size. Compare density and shared
-   plane speed in the first three, direction and palette in the next three,
-   the two panel lightness assignments, door acceleration, and static versus
-   coordinated-number wipes. For `IBR-007`–`IBR-011`, judge whether the abrupt
-   replay creates useful rewatch energy or merely feels broken.
+1. Review `IBP-001`–`IBP-011` at normal phone size. Judge whether the fixed
+   seven-code-value palette reaches the intended edge of conscious notice,
+   whether the columns now continue beyond the frame, which panel acceleration
+   has the better rhythm, whether the softened door remains legible, and which
+   irregular wipe relationship works. For `IBP-007`–`IBP-011`, also judge
+   whether the abrupt replay creates useful rewatch energy or merely feels
+   broken.
 2. Freeze `PDE-002` as the portrait-surface treatment for 10000 and NYChildren;
    freeze Infinity after its background decision.
 3. Continue using embedded-profile 16-bit TIFF as the preferred portrait
