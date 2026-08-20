@@ -82,6 +82,9 @@ class DevelopmentTests(unittest.TestCase):
         self.infinity_palette_config = load_infinity_background_config(
             ROOT / "config/infinity-background-fixed-palette-recipes.json"
         )
+        self.infinity_contrast_config = load_infinity_background_config(
+            ROOT / "config/infinity-background-contrast-calibration-recipes.json"
+        )
 
     def test_pilot_has_five_fixed_geometry_recipes(self) -> None:
         self.assertEqual("portrait-development-pilot-v5", self.development_config.experiment_id)
@@ -797,6 +800,53 @@ class DevelopmentTests(unittest.TestCase):
                     0.10,
                     recipe.id,
                 )
+
+    def test_infinity_contrast_calibration_is_three_matched_pairs(self) -> None:
+        config = self.infinity_contrast_config
+        self.assertEqual(
+            "infinity-background-contrast-calibration-v16",
+            config.experiment_id,
+        )
+        self.assertEqual(
+            [f"IBK-{index:03d}" for index in range(1, 7)],
+            list(config.recipes),
+        )
+        light = (0.968627, 0.960784, 0.937255)
+        darker = [
+            (0.929412, 0.917647, 0.890196),
+            (0.909804, 0.894118, 0.862745),
+            (0.886275, 0.866667, 0.831373),
+        ]
+        for pair_index, dark in enumerate(darker):
+            numbers = config.recipes[f"IBK-{pair_index * 2 + 1:03d}"]
+            panel = config.recipes[f"IBK-{pair_index * 2 + 2:03d}"]
+            self.assertEqual("flat_number_grid", numbers.effect)
+            self.assertEqual("sliding_panel_full", panel.effect)
+            self.assertEqual(light, tuple(numbers.parameters["backgroundColor"]))
+            self.assertEqual(light, tuple(panel.parameters["backgroundColor"]))
+            self.assertEqual(dark, tuple(numbers.parameters["color"]))
+            self.assertEqual(dark, tuple(panel.parameters["color"]))
+            self.assertEqual(1.0, numbers.parameters["maximumMix"])
+            self.assertEqual(1.0, panel.parameters["maximumMix"])
+
+    def test_infinity_contrast_panels_reach_the_recorded_color_endpoint(self) -> None:
+        import numpy as np
+
+        height, width = 192, 108
+        background = np.full((height, width, 3), 62000, dtype=np.uint16)
+        subject = np.zeros((height, width, 3), dtype=np.uint16)
+        alpha = np.zeros((height, width), dtype=np.uint16)
+        context = build_background_context(background, subject, alpha)
+        for recipe_id in ("IBK-002", "IBK-004", "IBK-006"):
+            recipe = self.infinity_contrast_config.recipes[recipe_id]
+            final_frame = background_effect_frame(recipe, 1.0, context)
+            expected = np.rint(
+                np.asarray(recipe.parameters["color"]) * 65535.0
+            ).astype(np.uint16)
+            self.assertTrue(
+                np.allclose(final_frame[-1, -1], expected, atol=1),
+                recipe.id,
+            )
 
     def test_infinity_background_filter_preserves_subject_geometry(self) -> None:
         graph = build_infinity_background_filter(self.video_config, 135, 240)

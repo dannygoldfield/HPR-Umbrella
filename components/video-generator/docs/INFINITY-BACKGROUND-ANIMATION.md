@@ -170,6 +170,31 @@ columns; and `IBP-011` moves its number field right while the wipe travels left.
 All eleven remain 11-second, image-only, fixed-subject comparisons using the
 same `PDE-002` treatment.
 
+## Contrast-survival calibration
+
+Mobile review of v15 showed that `#f0eee9` and `#f7f5ef` were visually
+indistinguishable in every delivered candidate. Their channel differences are
+only seven, seven, and six 8-bit code values, and the generator's normal
+half-strength color-mix ceiling reduced the rendered difference again before
+H.264 encoding and display scaling.
+
+V16 therefore isolates the contrast question before rebuilding eleven creative
+effects. `IBK-001`–`IBK-006` hold the light endpoint at `#f7f5ef` and compare
+three darker endpoints in matched pairs:
+
+| Pair | Thin number field | Broad panel | Darker endpoint |
+| --- | --- | --- | --- |
+| Subtle | `IBK-001` | `IBK-002` | `#edeae3` |
+| Middle | `IBK-003` | `IBK-004` | `#e8e4dc` |
+| Stronger | `IBK-005` | `IBK-006` | `#e2ddd4` |
+
+Motion, timing, typography, subject, and `PDE-002` stay constant within each
+construction. `maximumMix: 1.0` is explicitly recorded in all six manifests so
+opaque digit interiors and fully covered panel regions reach the specified
+darker endpoint instead of stopping at a half-strength interpolation. The
+number fields close continuously; the one-way panels keep the intentional hard
+reset being evaluated as a replay cue.
+
 Every candidate uses the identical `PDE-002` recipe, seed, focal point, and
 264-frame development timeline. The subject is composited from its unmatted
 16-bit layer rather than extracted from a flattened video, preventing a pale
@@ -177,7 +202,7 @@ cutout halo.
 
 ## Output and safeguards
 
-- Seven silent, image-only candidates in v10–v13; eleven in v14
+- Seven silent, image-only candidates in v10–v13; eleven in v14–v15; six in v16
 - 11 seconds, 24 fps, 264 frames, 1080 × 1920
 - 16-bit source preparation, effect generation, and compositing
 - H.264/BT.709 delivery

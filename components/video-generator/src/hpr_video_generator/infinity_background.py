@@ -584,9 +584,15 @@ def build_background_context(
     }
 
 
-def _mix_color(base: Any, color: Any, amount: Any) -> Any:
+def _mix_color(
+    base: Any,
+    color: Any,
+    amount: Any,
+    maximum_opacity: float = 0.50,
+) -> Any:
     np = _numpy()
-    opacity = np.clip(amount, 0.0, 0.50)[:, :, None]
+    maximum = max(0.0, min(1.0, float(maximum_opacity)))
+    opacity = np.clip(amount, 0.0, maximum)[:, :, None]
     return base * (1.0 - opacity) + np.asarray(color, dtype=np.float32) * opacity
 
 
@@ -1045,6 +1051,7 @@ def background_effect_frame(
             number_base,
             number_color,
             numbers * recipe.strength * recipe.visibility_boost,
+            maximum_opacity=float(recipe.parameters.get("maximumMix", 0.50)),
         )
     elif recipe.effect == "gradient_curtain_2d":
         travel = 0.5 - 0.5 * math.cos(2.0 * math.pi * fraction)
@@ -1118,6 +1125,7 @@ def background_effect_frame(
             panel_base,
             panel_color,
             panel * recipe.strength * recipe.visibility_boost,
+            maximum_opacity=float(recipe.parameters.get("maximumMix", 0.50)),
         )
     elif recipe.effect == "hinged_door_one_way":
         easing_exponent = float(recipe.parameters.get("easingExponent", 1.0))

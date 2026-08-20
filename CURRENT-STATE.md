@@ -1,6 +1,6 @@
 # Current State
 
-Updated: 2026-08-19
+Updated: 2026-08-20
 
 ## Permanent decisions
 
@@ -185,6 +185,14 @@ Updated: 2026-08-19
   rows and columns, and `IBP-011` moves its irregular number field opposite the
   wipe. All eleven are rendered and registered; the Registry now contains 164
   visuals.
+- Mobile review found all eleven v15 backgrounds indistinguishable. The palette
+  differs by only seven, seven, and six 8-bit RGB codes, and the generator's
+  normal half-strength mix ceiling reduced the delivered signal again. V16 is a
+  six-candidate contrast-survival calibration rather than another eleven-effect
+  creative round. `IBK-001`–`IBK-006` compare `#edeae3`, `#e8e4dc`, and
+  `#e2ddd4` against fixed `#f7f5ef`, each in matched thin-number and broad-panel
+  constructions at an explicitly recorded full color mix. All six are rendered
+  and registered; the Registry now contains 170 visuals.
 
 ## Earlier implemented work
 
@@ -197,13 +205,10 @@ Updated: 2026-08-19
 
 ## Next production work
 
-1. Review `IBP-001`–`IBP-011` at normal phone size. Judge whether the fixed
-   seven-code-value palette reaches the intended edge of conscious notice,
-   whether the columns now continue beyond the frame, which panel acceleration
-   has the better rhythm, whether the softened door remains legible, and which
-   irregular wipe relationship works. For `IBP-007`–`IBP-011`, also judge
-   whether the abrupt replay creates useful rewatch energy or merely feels
-   broken.
+1. Review `IBK-001`–`IBK-006` at normal phone size and choose the lightest darker
+   endpoint that is still clearly visible in both thin numbers and the broad
+   panel. This round calibrates contrast only; do not select a shipping effect
+   from it. Use the chosen contrast interval to rebuild the creative family.
 2. Freeze `PDE-002` as the portrait-surface treatment for 10000 and NYChildren;
    freeze Infinity after its background decision.
 3. Continue using embedded-profile 16-bit TIFF as the preferred portrait

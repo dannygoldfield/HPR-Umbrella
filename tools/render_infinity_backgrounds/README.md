@@ -43,3 +43,11 @@ for the eleven-candidate `IBP` correction round. Every graphic background color
 is one of the two supplied endpoints, `#f0eee9` and `#f7f5ef`. This round also
 adds frame-edge column bleed, deterministic irregular number placement, two
 panel acceleration curves, a softer door edge, and opposing number/wipe travel.
+
+Pass
+`--background-config components/video-generator/config/infinity-background-contrast-calibration-recipes.json`
+for the six-candidate `IBK` calibration round. It holds `#f7f5ef` constant and
+tests `#edeae3`, `#e8e4dc`, and `#e2ddd4` in matched thin-number and broad-panel
+pairs. Each effect can raise its explicit `maximumMix` to `1.0`, bypassing the
+normal half-strength creative ceiling so the encoded result reaches the saved
+color endpoint.
