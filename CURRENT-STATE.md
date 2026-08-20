@@ -17,6 +17,13 @@ Updated: 2026-08-20
 - The settled soft sweep `PDE-002` is the portrait-surface baseline: it received
   a five-star rating for 10000, NYChildren, and Infinity. Motion-picture grain
   remains a later finishing decision for all three.
+- The official production name is Portrait Development Animation, or
+  Development Animation for short. “Adjustment Animation” is avoided because
+  it suggests a software demonstration rather than a living portrait surface.
+- Infinity uses the selected five-star `IBK-001` composite: `PDE-002` plus
+  gently moving Brandon Grotesque Bold numbers in `#edeae3` on `#f7f5ef`.
+  Blobs are rejected. The 40 production versions share one speed and motion
+  path while deterministic digit layouts and starting phases vary by portrait.
 - Each portrait initially receives five constrained development candidates;
   visible mechanism or novelty is a failure mode.
 - The audio bank contains 150 unique tracks: 50 per duration.
@@ -209,6 +216,11 @@ Updated: 2026-08-20
   one-, two-, and three-blob paths while holding every digit completely still.
   All three close exactly and are rendered; the Registry now contains 176
   visuals. `IBK-001` remains the no-blob moving-number control.
+- Final review rejected all blob variants and locked the no-blob `IBK-001`
+  system. A portrait-specific `numberSeed` changes the digit arrangement and a
+  portrait-specific `phaseOffset` changes only the starting point on the shared
+  closed path. This keeps future grid playback at one tempo without lockstep.
+  No three-video grid preview is required.
 
 ## Earlier implemented work
 
@@ -221,20 +233,20 @@ Updated: 2026-08-20
 
 ## Next production work
 
-1. Review `IBS-001`–`IBS-003` at normal phone size and compare the preferred
-   static-number/blob candidate with `IBK-001`, the moving-number/no-blob
-   control. Choose one mutually exclusive motion system for production, and if
-   blobs win, choose one, two, or three.
-2. Freeze `PDE-002` as the portrait-surface treatment for 10000 and NYChildren;
-   freeze Infinity after its background decision.
-3. Continue using embedded-profile 16-bit TIFF as the preferred portrait
+1. Treat `PDE-002` as locked for 10000 and NYChildren and the combined
+   `PDE-002` + `IBK-001` composite as locked for Infinity. These are approved
+   silent visual components, not yet registered final audio-video masters.
+2. Continue using embedded-profile 16-bit TIFF as the preferred portrait
    source. Seven Lightroom stage exports remain an optional calibration
    experiment, not a requirement for every portrait or video.
-4. Test the recorded film-grain source after the Infinity background decision,
-   applying it uniformly after development and background compositing.
-5. After shippable visuals are selected, connect them to selected Audio
+3. Decide whether to omit grain or test the recorded film-grain source,
+   applying any selected grain uniformly after development and background
+   compositing.
+4. Connect the locked visuals to selected Audio
    Generator tracks and complete pair review.
-6. Test one completed video on both the visible and structured-data development
+5. Render, verify, and register final masters only after grain and audio pairing
+   decisions are approved.
+6. Test one completed master on both the visible and structured-data development
    site pages, then schedule one clearly labeled disposable test post through
    Buffer. Do not begin those external publication steps before a visual/audio
    pair is approved.

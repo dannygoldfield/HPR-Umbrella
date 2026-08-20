@@ -241,6 +241,26 @@ Every candidate uses the identical `PDE-002` recipe, seed, focal point, and
 16-bit layer rather than extracted from a flattened video, preventing a pale
 cutout halo.
 
+## Production selection
+
+Review rejected the static-number/moving-blob grammar. No blobs will appear in
+production. `IBK-001` is locked: subtle `#edeae3` Brandon Grotesque Bold digits
+move gently over the fixed `#f7f5ef` background while the subject receives the
+same five-star `PDE-002` Development Animation used by the other pilots.
+
+Across the 40 Infinity portraits, speed, path, direction, travel amplitude,
+density, typography, and colors remain fixed. Two deterministic values vary by
+portrait: `numberSeed` changes which digits appear where, and `phaseOffset`
+changes the starting point on the same closed motion path. The phase variation
+prevents multiple videos from moving in lockstep when shown in a grid without
+changing their shared tempo. Both values are derived from portrait identity so
+every result is reproducible. No three-video grid preview is required before
+production.
+
+The selected `IBK-001` render is already a complete visual composite, not a
+background-only asset: it includes the isolated subject, the number field, and
+`PDE-002`. Grain and audio remain intentionally absent.
+
 ## Output and safeguards
 
 - Seven silent, image-only candidates in v10–v13; eleven in v14–v15; six in v16; three in v17–v18

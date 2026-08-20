@@ -710,7 +710,11 @@ def _flat_number_field_mask(
     # A complete cycle is always closed inside the fixed 11-second duration.
     # ``speed`` scales the shared travel distance rather than allowing a
     # fractional cycle that would jump at the loop boundary.
-    cycle = 2.0 * math.pi * (fraction % 1.0)
+    # Production may give each portrait a different deterministic starting
+    # phase. The field keeps the selected speed and closed path, but a grid of
+    # videos will not make every number field move in lockstep.
+    phase_offset = float(parameters.get("phaseOffset", 0.0)) % 1.0
+    cycle = 2.0 * math.pi * ((fraction + phase_offset) % 1.0)
     jitter_x = float(parameters.get("jitterX", 0.0))
     jitter_y = float(parameters.get("jitterY", 0.0))
     coordinated_motion = bool(parameters.get("coordinatedMotion", False))

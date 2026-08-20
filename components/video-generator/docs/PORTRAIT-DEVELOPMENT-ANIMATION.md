@@ -431,6 +431,23 @@ background treatment changes.
 | `PDE-002` | Settled soft sweep | 40.75% | 0.980 | 0.804 | 0 | 8.64% |
 | `PDE-003` | Settled activation ceiling | 17.50% | 1.0275 | 0.697 | 5 | 7.08% |
 
+## Production selection and name
+
+The production name is **Portrait Development Animation**, shortened to
+**Development Animation** when context is clear. “Adjustment Animation” is not
+used: it suggests visible software controls or an editing tutorial, while the
+selected treatment is meant to read as a living portrait surface.
+
+`PDE-002`, Settled soft sweep, is locked as the shared production treatment for
+10000, NYChildren, and Infinity. Each received a five-star review. The recipe
+keeps portrait geometry fixed while the finished Lightroom pixels are revealed
+through an 11-second, 24 fps, exactly closed tonal field. It contains no camera
+movement, facial distortion, grain, audio, or editorial text.
+
+The approved files are shippable silent visual components. They become final
+audio-video release masters only after the separate grain decision and an
+approved audio pairing.
+
 The registered experiment is `portrait-development-settlement-v9`: nine
 silent, image-only candidates at 1080 × 1920, 24 fps, and 264 frames. All nine
 passed decoded duration, frame-count, BT.709, fixed-geometry, source-resolution,

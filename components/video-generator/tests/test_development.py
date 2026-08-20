@@ -1,3 +1,4 @@
+from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import io
@@ -853,6 +854,30 @@ class DevelopmentTests(unittest.TestCase):
                 np.allclose(final_frame[-1, -1], expected, atol=1),
                 recipe.id,
             )
+
+    def test_infinity_number_phase_varies_start_without_changing_loop(self) -> None:
+        import numpy as np
+
+        height, width = 192, 108
+        background = np.full((height, width, 3), 62000, dtype=np.uint16)
+        subject = np.zeros((height, width, 3), dtype=np.uint16)
+        alpha = np.zeros((height, width), dtype=np.uint16)
+        context = build_background_context(background, subject, alpha)
+        context["fontPath"] = "test-font.otf"
+        reference = self.infinity_contrast_config.recipes["IBK-001"]
+        phased = replace(
+            reference,
+            parameters={**reference.parameters, "phaseOffset": 0.37},
+        )
+        with patch(
+            "hpr_video_generator.infinity_background._font",
+            side_effect=lambda _path, size: ImageFont.load_default(size=size),
+        ):
+            reference_start = background_effect_frame(reference, 0.0, context)
+            phased_start = background_effect_frame(phased, 0.0, context)
+            phased_end = background_effect_frame(phased, 1.0, context)
+        self.assertFalse(np.array_equal(reference_start, phased_start))
+        self.assertTrue(np.array_equal(phased_start, phased_end))
 
     def test_infinity_blob_round_changes_only_the_nested_blob_count(self) -> None:
         config = self.infinity_blob_config
