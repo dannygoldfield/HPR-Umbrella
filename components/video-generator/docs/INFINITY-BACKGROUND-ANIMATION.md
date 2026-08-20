@@ -123,6 +123,32 @@ The first five options remain continuous loops. The last two explicitly test an
 abrupt replay cue requested in review; their manifests use
 `intentional_hard_reset` rather than falsely describing them as seamless.
 
+## Directed-variation response round
+
+Review of v13 rejected `IBF-003` without a requested repair and generated more
+than seven independent tests. The v14 `IBR` family therefore contains eleven
+candidates instead of forcing the feedback back into a seven-item template.
+
+| ID | Construction | Recorded review decision |
+| --- | --- | --- |
+| `IBR-001` | Dense overlapping number loop | 420 bold, equal-size digits; balanced `1`–`9` and `0`; more than 50% active background; one-quarter movement magnitude; exact closed path. |
+| `IBR-002` | Coordinated slow number columns | Close columns move as one plane at a saved uniform speed. |
+| `IBR-003` | Coordinated columns, reversed palette | Same planar rule with lighter numbers on a darker field and a second saved speed. |
+| `IBR-004` | Reversed-color curtain | Horizontal curtain with the two tones exchanged. |
+| `IBR-005` | Top-to-bottom curtain | The curtain projection is rotated to 90 degrees. |
+| `IBR-006` | Angled curtain | One reproducible 31-degree assignment demonstrates randomized production direction. |
+| `IBR-007` | Light warm one-way panel | Completes one crossing in 11 seconds, then cuts to the all-light first frame. |
+| `IBR-008` | Quiet neutral one-way panel | Same motion with a second fixed lightness pair. |
+| `IBR-009` | Accelerating hinged door | A 2.4-power ease begins slowly and increases speed most strongly near the end. |
+| `IBR-010` | Static-number accelerating wipe | Dense equal-size numbers stay fixed while the wipe accelerates. |
+| `IBR-011` | Moving-number accelerating wipe | Every number moves left at the same velocity while the same wipe accelerates. |
+
+Brandon Grotesque Bold is used for every v14 number field. Balanced random digit
+assembly is deterministic, and all angles, colors, lightness values, speeds,
+and easing exponents are stored in the recipe and output manifest. The first
+six candidates close continuously. `IBR-007`–`IBR-011` deliberately hard-reset
+so replay itself can be judged as a possible invitation to watch again.
+
 Every candidate uses the identical `PDE-002` recipe, seed, focal point, and
 264-frame development timeline. The subject is composited from its unmatted
 16-bit layer rather than extracted from a flattened video, preventing a pale
@@ -130,12 +156,13 @@ cutout halo.
 
 ## Output and safeguards
 
-- Seven silent, image-only candidates
+- Seven silent, image-only candidates in v10–v13; eleven in v14
 - 11 seconds, 24 fps, 264 frames, 1080 × 1920
 - 16-bit source preparation, effect generation, and compositing
 - H.264/BT.709 delivery
 - Fixed subject position, scale, rotation, and geometry
-- Exact matching first and last procedural background frames
+- Exact matching first and last procedural background frames for continuous
+  recipes; explicitly recorded non-matching endpoints for hard-reset recipes
 - No grain, audio, text, camera motion, displacement, or facial deformation
 
 For `IBC`, “text” means no caption or editorial copy. Single digits are treated

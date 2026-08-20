@@ -167,6 +167,16 @@ Updated: 2026-08-19
   eleven-second one-way door, and a dense number wipe. No digit is coordinated
   with the `26` prop. `IBF-006` and `IBF-007` intentionally reset abruptly at
   replay; the other five are continuous. The Registry now contains 142 visuals.
+- V13 review rejected `IBF-003` without a repair direction and expanded the
+  requested response beyond seven options. The v14 directed-variation round
+  therefore registers eleven candidates as `IBR-001`–`IBR-011`: three bold
+  fixed-size number fields with coordinated motion, three gradient direction or
+  palette studies, two one-way panel lightness pairs, an accelerating hinged
+  door, and static-versus-moving accelerating number wipes. `IBR-001` uses 420
+  balanced single digits and measures 57.2% active background in the finished
+  render. `IBR-007`–`IBR-011` intentionally cut back to their first frame;
+  `IBR-001`–`IBR-006` close continuously. All values are deterministic and
+  recorded. The Registry now contains 153 visuals.
 
 ## Earlier implemented work
 
@@ -179,10 +189,11 @@ Updated: 2026-08-19
 
 ## Next production work
 
-1. Review `IBF-001`–`IBF-007` at normal phone size. For the first three, judge
-   density, fixed size, order, and x-y movement; reject any remaining illusion
-   of depth. For the last two, judge whether the abrupt replay creates useful
-   rewatch energy or merely feels broken.
+1. Review `IBR-001`–`IBR-011` at normal phone size. Compare density and shared
+   plane speed in the first three, direction and palette in the next three,
+   the two panel lightness assignments, door acceleration, and static versus
+   coordinated-number wipes. For `IBR-007`–`IBR-011`, judge whether the abrupt
+   replay creates useful rewatch energy or merely feels broken.
 2. Freeze `PDE-002` as the portrait-surface treatment for 10000 and NYChildren;
    freeze Infinity after its background decision.
 3. Continue using embedded-profile 16-bit TIFF as the preferred portrait

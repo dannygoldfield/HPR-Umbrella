@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render and register seven layered Infinity background comparisons."""
+"""Render and register a layered Infinity background comparison."""
 
 from __future__ import annotations
 
@@ -265,6 +265,9 @@ def render_experiment(
             }
         )
 
+    typography_count = sum(
+        "number" in recipe.effect for recipe in background_config.recipes.values()
+    )
     summary = {
         "schemaVersion": "1.0",
         "experimentId": background_config.experiment_id,
@@ -278,7 +281,10 @@ def render_experiment(
         "candidateCount": len(rendered),
         "grain": "none",
         "audio": "none",
-        "text": "background single digits in four candidates; no editorial text",
+        "text": (
+            f"background single digits in {typography_count} candidates; "
+            "no editorial text"
+        ),
         "subjectGeometry": "fixed",
         "loopBehavior": "per candidate; continuous or intentional hard reset",
         "candidates": rendered,

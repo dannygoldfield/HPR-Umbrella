@@ -76,6 +76,9 @@ class DevelopmentTests(unittest.TestCase):
         self.infinity_flat_config = load_infinity_background_config(
             ROOT / "config/infinity-background-flat-recipes.json"
         )
+        self.infinity_directed_config = load_infinity_background_config(
+            ROOT / "config/infinity-background-directed-recipes.json"
+        )
 
     def test_pilot_has_five_fixed_geometry_recipes(self) -> None:
         self.assertEqual("portrait-development-pilot-v5", self.development_config.experiment_id)
@@ -617,6 +620,84 @@ class DevelopmentTests(unittest.TestCase):
             side_effect=lambda _path, size: ImageFont.load_default(size=size),
         ):
             for recipe in self.infinity_flat_config.recipes.values():
+                first = background_effect_frame(recipe, 0.0, context)
+                middle = background_effect_frame(recipe, 0.5, context)
+                last = background_effect_frame(recipe, 1.0, context)
+                if recipe.loop_behavior == "continuous":
+                    self.assertTrue(np.array_equal(first, last), recipe.id)
+                else:
+                    self.assertFalse(np.array_equal(first, last), recipe.id)
+                self.assertGreater(
+                    background_visibility_metrics(middle, first)["meanDelta8Bit"],
+                    0.25,
+                    recipe.id,
+                )
+
+    def test_infinity_directed_round_translates_every_review_decision(self) -> None:
+        config = self.infinity_directed_config
+        self.assertEqual(
+            "infinity-background-directed-variations-v14",
+            config.experiment_id,
+        )
+        self.assertEqual(
+            [f"IBR-{index:03d}" for index in range(1, 12)],
+            list(config.recipes),
+        )
+        self.assertEqual("Bold", config.font["style"])
+        self.assertNotIn(
+            "flat_number_separation",
+            {recipe.effect for recipe in config.recipes.values()},
+        )
+        dense = config.recipes["IBR-001"]
+        self.assertEqual(420, dense.parameters["columns"] * dense.parameters["rows"])
+        self.assertEqual(dense.parameters["minimumSize"], dense.parameters["maximumSize"])
+        self.assertTrue(dense.parameters["balancedRandomDigits"])
+        self.assertEqual(
+            [0.22, 0.30],
+            [config.recipes[key].speed for key in ("IBR-002", "IBR-003")],
+        )
+        self.assertEqual(
+            [0.0, 90.0, 31.0],
+            [
+                config.recipes[key].parameters["angleDegrees"]
+                for key in ("IBR-004", "IBR-005", "IBR-006")
+            ],
+        )
+        self.assertTrue(config.recipes["IBR-007"].parameters["oneWay"])
+        self.assertTrue(config.recipes["IBR-008"].parameters["oneWay"])
+        self.assertEqual(2.4, config.recipes["IBR-009"].parameters["easingExponent"])
+        self.assertEqual(
+            ["static", "linear_left"],
+            [
+                config.recipes[key].parameters["numberMotion"]
+                for key in ("IBR-010", "IBR-011")
+            ],
+        )
+        self.assertEqual(
+            {f"IBR-{index:03d}" for index in range(7, 12)},
+            {
+                recipe.id
+                for recipe in config.recipes.values()
+                if recipe.loop_behavior == "intentional_hard_reset"
+            },
+        )
+
+    def test_infinity_directed_frames_follow_the_recorded_loop_contract(self) -> None:
+        import numpy as np
+
+        height, width = 192, 108
+        background = np.full((height, width, 3), 62000, dtype=np.uint16)
+        subject = np.zeros((height, width, 3), dtype=np.uint16)
+        subject[:, :, :] = [42000, 30000, 24000]
+        alpha = np.zeros((height, width), dtype=np.uint16)
+        alpha[28:170, 24:91] = 65535
+        context = build_background_context(background, subject, alpha)
+        context["fontPath"] = "test-font.otf"
+        with patch(
+            "hpr_video_generator.infinity_background._font",
+            side_effect=lambda _path, size: ImageFont.load_default(size=size),
+        ):
+            for recipe in self.infinity_directed_config.recipes.values():
                 first = background_effect_frame(recipe, 0.0, context)
                 middle = background_effect_frame(recipe, 0.5, context)
                 last = background_effect_frame(recipe, 1.0, context)

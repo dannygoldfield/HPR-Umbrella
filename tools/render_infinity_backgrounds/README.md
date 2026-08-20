@@ -27,3 +27,12 @@ for the review-driven `IBF` round. Its number fields are strictly two
 dimensional: digit size and opacity remain fixed while only x-y position moves.
 The last two recipes intentionally hard-reset at replay; the other five close
 continuously.
+
+Pass
+`--background-config components/video-generator/config/infinity-background-directed-recipes.json`
+for the eleven-candidate `IBR` response round. It omits rejected `IBF-003`,
+uses Brandon Grotesque Bold for five number treatments, and records coordinated
+number-plane speed, balanced digit populations, gradient angle and palette,
+panel lightness, door acceleration, wipe acceleration, and hard-reset behavior.
+The first three number fields and three curtain studies close continuously;
+the two panels, accelerating door, and two number wipes reset intentionally.

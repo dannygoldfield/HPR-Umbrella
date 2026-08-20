@@ -148,8 +148,8 @@ def load_infinity_background_config(path: Path) -> InfinityBackgroundConfig:
         if recipe.id in recipes:
             raise ValueError(f"Duplicate Infinity background recipe: {recipe.id}")
         recipes[recipe.id] = recipe
-    if len(recipes) != 7:
-        raise ValueError("The Infinity background comparison requires exactly seven recipes")
+    if not recipes:
+        raise ValueError("An Infinity background comparison requires at least one recipe")
     return InfinityBackgroundConfig(
         version=payload["version"],
         experiment_id=payload["experimentId"],
@@ -699,22 +699,53 @@ def _flat_number_field_mask(
     if not font_path:
         raise ValueError(f"{recipe.id} requires a resolved fontPath in the background context")
     digits = "1234567890"
-    cycle = 2.0 * math.pi * (fraction % 1.0) * recipe.speed
+    # A complete cycle is always closed inside the fixed 11-second duration.
+    # ``speed`` scales the shared travel distance rather than allowing a
+    # fractional cycle that would jump at the loop boundary.
+    cycle = 2.0 * math.pi * (fraction % 1.0)
+    jitter_x = float(parameters.get("jitterX", 0.0))
+    jitter_y = float(parameters.get("jitterY", 0.0))
+    coordinated_motion = bool(parameters.get("coordinatedMotion", False))
+    balanced_random_digits = bool(parameters.get("balancedRandomDigits", False))
+    travel_x = float(parameters.get("travelX", 0.12)) * recipe.speed
+    travel_y = float(parameters.get("travelY", 0.045)) * recipe.speed
+    linear_travel = float(parameters.get("linearTravel", 0.22)) * recipe.speed
     for row in range(rows):
         for column in range(columns):
             index = row * columns + column
             prefix = f"{recipe.id}:{index}"
             base_x = (column + 0.5) / columns
             base_y = (row + 0.5) / rows
+            base_x += (_stable_fraction(prefix + ":jx") - 0.5) * jitter_x / columns
+            base_y += (_stable_fraction(prefix + ":jy") - 0.5) * jitter_y / rows
             if mode == "varied":
-                base_x += (_stable_fraction(prefix + ":jx") - 0.5) * 0.55 / columns
-                base_y += (_stable_fraction(prefix + ":jy") - 0.5) * 0.55 / rows
-                x = base_x + 0.075 * math.sin(cycle + _stable_fraction(prefix + ":px") * 2.0 * math.pi)
-                y = base_y + 0.035 * math.cos(cycle + _stable_fraction(prefix + ":py") * 2.0 * math.pi)
+                if jitter_x == 0.0:
+                    base_x += (_stable_fraction(prefix + ":jx") - 0.5) * 0.55 / columns
+                if jitter_y == 0.0:
+                    base_y += (_stable_fraction(prefix + ":jy") - 0.5) * 0.55 / rows
+                if coordinated_motion:
+                    x = base_x + travel_x * math.sin(cycle)
+                    y = base_y + travel_y * math.cos(cycle)
+                else:
+                    x = base_x + 0.075 * math.sin(
+                        cycle + _stable_fraction(prefix + ":px") * 2.0 * math.pi
+                    )
+                    y = base_y + 0.035 * math.cos(
+                        cycle + _stable_fraction(prefix + ":py") * 2.0 * math.pi
+                    )
                 size = minimum_size + (maximum_size - minimum_size) * _stable_fraction(prefix + ":size")
             elif mode == "uniform":
-                x = base_x + 0.12 * math.sin(cycle)
-                y = base_y + 0.045 * math.cos(cycle)
+                x = base_x + travel_x * math.sin(cycle)
+                y = base_y + travel_y * math.cos(cycle)
+                size = minimum_size
+            elif mode == "static":
+                x = base_x
+                y = base_y
+                size = minimum_size
+            elif mode in {"linear_left", "linear_right"}:
+                direction = -1.0 if mode == "linear_left" else 1.0
+                x = (base_x + direction * linear_travel * fraction) % 1.0
+                y = base_y
                 size = minimum_size
             else:
                 separation = 0.18 * (0.5 - 0.5 * math.cos(cycle))
@@ -723,7 +754,19 @@ def _flat_number_field_mask(
                 size = minimum_size + (maximum_size - minimum_size) * (
                     (row + column) % 5
                 ) / 4.0
-            digit = digits[(index + int(parameters.get("digitOffset", 0))) % len(digits)]
+            if balanced_random_digits:
+                block = index // len(digits)
+                balanced_block = sorted(
+                    digits,
+                    key=lambda digit: _stable_fraction(
+                        f"{recipe.id}:digit-block:{block}:{digit}"
+                    ),
+                )
+                digit = balanced_block[index % len(digits)]
+            else:
+                digit = digits[
+                    (index + int(parameters.get("digitOffset", 0))) % len(digits)
+                ]
             typeface = _font(font_path, round(size * scale))
             bbox = draw.textbbox((0, 0), digit, font=typeface)
             text_width = bbox[2] - bbox[0]
@@ -981,17 +1024,41 @@ def background_effect_frame(
             recipe.parameters.get("color", [0.48, 0.47, 0.45]),
             dtype=np.float32,
         )
+        number_base = base
+        if "backgroundColor" in recipe.parameters:
+            background_color = np.asarray(
+                recipe.parameters["backgroundColor"], dtype=np.float32
+            )
+            number_base = np.broadcast_to(background_color, base.shape).copy()
         frame = _mix_color(
-            base,
+            number_base,
             number_color,
             numbers * recipe.strength * recipe.visibility_boost,
         )
     elif recipe.effect == "gradient_curtain_2d":
         travel = 0.5 - 0.5 * math.cos(2.0 * math.pi * fraction)
-        center = 1.18 - 1.36 * travel
+        angle = math.radians(float(recipe.parameters.get("angleDegrees", 0.0)))
+        direction_x = math.cos(angle)
+        direction_y = math.sin(angle)
+        projected = x * direction_x + y * direction_y
+        corner_values = (
+            0.0,
+            direction_x,
+            direction_y,
+            direction_x + direction_y,
+        )
+        minimum_projection = min(corner_values)
+        projection_range = max(corner_values) - minimum_projection
+        coordinate = (projected - minimum_projection) / max(projection_range, 1e-6)
+        if bool(recipe.parameters.get("reverseTravel", False)):
+            center = -0.18 + 1.36 * travel
+        else:
+            center = 1.18 - 1.36 * travel
         band_width = float(recipe.parameters.get("bandWidth", 0.24))
-        band = np.exp(-0.5 * ((x - center) / band_width) ** 2)
-        shoulder = np.exp(-0.5 * ((x - (center + 0.30)) / (band_width * 1.7)) ** 2)
+        band = np.exp(-0.5 * ((coordinate - center) / band_width) ** 2)
+        shoulder = np.exp(
+            -0.5 * ((coordinate - (center + 0.30)) / (band_width * 1.7)) ** 2
+        )
         color_a = np.asarray(
             recipe.parameters.get("colorA", [0.69, 0.67, 0.63]),
             dtype=np.float32,
@@ -1011,7 +1078,11 @@ def background_effect_frame(
             band * recipe.strength * recipe.visibility_boost,
         )
     elif recipe.effect == "sliding_panel_full":
-        travel = math.sin(math.pi * fraction) ** 2
+        if bool(recipe.parameters.get("oneWay", False)):
+            easing_exponent = float(recipe.parameters.get("easingExponent", 1.0))
+            travel = max(0.0, min(1.0, fraction)) ** easing_exponent
+        else:
+            travel = math.sin(math.pi * fraction) ** 2
         edge = 1.08 - 1.16 * travel
         feather = float(recipe.parameters.get("feather", 0.010))
         exponent = np.clip((edge - x) / max(feather, 0.003), -60.0, 60.0)
@@ -1020,13 +1091,20 @@ def background_effect_frame(
             recipe.parameters.get("color", [0.77, 0.75, 0.71]),
             dtype=np.float32,
         )
+        panel_base = base
+        if "backgroundColor" in recipe.parameters:
+            background_color = np.asarray(
+                recipe.parameters["backgroundColor"], dtype=np.float32
+            )
+            panel_base = np.broadcast_to(background_color, base.shape).copy()
         frame = _mix_color(
-            base,
+            panel_base,
             panel_color,
             panel * recipe.strength * recipe.visibility_boost,
         )
     elif recipe.effect == "hinged_door_one_way":
-        openness = min(1.0, max(0.0, fraction * recipe.speed))
+        easing_exponent = float(recipe.parameters.get("easingExponent", 1.0))
+        openness = min(1.0, max(0.0, fraction * recipe.speed)) ** easing_exponent
         far_x = 1.04 - 1.01 * openness
         inset = 0.485 * openness
         door = _polygon_mask(
@@ -1045,17 +1123,32 @@ def background_effect_frame(
             door * recipe.strength * recipe.visibility_boost,
         )
     elif recipe.effect == "flat_number_wipe":
-        numbers = _flat_number_field_mask(recipe, fraction, context, mode="varied")
+        number_motion = str(recipe.parameters.get("numberMotion", "varied"))
+        if number_motion not in {"varied", "uniform", "static", "linear_left", "linear_right"}:
+            raise ValueError(f"{recipe.id} has an unsupported numberMotion")
+        numbers = _flat_number_field_mask(
+            recipe, fraction, context, mode=number_motion
+        )
         number_color = np.asarray(
             recipe.parameters.get("numberColor", [0.55, 0.54, 0.52]),
             dtype=np.float32,
         )
+        wipe_base = base
+        if "backgroundColor" in recipe.parameters:
+            background_color = np.asarray(
+                recipe.parameters["backgroundColor"], dtype=np.float32
+            )
+            wipe_base = np.broadcast_to(background_color, base.shape).copy()
         frame = _mix_color(
-            base,
+            wipe_base,
             number_color,
             numbers * recipe.strength * recipe.visibility_boost,
         )
-        edge = 1.06 - 1.12 * fraction
+        wipe_easing_exponent = float(
+            recipe.parameters.get("wipeEasingExponent", 1.0)
+        )
+        wipe_progress = max(0.0, min(1.0, fraction)) ** wipe_easing_exponent
+        edge = 1.06 - 1.12 * wipe_progress
         feather = float(recipe.parameters.get("feather", 0.010))
         exponent = np.clip((edge - x) / max(feather, 0.003), -60.0, 60.0)
         panel = 1.0 / (1.0 + np.exp(exponent))
