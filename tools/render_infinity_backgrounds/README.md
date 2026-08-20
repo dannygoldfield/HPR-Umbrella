@@ -60,3 +60,10 @@ subtle number field with one, two, or three nested organic blobs. Shared
 those seeds per portrait will produce reproducible number arrangements and blob
 geometry for production. Every path and shape function is periodic and closes
 inside the 11-second duration.
+
+Pass
+`--background-config components/video-generator/config/infinity-background-static-number-blobs-recipes.json`
+for the three-candidate `IBS` separation round. It reproduces the exact v17
+number arrangement and nested blob paths while setting `numberMotion` to
+`static`. This directly tests static numbers with moving blobs. The mutually
+exclusive moving-number option remains `IBK-001`, which contains no blobs.

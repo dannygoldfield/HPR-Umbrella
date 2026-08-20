@@ -1114,7 +1114,15 @@ def background_effect_frame(
             maximum_opacity=float(recipe.parameters.get("maximumMix", 0.50)),
         )
     elif recipe.effect == "flat_number_blobs":
-        numbers = _flat_number_field_mask(recipe, fraction, context, mode="uniform")
+        number_motion = str(recipe.parameters.get("numberMotion", "uniform"))
+        if number_motion not in {"uniform", "static"}:
+            raise ValueError(f"{recipe.id} has an unsupported numberMotion")
+        numbers = _flat_number_field_mask(
+            recipe,
+            fraction,
+            context,
+            mode=number_motion,
+        )
         blobs = _looping_blob_field_mask(recipe, fraction, context)
         background_color = np.asarray(
             recipe.parameters.get("backgroundColor", [0.97, 0.96, 0.94]),

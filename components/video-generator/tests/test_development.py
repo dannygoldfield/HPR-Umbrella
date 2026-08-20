@@ -88,6 +88,9 @@ class DevelopmentTests(unittest.TestCase):
         self.infinity_blob_config = load_infinity_background_config(
             ROOT / "config/infinity-background-number-blobs-recipes.json"
         )
+        self.infinity_static_blob_config = load_infinity_background_config(
+            ROOT / "config/infinity-background-static-number-blobs-recipes.json"
+        )
 
     def test_pilot_has_five_fixed_geometry_recipes(self) -> None:
         self.assertEqual("portrait-development-pilot-v5", self.development_config.experiment_id)
@@ -899,6 +902,48 @@ class DevelopmentTests(unittest.TestCase):
                 )
         self.assertEqual(sorted(mid_deltas), mid_deltas)
         self.assertGreater(mid_deltas[0], 0.1)
+
+    def test_infinity_static_blob_round_changes_only_number_motion(self) -> None:
+        config = self.infinity_static_blob_config
+        self.assertEqual(
+            "infinity-background-static-number-blobs-v18",
+            config.experiment_id,
+        )
+        self.assertEqual(
+            ["IBS-001", "IBS-002", "IBS-003"],
+            list(config.recipes),
+        )
+        for index, recipe in enumerate(config.recipes.values(), start=1):
+            moving = self.infinity_blob_config.recipes[f"IBL-{index:03d}"]
+            expected = dict(moving.parameters)
+            expected["numberMotion"] = "static"
+            self.assertEqual(expected, recipe.parameters)
+            self.assertEqual(index, recipe.parameters["blobCount"])
+            self.assertEqual("continuous", recipe.loop_behavior)
+
+    def test_infinity_static_blob_round_is_visible_and_exactly_closed(self) -> None:
+        import numpy as np
+
+        height, width = 192, 108
+        background = np.full((height, width, 3), 62000, dtype=np.uint16)
+        subject = np.zeros((height, width, 3), dtype=np.uint16)
+        alpha = np.zeros((height, width), dtype=np.uint16)
+        context = build_background_context(background, subject, alpha)
+        context["fontPath"] = "test-font.otf"
+        with patch(
+            "hpr_video_generator.infinity_background._font",
+            side_effect=lambda _path, size: ImageFont.load_default(size=size),
+        ):
+            for recipe in self.infinity_static_blob_config.recipes.values():
+                first = background_effect_frame(recipe, 0.0, context)
+                middle = background_effect_frame(recipe, 0.5, context)
+                last = background_effect_frame(recipe, 1.0, context)
+                self.assertTrue(np.array_equal(first, last), recipe.id)
+                self.assertGreater(
+                    background_visibility_metrics(middle, first)["meanDelta8Bit"],
+                    0.1,
+                    recipe.id,
+                )
 
     def test_infinity_background_filter_preserves_subject_geometry(self) -> None:
         graph = build_infinity_background_filter(self.video_config, 135, 240)

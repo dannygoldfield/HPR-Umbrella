@@ -220,6 +220,22 @@ will vary digit ordering, blob position, shape, size, path, and timing across th
 first 40 portraits while preserving the selected visual grammar and making
 every result exactly reproducible.
 
+## Motion separation rule
+
+V17 review established that two simultaneous background-motion systems create
+unnecessary competition. Production must choose one of two mutually exclusive
+grammars:
+
+1. Static numbers with one or more moving blobs.
+2. Gently moving numbers with no blobs, represented by `IBK-001`.
+
+V18 tests the first grammar through `IBS-001`–`IBS-003`. These candidates reuse
+the exact v17 number arrangement, blob seeds, blob positions, blob shapes, and
+closed paths, but set `numberMotion` to `static`. The one-, two-, and three-blob
+comparison is still nested, so blob count remains the only within-round
+variable. V17 is preserved as research history but its moving-number-plus-blob
+combination is not a production option.
+
 Every candidate uses the identical `PDE-002` recipe, seed, focal point, and
 264-frame development timeline. The subject is composited from its unmatted
 16-bit layer rather than extracted from a flattened video, preventing a pale
@@ -227,7 +243,7 @@ cutout halo.
 
 ## Output and safeguards
 
-- Seven silent, image-only candidates in v10–v13; eleven in v14–v15; six in v16; three in v17
+- Seven silent, image-only candidates in v10–v13; eleven in v14–v15; six in v16; three in v17–v18
 - 11 seconds, 24 fps, 264 frames, 1080 × 1920
 - 16-bit source preparation, effect generation, and compositing
 - H.264/BT.709 delivery

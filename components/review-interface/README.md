@@ -5,12 +5,13 @@ only on the local computer and writes every human decision directly to the
 SQLite Registry. JSON manifests remain provenance records, not forms Danny has
 to edit.
 
-The active review family is the three-candidate Infinity number-and-blob round,
-`IBL-001`–`IBL-003`. Every candidate holds the five-star `PDE-002` subject
-treatment, subject geometry, timing, number field, palette, and delivery format
-constant. The accepted subtle `#edeae3` numbers remain on `#f7f5ef`; one, two,
-or three softly feathered blobs of the same neutral move behind them. All
-earlier Infinity and portrait-development sets remain available unchanged.
+The active review family is the three-candidate Infinity static-number and blob
+round, `IBS-001`–`IBS-003`. Every candidate holds the five-star `PDE-002`
+subject treatment, subject geometry, timing, static number field, palette, and
+delivery format constant. The accepted subtle `#edeae3` numbers remain still on
+`#f7f5ef`; one, two, or three softly feathered blobs of the same neutral move
+behind them. All earlier Infinity and portrait-development sets remain
+available unchanged.
 
 The visual-review screen provides looping video, 1–5 rating, reject, notes,
 selection, render/review status, and a provenance link. Episode is explicitly
@@ -48,11 +49,14 @@ pause, speed, feather, and patch values for every development candidate. This
 makes it possible to compare prior rounds or request an interpolated setting
 between two tests without estimating from memory.
 
-For the active Infinity set, compare one, two, and three blobs. The first blob
-is identical in all candidates; the second and third are added without changing
-the existing system, so blob count is the only creative variable. Number and
-blob paths, blob shapes, and softness close continuously at the loop boundary.
-`PDE-002` remains unchanged; grain, audio, and editorial text are absent.
+For the active Infinity set, compare one, two, and three moving blobs behind a
+completely static number field. The first blob is identical in all candidates;
+the second and third are added without changing the existing system, so blob
+count is the only within-round variable. Blob paths, shapes, and softness close
+continuously at the loop boundary. The only permitted alternate system is
+`IBK-001`: gently moving numbers with no blobs. Moving numbers and moving blobs
+will not be combined in production. `PDE-002` remains unchanged; grain, audio,
+and editorial text are absent.
 
 ## Start it
 

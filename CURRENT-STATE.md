@@ -202,6 +202,13 @@ Updated: 2026-08-20
   exactly; shared seeds keep number and blob geometry constant while blob count
   changes. All three are rendered and registered; the Registry now contains 173
   visuals.
+- V17 review established a motion-separation rule: moving numbers and moving
+  blobs must not coexist in production. The two possible systems are static
+  numbers with moving blobs, or gently moving numbers with no blobs. V18
+  registers `IBS-001`–`IBS-003`, which reproduce the exact v17 number layout and
+  one-, two-, and three-blob paths while holding every digit completely still.
+  All three close exactly and are rendered; the Registry now contains 176
+  visuals. `IBK-001` remains the no-blob moving-number control.
 
 ## Earlier implemented work
 
@@ -214,10 +221,10 @@ Updated: 2026-08-20
 
 ## Next production work
 
-1. Review `IBL-001`–`IBL-003` at normal phone size and choose whether one, two,
-   or three simultaneous soft blobs gives the best balance of organic motion
-   and portrait presence. Once chosen, treat the number-and-blob combination as
-   the production grammar rather than reopening the earlier effect menu.
+1. Review `IBS-001`–`IBS-003` at normal phone size and compare the preferred
+   static-number/blob candidate with `IBK-001`, the moving-number/no-blob
+   control. Choose one mutually exclusive motion system for production, and if
+   blobs win, choose one, two, or three.
 2. Freeze `PDE-002` as the portrait-surface treatment for 10000 and NYChildren;
    freeze Infinity after its background decision.
 3. Continue using embedded-profile 16-bit TIFF as the preferred portrait
