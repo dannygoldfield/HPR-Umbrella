@@ -26,6 +26,7 @@ from hpr_video_generator.infinity_background import (
     build_background_context,
     development_state,
     load_infinity_background_config,
+    personalize_infinity_background_recipe,
     prepare_layered_working_sources,
     render_background_intermediate,
     render_composite_candidate,
@@ -126,7 +127,11 @@ def render_experiment(
     )
 
     rendered = []
-    for recipe in background_config.recipes.values():
+    for configured_recipe in background_config.recipes.values():
+        recipe = personalize_infinity_background_recipe(
+            configured_recipe,
+            base_candidate["portrait_id"],
+        )
         recipe_uses_typography = "number" in recipe.effect
         recipe_font_record = font_record if recipe_uses_typography else None
         candidate_seed = _seed(

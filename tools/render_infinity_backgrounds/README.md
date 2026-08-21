@@ -8,6 +8,14 @@ working copies of the named `Subject` and `Background` layers.
 Every candidate is silent, image-only, 11 seconds, 24 fps, 1080 × 1920,
 fixed-geometry, and loop-safe. Grain and audio remain deferred.
 
+Pass
+`--background-config components/video-generator/config/infinity-background-static-production-recipes.json`
+for the selected `IBN-001` production treatment. It preserves the approved
+IBK-001 typography, density, size, and palette while holding every digit
+completely still. The renderer derives `numberSeed` from portrait identity, so
+each Infinity portrait receives a different deterministic digit arrangement
+without background motion.
+
 The default configuration reproduces the original restrained `INF` round. Pass
 `--background-config components/video-generator/config/infinity-background-visibility-recipes.json`
 for the separately versioned `IBV` calibration round. That configuration adds

@@ -6,10 +6,11 @@ SQLite Registry. JSON manifests remain provenance records, not forms Danny has
 to edit.
 
 The Infinity comparison is complete. Review rejected the static-number and
-moving-blob round `IBS-001`–`IBS-003` and locked `IBK-001`: gently moving
-`#edeae3` numbers on `#f7f5ef`, with no blobs. The selected Infinity composite
-also contains the five-star `PDE-002` portrait treatment. The blob rounds remain
-available unchanged as research history.
+moving-blob round `IBS-001`–`IBS-003`, then superseded the moving `IBK-001`
+field with `IBN-001`: completely static `#edeae3` numbers on `#f7f5ef`, with
+no blobs. The selected Infinity composite also contains the five-star `PDE-002`
+portrait treatment. The moving and blob rounds remain available unchanged as
+research history.
 
 The visual-review screen provides looping video, 1–5 rating, reject, notes,
 selection, render/review status, and a provenance link. Episode is explicitly
@@ -47,15 +48,16 @@ pause, speed, feather, and patch values for every development candidate. This
 makes it possible to compare prior rounds or request an interpolated setting
 between two tests without estimating from memory.
 
-For production, `IBK-001` uses one fixed speed and closed two-dimensional motion
-path. Portrait-specific deterministic number layouts and starting phases keep
-the 40 Infinity videos related without making a future grid move in lockstep.
-`PDE-002` remains unchanged; film grain is disabled under the production
-policy, while audio and editorial text remain pending.
+For production, `IBN-001` holds every background digit completely still.
+Portrait identity deterministically changes which digits occupy the fixed grid,
+so the 40 Infinity videos remain related but each has a unique layout. There is
+no background phase or motion path. `PDE-002` remains the only visual motion;
+film grain is disabled under the production policy, while audio and editorial
+text remain pending.
 
 The default review set is **Production visuals — no film grain**. It contains
 the selected NYChildren and 10000 `PDE-002` candidates and the selected
-Infinity `IBK-001` composite. The completed `film-grain-opacity-v25` set remains
+Infinity `IBN-001` composite. The completed `film-grain-opacity-v25` set remains
 available as research history: 13 10000 candidates using the same Super 35
 Light sample at opacities from 10% through 40%. Its read-only panel records the
 exact settings; raw grain plates are never served.

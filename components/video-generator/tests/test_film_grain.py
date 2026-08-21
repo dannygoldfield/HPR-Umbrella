@@ -29,7 +29,7 @@ class FilmGrainConfigTests(unittest.TestCase):
             [
                 "VIS-30FE48FB73CE-PDE-002",
                 "VIS-90500D66EBBF-PDE-002",
-                "VIS-4DF5D853ACDA-IBK-001",
+                "VIS-4DF5D853ACDA-IBN-001",
             ],
             [item["visualId"] for item in policy["finalVisualCandidates"]],
         )

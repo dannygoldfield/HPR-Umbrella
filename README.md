@@ -46,7 +46,7 @@ Each candidate can be recreated from its portrait, duration, presets, recipes, g
 - **Audio Generator:** implemented with deterministic recipes for 7-, 9-, and 11-second loops.
 - **Video Generator:** legacy camera-motion and White Balance prototypes remain
   reproducible. `PDE-002` is the locked Development Animation; Infinity adds
-  the locked `IBK-001` moving-number background. Film grain was evaluated
+  the locked `IBN-001` static, portrait-unique number background. Film grain was evaluated
   through multiple visibility, motion, source, and opacity comparisons and was
   rejected as a production layer on 2026-08-21. Shipping visuals contain no
   film grain. All registered test visuals remain reproducible as research

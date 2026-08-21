@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from io import BytesIO
 import hashlib
@@ -136,8 +136,15 @@ def load_infinity_background_config(path: Path) -> InfinityBackgroundConfig:
             raise ValueError(f"{recipe.id} has an unsupported effect: {recipe.effect}")
         if not 0 < recipe.strength <= 0.45:
             raise ValueError(f"{recipe.id} strength must be greater than 0 and at most 0.45")
-        if recipe.speed <= 0:
-            raise ValueError(f"{recipe.id} speed must be greater than zero")
+        static_number_field = (
+            recipe.effect == "flat_number_grid"
+            and recipe.parameters.get("numberMotion") == "static"
+        )
+        if recipe.speed < 0 or (recipe.speed == 0 and not static_number_field):
+            raise ValueError(
+                f"{recipe.id} speed must be greater than zero unless its "
+                "numberMotion is static"
+            )
         if not 1.0 <= recipe.visibility_boost <= 3.0:
             raise ValueError(
                 f"{recipe.id} visibilityBoost must be between 1.0 and 3.0"
@@ -161,6 +168,19 @@ def load_infinity_background_config(path: Path) -> InfinityBackgroundConfig:
         principle=payload["principle"],
         recipes=recipes,
     )
+
+
+def personalize_infinity_background_recipe(
+    recipe: InfinityBackgroundRecipe,
+    portrait_id: str,
+) -> InfinityBackgroundRecipe:
+    """Resolve a reproducible portrait-specific digit arrangement when requested."""
+    if not recipe.parameters.get("portraitUniqueLayout", False):
+        return recipe
+    parameters = dict(recipe.parameters)
+    parameters["numberSeed"] = f"{recipe.id}:{portrait_id}"
+    parameters.pop("phaseOffset", None)
+    return replace(recipe, parameters=parameters)
 
 
 def resolve_font_file(
@@ -1095,11 +1115,13 @@ def background_effect_frame(
         "flat_number_grid",
         "flat_number_separation",
     }:
-        flat_mode = {
+        flat_mode = str(recipe.parameters.get("numberMotion") or {
             "flat_number_drift": "varied",
             "flat_number_grid": "uniform",
             "flat_number_separation": "separation",
-        }[recipe.effect]
+        }[recipe.effect])
+        if flat_mode not in {"varied", "uniform", "static", "separation"}:
+            raise ValueError(f"{recipe.id} has an unsupported numberMotion")
         numbers = _flat_number_field_mask(recipe, fraction, context, mode=flat_mode)
         number_color = np.asarray(
             recipe.parameters.get("color", [0.48, 0.47, 0.45]),

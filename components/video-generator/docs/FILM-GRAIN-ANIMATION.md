@@ -13,7 +13,7 @@ that the layer did not add enough to the portrait. The shipping decision is:
 - opacity: 0%;
 - source plate: none;
 - approved visuals: the selected `PDE-002` Development Animation for
-  NYChildren and 10000, and the complete `PDE-002` plus `IBK-001` Infinity
+  NYChildren and 10000, and the complete `PDE-002` plus `IBN-001` Infinity
   composite;
 - next stage: audio pairing without another visual texture layer.
 

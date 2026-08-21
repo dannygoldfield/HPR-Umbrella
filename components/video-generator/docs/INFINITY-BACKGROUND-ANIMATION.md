@@ -244,33 +244,33 @@ cutout halo.
 ## Production selection
 
 Review rejected the static-number/moving-blob grammar. No blobs will appear in
-production. `IBK-001` is locked: subtle `#edeae3` Brandon Grotesque Bold digits
-move gently over the fixed `#f7f5ef` background while the subject receives the
-same five-star `PDE-002` Development Animation used by the other pilots.
+production. Subsequent review also found the accepted `IBK-001` number motion
+unnecessary. `IBN-001` supersedes it for production: subtle `#edeae3` Brandon
+Grotesque Bold digits remain completely still over the fixed `#f7f5ef`
+background while the subject receives the same five-star `PDE-002` Development
+Animation used by the other pilots.
 
-Across the 40 Infinity portraits, speed, path, direction, travel amplitude,
-density, typography, and colors remain fixed. Two deterministic values vary by
-portrait: `numberSeed` changes which digits appear where, and `phaseOffset`
-changes the starting point on the same closed motion path. The phase variation
-prevents multiple videos from moving in lockstep when shown in a grid without
-changing their shared tempo. Both values are derived from portrait identity so
-every result is reproducible. No three-video grid preview is required before
-production.
+Across the 40 Infinity portraits, position grid, density, size, typography, and
+colors remain fixed. `numberSeed` is derived from portrait identity and changes
+which digits occupy those positions. There is no `phaseOffset`, speed, path,
+direction, or travel amplitude. Every portrait therefore has a unique,
+reproducible number layout without creating a second motion system.
 
-The selected `IBK-001` render is already a complete visual composite, not a
-background-only asset: it includes the isolated subject, the number field, and
-`PDE-002`. Film grain is permanently absent under the production policy; audio
-remains a separate pending pairing decision.
+The selected `IBN-001` render is already a complete visual composite, not a
+background-only asset: it includes the isolated subject, the static number
+field, and `PDE-002`. Film grain is permanently absent under the production
+policy; audio remains a separate pending pairing decision.
 
 ## Output and safeguards
 
-- Seven silent, image-only candidates in v10–v13; eleven in v14–v15; six in v16; three in v17–v18
+- Seven silent, image-only candidates in v10–v13; eleven in v14–v15; six in v16; three in v17–v18; one production replacement in v26
 - 11 seconds, 24 fps, 264 frames, 1080 × 1920
 - 16-bit source preparation, effect generation, and compositing
 - H.264/BT.709 delivery
 - Fixed subject position, scale, rotation, and geometry
-- Exact matching first and last procedural background frames for continuous
-  recipes; explicitly recorded non-matching endpoints for hard-reset recipes
+- Identical first, middle, and last background frames for `IBN-001`; exact
+  matching endpoints for continuous research recipes; explicitly recorded
+  non-matching endpoints for hard-reset recipes
 - No grain, audio, text, camera motion, displacement, or facial deformation
 
 For `IBC`, “text” means no caption or editorial copy. Single digits are treated

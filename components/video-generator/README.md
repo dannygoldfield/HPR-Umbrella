@@ -15,7 +15,7 @@ See the complete
 [Portrait Development Animation specification](docs/PORTRAIT-DEVELOPMENT-ANIMATION.md).
 
 The shared five-star `PDE-002` Development Animation is now locked. Infinity
-adds the locked `IBK-001` moving-number background. Film grain was tested as a
+adds the locked `IBN-001` static, portrait-unique number background. Film grain was tested as a
 finishing layer and rejected on 2026-08-21 because it did not improve the
 portrait enough to justify the added effect. The photographed image remains
 fixed in the frame; shipping visuals contain Development Animation and, for

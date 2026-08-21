@@ -24,6 +24,7 @@ from hpr_video_generator.infinity_background import (
     build_background_context,
     build_infinity_background_filter,
     load_infinity_background_config,
+    personalize_infinity_background_recipe,
     require_perceptual_visibility,
     resolve_font_file,
 )
@@ -91,6 +92,9 @@ class DevelopmentTests(unittest.TestCase):
         )
         self.infinity_static_blob_config = load_infinity_background_config(
             ROOT / "config/infinity-background-static-number-blobs-recipes.json"
+        )
+        self.infinity_static_production_config = load_infinity_background_config(
+            ROOT / "config/infinity-background-static-production-recipes.json"
         )
 
     def test_pilot_has_five_fixed_geometry_recipes(self) -> None:
@@ -969,6 +973,44 @@ class DevelopmentTests(unittest.TestCase):
                     0.1,
                     recipe.id,
                 )
+
+    def test_infinity_production_number_field_is_static_and_portrait_unique(self) -> None:
+        import numpy as np
+
+        config = self.infinity_static_production_config
+        self.assertEqual("infinity-background-static-production-v26", config.experiment_id)
+        self.assertEqual(["IBN-001"], list(config.recipes))
+        configured = config.recipes["IBN-001"]
+        self.assertEqual(0.0, configured.speed)
+        self.assertEqual("static", configured.parameters["numberMotion"])
+        first_portrait = personalize_infinity_background_recipe(configured, "POR-FIRST")
+        second_portrait = personalize_infinity_background_recipe(configured, "POR-SECOND")
+        self.assertNotEqual(
+            first_portrait.parameters["numberSeed"],
+            second_portrait.parameters["numberSeed"],
+        )
+
+        height, width = 192, 108
+        background = np.full((height, width, 3), 62000, dtype=np.uint16)
+        subject = np.zeros((height, width, 3), dtype=np.uint16)
+        alpha = np.zeros((height, width), dtype=np.uint16)
+        context = build_background_context(background, subject, alpha)
+        context["fontPath"] = "test-font.otf"
+        with patch(
+            "hpr_video_generator.infinity_background._font",
+            side_effect=lambda _path, size: ImageFont.load_default(size=size),
+        ):
+            first_start = background_effect_frame(first_portrait, 0.0, context)
+            first_middle = background_effect_frame(first_portrait, 0.5, context)
+            first_end = background_effect_frame(first_portrait, 1.0, context)
+            second_start = background_effect_frame(second_portrait, 0.0, context)
+        self.assertTrue(np.array_equal(first_start, first_middle))
+        self.assertTrue(np.array_equal(first_start, first_end))
+        self.assertFalse(np.array_equal(first_start, second_start))
+        self.assertGreater(
+            background_visibility_metrics(first_start, background)["meanDelta8Bit"],
+            0.25,
+        )
 
     def test_infinity_background_filter_preserves_subject_geometry(self) -> None:
         graph = build_infinity_background_filter(self.video_config, 135, 240)
