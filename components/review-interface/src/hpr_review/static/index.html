@@ -93,6 +93,19 @@
             <dt>Subject</dt><dd id="backgroundSubjectTreatment">PDE-002 unchanged</dd>
           </dl>
         </div>
+        <div id="filmGrainSettings" class="diagnostic-section" hidden>
+          <h3>Film-grain treatment</h3>
+          <div class="muted">The locked Development Animation remains active and the camera is fixed. Infinity also retains its approved moving-number background. Grain affects luminance only; these settings stay outside the video.</div>
+          <dl class="settings-grid">
+            <dt>Film format</dt><dd id="grainFilmFormat">—</dd>
+            <dt>Source plate</dt><dd id="grainSourceStrength">—</dd>
+            <dt>Mix</dt><dd id="grainOpacity">—</dd>
+            <dt>Plate file</dt><dd id="grainPlateFilename">—</dd>
+            <dt>Starting frame</dt><dd id="grainStartFrame">—</dd>
+            <dt>Color</dt><dd>Luma only</dd>
+            <dt>Parent visual</dt><dd id="grainParentVisual">—</dd>
+          </dl>
+        </div>
       </div>
     </section>
     <section class="panel">
@@ -182,11 +195,17 @@
       if(infinityBlobs)return infinityBlobs;
       const infinityStaticBlobs=({'IBS-001':'Static numbers + one looping blob','IBS-002':'Static numbers + two looping blobs','IBS-003':'Static numbers + three looping blobs'})[id];
       if(infinityStaticBlobs)return infinityStaticBlobs;
+      const filmGrain=({'FGT-001':'No-grain transcode control','FGT-002':'Super 35 Light — subtle','FGT-003':'35mm Light — medium','FGT-004':'Super 35 Light — medium','FGT-005':'16mm Light — medium','FGT-006':'Super 35 Heavy — medium','FGT-007':'Super 35 Light — strong'})[id];
+      if(filmGrain)return filmGrain;
+      const filmGrainIsolation=({'FGI-001':'Static portrait — no-grain control','FGI-002':'Super 35 Light — subtle','FGI-003':'35mm Light — medium','FGI-004':'Super 35 Light — medium','FGI-005':'16mm Light — medium','FGI-006':'Super 35 Heavy — medium','FGI-007':'Super 35 Light — strong'})[id];
+      if(filmGrainIsolation)return filmGrainIsolation;
+      const filmGrainComposite=({'FGC-001':'No-grain composite control','FGC-002':'Super 35 Light — subtle','FGC-003':'35mm Light — medium','FGC-004':'Super 35 Light — medium','FGC-005':'16mm Light — medium','FGC-006':'Super 35 Heavy — medium','FGC-007':'Super 35 Light — strong'})[id];
+      if(filmGrainComposite)return filmGrainComposite;
       return id;
     }
-    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions','infinity-background-flat-fields-v13':'Infinity Backgrounds — flat fields','infinity-background-directed-variations-v14':'Infinity Backgrounds — directed variations','infinity-background-fixed-palette-v15':'Infinity Backgrounds — fixed palette','infinity-background-contrast-calibration-v16':'Infinity Backgrounds — contrast calibration','infinity-background-number-blobs-v17':'Infinity Backgrounds — number and blob system','infinity-background-static-number-blobs-v18':'Infinity Backgrounds — static numbers and blobs'})[id]||id; }
+    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions','infinity-background-flat-fields-v13':'Infinity Backgrounds — flat fields','infinity-background-directed-variations-v14':'Infinity Backgrounds — directed variations','infinity-background-fixed-palette-v15':'Infinity Backgrounds — fixed palette','infinity-background-contrast-calibration-v16':'Infinity Backgrounds — contrast calibration','infinity-background-number-blobs-v17':'Infinity Backgrounds — number and blob system','infinity-background-static-number-blobs-v18':'Infinity Backgrounds — static numbers and blobs','film-grain-character-strength-v19':'Film Grain — 10000 composite test','film-grain-isolation-v20':'Film Grain — grain-only diagnostic (superseded)','film-grain-composite-v21':'Film Grain — all three locked visuals'})[id]||id; }
     async function loadTelemetry(c){
-      const token=++telemetryToken; telemetry=null; $('diagnostics').hidden=true; $('whiteBalanceDiagnostics').hidden=true; $('developmentDiagnostics').hidden=true; $('developmentSettings').hidden=true; $('backgroundSettings').hidden=true;
+      const token=++telemetryToken; telemetry=null; $('diagnostics').hidden=true; $('whiteBalanceDiagnostics').hidden=true; $('developmentDiagnostics').hidden=true; $('developmentSettings').hidden=true; $('backgroundSettings').hidden=true; $('filmGrainSettings').hidden=true;
       $('temperatureSlider').value=0; $('tintSlider').value=0; $('temperatureValue').textContent='0.00'; $('tintValue').textContent='0.00';
       $('developmentSlider').value=100; $('developmentValue').textContent='100%'; $('developmentRange').textContent='Local range: 100–100%';
       try {
@@ -221,6 +240,16 @@
           const loop=manifest.backgroundLoopBehavior||manifest.backgroundTelemetry?.loopBehavior||'continuous'; $('backgroundLoop').textContent=loop==='intentional_hard_reset'?'Intentional abrupt reset':'Continuous';
           $('backgroundSubjectTreatment').textContent=`${manifest.basePortraitTreatment?.developmentRecipeId||'PDE-002'} unchanged`;
           $('backgroundSettings').hidden=false; $('diagnostics').hidden=false;
+        }
+        if(manifest.candidateType==='visual_film_grain_test'){
+          const grain=manifest.grainTreatment||{};
+          $('grainFilmFormat').textContent=grain.filmFormat||'None';
+          $('grainSourceStrength').textContent=grain.sourceStrength||'Control';
+          $('grainOpacity').textContent=`${(Number(grain.opacity||0)*100).toFixed(0)}%`;
+          $('grainPlateFilename').textContent=grain.plateFilename||'None';
+          $('grainStartFrame').textContent=grain.plateFilename?String(grain.startFrame??0):'Not applicable';
+          $('grainParentVisual').textContent=manifest.parentVisualId||'—';
+          $('filmGrainSettings').hidden=false; $('diagnostics').hidden=false;
         }
       } catch(error) { if(token===telemetryToken)telemetry=null; }
     }
@@ -281,6 +310,7 @@
       allCandidates=data.candidates; if(!allCandidates.length)throw new Error('No visual candidates are registered.');
       const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
       const choices=[];
+      if(experiments.includes('film-grain-composite-v21'))choices.push(['film-grain-composite-v21','Film Grain — all three locked visuals']);
       if(experiments.includes('infinity-background-static-number-blobs-v18'))choices.push(['infinity-background-static-number-blobs-v18','Infinity Backgrounds — static numbers and blobs']);
       if(experiments.includes('infinity-background-number-blobs-v17'))choices.push(['infinity-background-number-blobs-v17','Infinity Backgrounds — number and blob system']);
       if(experiments.includes('infinity-background-contrast-calibration-v16'))choices.push(['infinity-background-contrast-calibration-v16','Infinity Backgrounds — contrast calibration']);

@@ -45,9 +45,11 @@ Each candidate can be recreated from its portrait, duration, presets, recipes, g
 
 - **Audio Generator:** implemented with deterministic recipes for 7-, 9-, and 11-second loops.
 - **Video Generator:** legacy camera-motion and White Balance prototypes remain
-  reproducible. Portrait Development Animation now includes the 15-candidate
-  seven-second JPEG round and a 15-candidate 11-second, color-managed 16-bit
-  TIFF timing/easing round. All 87 visuals in the Registry remain reproducible.
+  reproducible. `PDE-002` is the locked Development Animation; Infinity adds
+  the locked `IBK-001` moving-number background. The active 21-candidate
+  film-grain round compares the same seven scanned-grain treatments on all
+  three complete locked visuals. All 211 visuals in the Registry remain
+  reproducible, including superseded research rounds.
 - **HPR Registry:** initial SQLite implementation ingests unsequenced Lightroom exports, preserves portrait revisions and metadata provenance, and assigns episode numbers only when an approved-master sequence is locked.
 - **Candidate Engine:** implements the earlier 120-slot archive dry-run planner, separate Audio/Visual/Pair/Publishing banks, deterministic option sets, independent component review fields, and replaceable photo sources. Its early `EpisodeRecord` model is legacy and must be integrated with the Registry before production planning.
 - **Human review:** a functional local visual-review screen records 1–5 rating,
@@ -74,6 +76,7 @@ tools/
   inspect_metadata/
   render_motion_pilot/
   render_white_balance_pilot/
+  render_film_grain_test/
 docs/
   architecture.md
   creative-principles.md
@@ -125,6 +128,7 @@ approved videos are sequenced.
 - [Motion Rhythm specification](components/video-generator/docs/MOTION-RHYTHM.md)
 - [White Balance animation specification](components/video-generator/docs/WHITE-BALANCE-ANIMATION.md)
 - [Portrait Development Animation specification](components/video-generator/docs/PORTRAIT-DEVELOPMENT-ANIMATION.md)
+- [Film Grain Animation specification](components/video-generator/docs/FILM-GRAIN-ANIMATION.md)
 - [Local review interface](components/review-interface/)
 - [HPR Registry](components/registry/)
 - [Danny Goldfield’s portrait projects](https://dannygoldfield.com/)

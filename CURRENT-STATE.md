@@ -16,7 +16,7 @@ Updated: 2026-08-20
   deformation are outside the active testing plan.
 - The settled soft sweep `PDE-002` is the portrait-surface baseline: it received
   a five-star rating for 10000, NYChildren, and Infinity. Motion-picture grain
-  remains a later finishing decision for all three.
+  is the active finishing decision for all three.
 - The official production name is Portrait Development Animation, or
   Development Animation for short. “Adjustment Animation” is avoided because
   it suggests a software demonstration rather than a living portrait surface.
@@ -221,6 +221,25 @@ Updated: 2026-08-20
   portrait-specific `phaseOffset` changes only the starting point on the shared
   closed path. This keeps future grid playback at one tempo without lockstep.
   No three-video grid preview is required.
+- Four locally managed TDCatTech/LightKino grain plates are now verified as
+  matched 4096 × 2160, 10-bit ProRes, 24-fps, 15-second sources: 35mm Light,
+  Super 35 Light, 16mm Light, and Super 35 Heavy. The provider page states that
+  the plates are free to download and use as desired. Raw plates remain local
+  and outside Git; provenance records the page, observed permission wording,
+  filenames, and checksums.
+- Film-grain character/strength round v19 added seven 10000 candidates. A
+  temporary seven-candidate v20 diagnostic removed Development Animation to
+  isolate a reported impression of camera drift; it is retained as superseded
+  research and is not the creative decision set.
+- Film-grain composite round v21 adds 21 registered candidates under
+  `FGC-001`–`FGC-007`: the same seven grain choices for NYChildren, 10000, and
+  Infinity. NYChildren and 10000 use their locked five-star `PDE-002` visuals;
+  Infinity uses the complete selected `PDE-002 + IBK-001` moving-number
+  composite. Grain is downstream and luma-only. A decoded five-frame audit of
+  each representative medium-grain output measured exactly zero horizontal or
+  vertical displacement from its parent. All candidates pass 1080 × 1920,
+  24-fps, 11-second, 264-frame, and complete limited-range BT.709 audits. The
+  Registry now contains 211 visuals, including all retained research history.
 
 ## Earlier implemented work
 
@@ -239,9 +258,9 @@ Updated: 2026-08-20
 2. Continue using embedded-profile 16-bit TIFF as the preferred portrait
    source. Seven Lightroom stage exports remain an optional calibration
    experiment, not a requirement for every portrait or video.
-3. Decide whether to omit grain or test the recorded film-grain source,
-   applying any selected grain uniformly after development and background
-   compositing.
+3. Review the 21-candidate v21 film-grain composite set and lock one shared
+   character/strength that succeeds on NYChildren, 10000, and the complete
+   Infinity composite.
 4. Connect the locked visuals to selected Audio
    Generator tracks and complete pair review.
 5. Render, verify, and register final masters only after grain and audio pairing

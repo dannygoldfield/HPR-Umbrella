@@ -14,6 +14,14 @@ sweep, and activation fields are implemented in the first 15-candidate pilot.
 See the complete
 [Portrait Development Animation specification](docs/PORTRAIT-DEVELOPMENT-ANIMATION.md).
 
+The shared five-star `PDE-002` Development Animation is now locked. Infinity
+adds the locked `IBK-001` moving-number background. The active finishing test
+compares seven scanned-film grain treatments on all three complete locked
+visuals after those visual stages. The photographed image remains fixed in the
+frame; only Development Animation, Infinity's approved background, and film
+grain move;
+see [Film Grain Animation](docs/FILM-GRAIN-ANIMATION.md).
+
 The older camera-motion, texture, and White Balance-only renderers remain
 reproducible research tools; they are not the active production direction.
 
@@ -22,9 +30,9 @@ reproducible research tools; they are not the active production direction.
 - one portrait per candidate
 - 1080 × 1920, 9:16
 - 24 frames per second
-- 7 seconds initially; 9 and 11 seconds supported
+- 11-second active portrait format; earlier 7-second research retained
 - fixed geometry with loop-safe tonal and surface development
-- grain deferred until the development behavior is approved
+- optional luma-only scanned grain applied after visual compositing
 - deterministic seeds and complete provenance
 
 ## Local media
