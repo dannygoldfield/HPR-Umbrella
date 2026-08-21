@@ -4,12 +4,12 @@ This tool adds scanned film grain after the locked HPR visual treatment. It does
 not rerun or change Portrait Development Animation, Infinity backgrounds,
 geometry, audio, or text.
 
-The active round applies the same seven grain comparisons to all three locked
-pilot visuals. NYChildren and 10000 retain `PDE-002`; Infinity retains the
-complete `PDE-002 + IBK-001` composite, including its moving-number background.
-The photographed image never translates, scales, or rotates. The seven recipes
-separate a no-grain transcode control, 35mm/Super 35/16mm character,
-Light/Heavy source plates, and three Super 35 Light strengths.
+The active visibility-calibration round uses 10000 and Super 35 Light grain to
+find a signal that survives both H.264 delivery and the roughly 280-pixel-wide
+review display. It progresses from a no-grain control through native-size
+grain to deliberately enlarged and amplified grain, ending at an intentionally
+excessive boundary. The photographed image never translates, scales, or
+rotates; `PDE-002` remains active underneath the grain.
 
 Source plates remain outside Git in Danny's local media library. The tracked
 recipe file records their filenames and the TDCatTech/LightKino download page;
@@ -26,7 +26,7 @@ python3 tools/render_film_grain_test/render_film_grain_test.py \
 ```
 
 The outputs are written to
-`workspace/film-grain-composite-v21/` and registered in
+`workspace/film-grain-visibility-v22/` and registered in
 `workspace/registry/hpr.sqlite3`. Both are intentionally excluded from Git.
 
 ## Guardrails
@@ -36,4 +36,5 @@ The outputs are written to
 - Luma-only grain; the approved chroma planes pass through unchanged.
 - No grain plate shorter than the selected 11-second sample window.
 - Identical plate sample for recipes that differ only in opacity.
+- Explicit grain-signal gain and texture scale recorded in every manifest.
 - No source plate is copied into the repository or exposed by the review server.

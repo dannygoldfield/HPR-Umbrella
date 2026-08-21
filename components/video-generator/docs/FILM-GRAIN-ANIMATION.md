@@ -58,9 +58,9 @@ output_chroma = base_chroma
 The output returns to 4:2:0 only at delivery encoding and carries complete
 limited-range BT.709 characteristics. Geometry never changes.
 
-## Active comparison: `film-grain-composite-v21`
+## Layer-completeness comparison: `film-grain-composite-v21`
 
-The active round applies the same seven recipes to all three complete locked
+This round applied the same seven recipes to all three complete locked
 visuals. This makes the layer stack explicit in every test:
 
 1. the photograph stays fixed in the frame;
@@ -84,9 +84,33 @@ and zero vertical displacement from its parent visual.
 | `FGC-006` | Super 35 Heavy at 12% | Denser source boundary |
 | `FGC-007` | Super 35 Light at 20% | Strong visibility boundary |
 
-The 35mm, Super 35, and 16mm Light candidates share one nominal opacity so
-their structural differences remain legible. The three Super 35 Light variants
-reuse the exact same deterministic plate window and crop, isolating opacity.
+The review found no visible difference among the 21 candidates. Measurement at
+the 280-pixel-wide review size confirmed why: the strongest candidate changed
+the image by only 0.726 display-code values on average, with no pixels changing
+by more than four values. Fine scanned grain had been averaged away by delivery
+compression and display reduction. V21 is therefore failed visibility research,
+not a grain-character decision.
+
+## Active visibility calibration: `film-grain-visibility-v22`
+
+V22 uses the fixed-camera 10000 `PDE-002` parent and one Super 35 Light plate.
+It varies only delivered grain size and signal magnitude so the visibility
+threshold can be found before repeating a cross-portrait comparison.
+
+| ID | Texture scale | Signal gain | Mix | Purpose |
+| --- | ---: | ---: | ---: | --- |
+| `FGV-001` | 1.0× | 1.0× | 0% | No-grain control |
+| `FGV-002` | 1.0× | 1.0× | 50% | Native-grain lower boundary |
+| `FGV-003` | 1.0× | 1.0× | 100% | Full native scanned signal |
+| `FGV-004` | 1.5× | 1.5× | 65% | Moderately enlarged grain |
+| `FGV-005` | 2.0× | 2.0× | 65% | Clearly visible grain |
+| `FGV-006` | 2.0× | 3.0× | 85% | Strong boundary |
+| `FGV-007` | 2.5× | 4.0× | 100% | Intentionally excessive boundary |
+
+At review size, the new sequence progresses from 1.125 average display-code
+change in `FGV-002` to 12.436 in `FGV-007`; the share of pixels changing by
+more than four values rises from 0.22% to 73.62%. This is a genuine visible
+range. Grain size and signal gain are recorded separately in every manifest.
 
 ## Review questions
 
@@ -118,6 +142,7 @@ share one material character but do not display identical grain patterns.
 
 The earlier seven-candidate 10000 round v19 remains reproducible. A temporary
 v20 grain-only diagnostic removed Development Animation to isolate the apparent
-motion report; that was not the desired creative test and is superseded by
-v21. V21 is the decision set: choose one character/strength that holds across
-skin, the close 10000 portrait, and Infinity's low-contrast graphic background.
+motion report; that was not the desired creative test. V21 restored the proper
+three-layer stack but failed visibility. V22 is the current decision set. Once
+a credible visible range is found, test only that range on NYChildren and the
+complete Infinity composite.

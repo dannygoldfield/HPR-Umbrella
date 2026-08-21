@@ -100,6 +100,8 @@
             <dt>Film format</dt><dd id="grainFilmFormat">—</dd>
             <dt>Source plate</dt><dd id="grainSourceStrength">—</dd>
             <dt>Mix</dt><dd id="grainOpacity">—</dd>
+            <dt>Signal gain</dt><dd id="grainSignalGain">—</dd>
+            <dt>Grain size</dt><dd id="grainTextureScale">—</dd>
             <dt>Plate file</dt><dd id="grainPlateFilename">—</dd>
             <dt>Starting frame</dt><dd id="grainStartFrame">—</dd>
             <dt>Color</dt><dd>Luma only</dd>
@@ -201,9 +203,11 @@
       if(filmGrainIsolation)return filmGrainIsolation;
       const filmGrainComposite=({'FGC-001':'No-grain composite control','FGC-002':'Super 35 Light — subtle','FGC-003':'35mm Light — medium','FGC-004':'Super 35 Light — medium','FGC-005':'16mm Light — medium','FGC-006':'Super 35 Heavy — medium','FGC-007':'Super 35 Light — strong'})[id];
       if(filmGrainComposite)return filmGrainComposite;
+      const filmGrainVisibility=({'FGV-001':'No-grain composite control','FGV-002':'Native grain — 50%','FGV-003':'Native grain — 100%','FGV-004':'1.5× grain — 65%','FGV-005':'2× grain — 65%','FGV-006':'2× grain — strong','FGV-007':'2.5× grain — excessive boundary'})[id];
+      if(filmGrainVisibility)return filmGrainVisibility;
       return id;
     }
-    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions','infinity-background-flat-fields-v13':'Infinity Backgrounds — flat fields','infinity-background-directed-variations-v14':'Infinity Backgrounds — directed variations','infinity-background-fixed-palette-v15':'Infinity Backgrounds — fixed palette','infinity-background-contrast-calibration-v16':'Infinity Backgrounds — contrast calibration','infinity-background-number-blobs-v17':'Infinity Backgrounds — number and blob system','infinity-background-static-number-blobs-v18':'Infinity Backgrounds — static numbers and blobs','film-grain-character-strength-v19':'Film Grain — 10000 composite test','film-grain-isolation-v20':'Film Grain — grain-only diagnostic (superseded)','film-grain-composite-v21':'Film Grain — all three locked visuals'})[id]||id; }
+    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions','infinity-background-flat-fields-v13':'Infinity Backgrounds — flat fields','infinity-background-directed-variations-v14':'Infinity Backgrounds — directed variations','infinity-background-fixed-palette-v15':'Infinity Backgrounds — fixed palette','infinity-background-contrast-calibration-v16':'Infinity Backgrounds — contrast calibration','infinity-background-number-blobs-v17':'Infinity Backgrounds — number and blob system','infinity-background-static-number-blobs-v18':'Infinity Backgrounds — static numbers and blobs','film-grain-character-strength-v19':'Film Grain — 10000 composite test','film-grain-isolation-v20':'Film Grain — grain-only diagnostic (superseded)','film-grain-composite-v21':'Film Grain — all three locked visuals (failed visibility)','film-grain-visibility-v22':'Film Grain — visibility calibration'})[id]||id; }
     async function loadTelemetry(c){
       const token=++telemetryToken; telemetry=null; $('diagnostics').hidden=true; $('whiteBalanceDiagnostics').hidden=true; $('developmentDiagnostics').hidden=true; $('developmentSettings').hidden=true; $('backgroundSettings').hidden=true; $('filmGrainSettings').hidden=true;
       $('temperatureSlider').value=0; $('tintSlider').value=0; $('temperatureValue').textContent='0.00'; $('tintValue').textContent='0.00';
@@ -246,6 +250,8 @@
           $('grainFilmFormat').textContent=grain.filmFormat||'None';
           $('grainSourceStrength').textContent=grain.sourceStrength||'Control';
           $('grainOpacity').textContent=`${(Number(grain.opacity||0)*100).toFixed(0)}%`;
+          $('grainSignalGain').textContent=`${Number(grain.signalGain||1).toFixed(1)}×`;
+          $('grainTextureScale').textContent=`${Number(grain.textureScale||1).toFixed(1)}×`;
           $('grainPlateFilename').textContent=grain.plateFilename||'None';
           $('grainStartFrame').textContent=grain.plateFilename?String(grain.startFrame??0):'Not applicable';
           $('grainParentVisual').textContent=manifest.parentVisualId||'—';
@@ -310,7 +316,7 @@
       allCandidates=data.candidates; if(!allCandidates.length)throw new Error('No visual candidates are registered.');
       const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
       const choices=[];
-      if(experiments.includes('film-grain-composite-v21'))choices.push(['film-grain-composite-v21','Film Grain — all three locked visuals']);
+      if(experiments.includes('film-grain-visibility-v22'))choices.push(['film-grain-visibility-v22','Film Grain — visibility calibration']);
       if(experiments.includes('infinity-background-static-number-blobs-v18'))choices.push(['infinity-background-static-number-blobs-v18','Infinity Backgrounds — static numbers and blobs']);
       if(experiments.includes('infinity-background-number-blobs-v17'))choices.push(['infinity-background-number-blobs-v17','Infinity Backgrounds — number and blob system']);
       if(experiments.includes('infinity-background-contrast-calibration-v16'))choices.push(['infinity-background-contrast-calibration-v16','Infinity Backgrounds — contrast calibration']);

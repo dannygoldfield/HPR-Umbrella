@@ -52,15 +52,16 @@ path. Portrait-specific deterministic number layouts and starting phases keep
 the 40 Infinity videos related without making a future grid move in lockstep.
 `PDE-002` remains unchanged; grain, audio, and editorial text are absent.
 
-The active film-grain review set is `film-grain-composite-v21`. It contains 21
-candidates: the same seven `FGC-001`–`FGC-007` treatments for 10000,
-NYChildren, and Infinity. The first two retain their locked `PDE-002`
-Development Animation; Infinity retains the complete selected `IBK-001`
-composite. A read-only panel shows film format, Light/Heavy source, mix
-percentage, plate filename, starting frame, luma-only color handling, and the
-unchanged parent visual. The raw grain plates are never served by the review
-interface. The grain-only v20 diagnostic remains registered as superseded
-research but is omitted from the normal review-set menu.
+The active film-grain review set is `film-grain-visibility-v22`. It contains
+seven 10000 candidates, `FGV-001`–`FGV-007`, spanning a no-grain control,
+native-size grain, enlarged grain, stronger signal gain, and an intentionally
+excessive boundary. The prior 21-candidate v21 round failed because its grain
+collapsed to less than one display-code change on average at review size. A
+read-only panel shows film format, Light/Heavy source, mix percentage, signal
+gain, grain-size scale, plate filename, starting frame, luma-only color
+handling, and the unchanged parent visual. Raw grain plates are never served.
+Superseded v20 and v21 diagnostics remain registered but are omitted from the
+normal review-set menu.
 
 ## Start it
 

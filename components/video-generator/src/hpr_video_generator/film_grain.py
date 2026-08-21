@@ -32,6 +32,8 @@ class FilmGrainRecipe:
     name: str
     plate_id: str | None
     opacity: float
+    signal_gain: float = 1.0
+    texture_scale: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -94,12 +96,20 @@ def load_film_grain_config(path: Path) -> FilmGrainConfig:
             raise ValueError(f"Recipe {recipe_id} opacity must be between 0 and 1")
         if plate_id is None and opacity != 0.0:
             raise ValueError(f"Control recipe {recipe_id} must have zero opacity")
+        signal_gain = float(item.get("signalGain", 1.0))
+        texture_scale = float(item.get("textureScale", 1.0))
+        if not 0.25 <= signal_gain <= 8.0:
+            raise ValueError(f"Recipe {recipe_id} signalGain must be between 0.25 and 8")
+        if not 1.0 <= texture_scale <= 4.0:
+            raise ValueError(f"Recipe {recipe_id} textureScale must be between 1 and 4")
         recipes.append(
             FilmGrainRecipe(
                 id=recipe_id,
                 name=str(item["name"]),
                 plate_id=plate_id,
                 opacity=opacity,
+                signal_gain=signal_gain,
+                texture_scale=texture_scale,
             )
         )
     if not recipes:
@@ -191,10 +201,15 @@ def build_filter(
         )
 
     base += ",extractplanes=y+u+v[base_y][base_u][base_v]"
+    crop_width = max(2, round(width / recipe.texture_scale / 2) * 2)
+    crop_height = max(2, round(height / recipe.texture_scale / 2) * 2)
     grain = (
         f"[1:v]trim=start_frame={start_frame}:end_frame={start_frame + frames},"
         f"setpts=PTS-STARTPTS,fps={fps},scale=-2:{height}:flags=lanczos,"
-        f"format=gray,crop={width}:{height}:x='(iw-{width})*{crop_fraction:.4f}':y=0[grain_y]"
+        f"format=gray,crop={crop_width}:{crop_height}:"
+        f"x='(iw-{crop_width})*{crop_fraction:.4f}':y='(ih-{crop_height})/2',"
+        f"scale={width}:{height}:flags=lanczos,"
+        f"lut=y='clip(128+(val-128)*{recipe.signal_gain:.4f},0,255)'[grain_y]"
     )
     composite = (
         f"[base_y][grain_y]blend=all_mode=overlay:all_opacity={recipe.opacity:.4f}[textured_y];"
@@ -329,6 +344,8 @@ def generate_film_grain_candidate(
             "filmFormat": None if candidate.plate is None else candidate.plate.film_format,
             "sourceStrength": None if candidate.plate is None else candidate.plate.source_strength,
             "opacity": candidate.recipe.opacity,
+            "signalGain": candidate.recipe.signal_gain,
+            "textureScale": candidate.recipe.texture_scale,
             "startFrame": start_frame,
             "cropFraction": crop_fraction,
             "plateFilename": None if candidate.plate is None else candidate.plate.filename,

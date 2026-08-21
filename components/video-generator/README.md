@@ -16,10 +16,10 @@ See the complete
 
 The shared five-star `PDE-002` Development Animation is now locked. Infinity
 adds the locked `IBK-001` moving-number background. The active finishing test
-compares seven scanned-film grain treatments on all three complete locked
-visuals after those visual stages. The photographed image remains fixed in the
-frame; only Development Animation, Infinity's approved background, and film
-grain move;
+calibrates the minimum scanned-grain size and signal strength that remains
+visible after mobile-size delivery. The photographed image remains fixed in
+the frame; only Development Animation, Infinity's approved background, and
+film grain move;
 see [Film Grain Animation](docs/FILM-GRAIN-ANIMATION.md).
 
 The older camera-motion, texture, and White Balance-only renderers remain

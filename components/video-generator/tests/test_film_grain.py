@@ -51,6 +51,19 @@ class FilmGrainConfigTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "unknown plate"):
                 load_film_grain_config(path)
 
+    def test_visibility_round_reaches_an_intentional_boundary(self):
+        config = load_film_grain_config(
+            ROOT / "config/film-grain-visibility-recipes.json"
+        )
+        self.assertEqual("film-grain-visibility-v22", config.experiment_id)
+        self.assertEqual(1, len(config.base_visuals))
+        self.assertEqual(7, len(config.recipes))
+        boundary = config.recipes[-1]
+        self.assertEqual("FGV-007", boundary.id)
+        self.assertEqual(1.0, boundary.opacity)
+        self.assertEqual(4.0, boundary.signal_gain)
+        self.assertEqual(2.5, boundary.texture_scale)
+
 
 class FilmGrainFilterTests(unittest.TestCase):
     def test_control_uses_same_delivery_transcode_without_grain_input(self):
@@ -65,7 +78,9 @@ class FilmGrainFilterTests(unittest.TestCase):
         self.assertNotIn("[1:v]", value)
 
     def test_grain_changes_luma_only_and_passes_chroma_through(self):
-        recipe = FilmGrainRecipe("FGC-004", "Medium", "super35-light", 0.12)
+        recipe = FilmGrainRecipe(
+            "FGV-004", "Visible", "super35-light", 0.65, 1.5, 1.5
+        )
         value = build_filter(
             width=1080,
             height=1920,
@@ -78,7 +93,9 @@ class FilmGrainFilterTests(unittest.TestCase):
         self.assertIn("trim=start_frame=31:end_frame=295", value)
         self.assertIn("format=gray", value)
         self.assertIn("extractplanes=y+u+v", value)
-        self.assertIn("all_mode=overlay:all_opacity=0.1200", value)
+        self.assertIn("crop=720:1280", value)
+        self.assertIn("lut=y='clip(128+(val-128)*1.5000,0,255)'", value)
+        self.assertIn("all_mode=overlay:all_opacity=0.6500", value)
         self.assertIn("[textured_y][base_u][base_v]mergeplanes", value)
 
     def test_sample_window_is_repeatable_and_in_bounds(self):

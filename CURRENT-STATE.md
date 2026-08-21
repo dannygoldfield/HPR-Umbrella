@@ -238,8 +238,19 @@ Updated: 2026-08-20
   composite. Grain is downstream and luma-only. A decoded five-frame audit of
   each representative medium-grain output measured exactly zero horizontal or
   vertical displacement from its parent. All candidates pass 1080 × 1920,
-  24-fps, 11-second, 264-frame, and complete limited-range BT.709 audits. The
-  Registry now contains 211 visuals, including all retained research history.
+  24-fps, 11-second, 264-frame, and complete limited-range BT.709 audits.
+- Human review found no visible grain difference in v21. At the 280-pixel-wide
+  review size, the strongest candidate changed the image by only 0.726 display
+  codes on average and no pixels by more than four codes. V21 is retained as a
+  failed visibility test, not a grain choice.
+- Film-grain visibility round v22 adds seven 10000 candidates under
+  `FGV-001`–`FGV-007`. It keeps the selected `PDE-002` Development Animation
+  and fixed camera while progressively increasing grain mix, signal gain, and
+  texture scale. The intentionally excessive boundary reaches 12.436 average
+  display-code change at review size, with 73.62% of pixels changing by more
+  than four codes. All seven pass the locked 1080 × 1920, 24-fps, 11-second,
+  264-frame, and BT.709 delivery audits. The Registry now contains 218 visuals,
+  including retained research history.
 
 ## Earlier implemented work
 
@@ -258,9 +269,9 @@ Updated: 2026-08-20
 2. Continue using embedded-profile 16-bit TIFF as the preferred portrait
    source. Seven Lightroom stage exports remain an optional calibration
    experiment, not a requirement for every portrait or video.
-3. Review the 21-candidate v21 film-grain composite set and lock one shared
-   character/strength that succeeds on NYChildren, 10000, and the complete
-   Infinity composite.
+3. Review the seven-candidate v22 grain-visibility calibration. Use the result
+   to define a narrow cross-portrait confirmation on NYChildren and the
+   complete Infinity composite before locking production grain.
 4. Connect the locked visuals to selected Audio
    Generator tracks and complete pair review.
 5. Render, verify, and register final masters only after grain and audio pairing
