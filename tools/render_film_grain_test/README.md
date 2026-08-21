@@ -4,12 +4,11 @@ This tool adds scanned film grain after the locked HPR visual treatment. It does
 not rerun or change Portrait Development Animation, Infinity backgrounds,
 geometry, audio, or text.
 
-The active slow-swim refinement uses 10000 and Super 35 Light grain. It retains
-the prior `FGV-002` result as an exact checksum-matching reference, then
-correlates three, five, or seven neighboring grain frames to replace rapid
-flicker with a calmer swim. Mix and texture size increase only modestly. The
-photographed image never translates, scales, or rotates; `PDE-002` remains
-active underneath the grain.
+The active keep-or-drop round uses 10000 and four different scan plates. Each
+plate is calibrated at three, five, and seven-frame temporal windows so Danny
+can compare source character, visibility, and calmness in one 13-candidate
+matrix. The photographed image never translates, scales, or rotates;
+`PDE-002` remains active underneath the grain.
 
 Source plates remain outside Git in Danny's local media library. The tracked
 recipe file records their filenames and the TDCatTech/LightKino download page;
@@ -26,7 +25,7 @@ python3 tools/render_film_grain_test/render_film_grain_test.py \
 ```
 
 The outputs are written to
-`workspace/film-grain-slow-swim-v23/` and registered in
+`workspace/film-grain-decision-v24/` and registered in
 `workspace/registry/hpr.sqlite3`. Both are intentionally excluded from Git.
 
 ## Guardrails
@@ -38,4 +37,6 @@ The outputs are written to
 - Identical plate sample for recipes that differ only in opacity.
 - Explicit grain-signal gain and texture scale recorded in every manifest.
 - Explicit temporal-smoothing window recorded in every manifest.
+- Temporal pre-roll prevents the smoothing window from creating a start flash.
+- A one-second normalized loop blend returns the grain to its opening state.
 - No source plate is copied into the repository or exposed by the review server.

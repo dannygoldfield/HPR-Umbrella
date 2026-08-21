@@ -5,17 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HPR Visual Review</title>
   <style>
-    :root { color-scheme: dark; --ink:#f5f1e9; --muted:#aaa59c; --panel:#1d1c1a; --line:#3b3935; --accent:#e9a85d; --ok:#7ac99a; --danger:#ea847d; }
-    * { box-sizing: border-box; }
-    body { margin:0; background:#11110f; color:var(--ink); font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    header { display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:1rem 1.4rem; border-bottom:1px solid var(--line); position:sticky; top:0; background:#11110ff2; z-index:2; }
-    .header-controls { display:flex; gap:.8rem; align-items:center; }
-    select { background:#292824; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:.45rem .6rem; }
-    h1 { margin:0; font-size:1.15rem; letter-spacing:.02em; }
-    main { display:grid; grid-template-columns:minmax(280px, 360px) minmax(300px, 1fr); gap:1.5rem; max-width:980px; margin:0 auto; padding:1.5rem; }
-    video { display:block; width:min(78vw, 300px); max-height:56vh; margin:0 auto; background:#000; border-radius:10px; box-shadow:0 16px 60px #0008; }
-    .visual-column { width:100%; max-width:360px; justify-self:center; align-self:start; }
-    .diagnostics { margin-top:1rem; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1rem; }
+    :root { color-scheme:dark; --ink:#f5f1e9; --muted:#aaa59c; --panel:#1d1c1a; --line:#3b3935; --accent:#e9a85d; --ok:#7ac99a; --danger:#ea847d; }
+    * { box-sizing:border-box; }
+    html,body { height:100%; }
+    body { margin:0; overflow:hidden; background:#11110f; color:var(--ink); font:16px/1.42 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    header { min-height:58px; display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:.65rem 1rem; border-bottom:1px solid var(--line); background:#11110ff2; }
+    .header-controls { min-width:0; display:flex; gap:.8rem; align-items:center; }
+    select { max-width:min(48vw,30rem); background:#292824; color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.55rem .7rem; font:inherit; }
+    h1 { margin:0; white-space:nowrap; font-size:1.1rem; letter-spacing:.02em; }
+    main { height:calc(100dvh - 58px); display:grid; grid-template-columns:minmax(270px,340px) minmax(430px,1fr); gap:1rem; max-width:1180px; margin:0 auto; padding:1rem; overflow:hidden; }
+    video { display:block; width:min(100%,300px); max-height:calc(100dvh - 90px); margin:0 auto; background:#000; border-radius:10px; box-shadow:0 14px 44px #0008; }
+    .visual-column { min-height:0; width:100%; max-width:350px; justify-self:center; overflow-y:auto; padding-right:.25rem; scrollbar-gutter:stable; }
+    summary { cursor:pointer; font-weight:650; }
+    .diagnostics { margin-top:.8rem; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
+    .diagnostics>summary { padding:.8rem 1rem; }
+    .diagnostics>.diagnostic-section { padding:0 1rem 1rem; }
     .diagnostics h3 { margin:0 0 .2rem; font-size:1rem; }
     .slider-row { display:grid; grid-template-columns:7rem 1fr 3.8rem; gap:.7rem; align-items:center; margin-top:.8rem; }
     .slider-row output { text-align:right; font-variant-numeric:tabular-nums; }
@@ -23,15 +27,17 @@
     .diagnostics input.temp { accent-color:#e9a85d; }
     .diagnostics input.tint { accent-color:#d982ca; }
     .diagnostics input.development { accent-color:#7ac99a; }
-    .diagnostic-section + .diagnostic-section { margin-top:1rem; padding-top:1rem; border-top:1px solid var(--line); }
+    .diagnostic-section + .diagnostic-section { margin-top:0; padding-top:1rem; border-top:1px solid var(--line); }
     .settings-grid { grid-template-columns:8rem 1fr; margin:.7rem 0 0; gap:.25rem .7rem; font-size:.9rem; }
-    .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1.25rem; align-self:start; }
+    .panel { min-height:0; height:100%; overflow-y:auto; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1rem 1.15rem; scrollbar-gutter:stable; }
     .eyebrow,.muted { color:var(--muted); }
     .eyebrow { text-transform:uppercase; letter-spacing:.1em; font-size:.75rem; }
-    h2 { margin:.25rem 0 .15rem; font-size:1.5rem; }
-    dl { display:grid; grid-template-columns:9rem 1fr; margin:1.2rem 0; gap:.35rem .8rem; }
+    h2 { margin:.2rem 0 .1rem; font-size:1.35rem; }
+    dl { display:grid; grid-template-columns:8.5rem 1fr; margin:.8rem 0 0; gap:.28rem .7rem; }
     dt { color:var(--muted); } dd { margin:0; overflow-wrap:anywhere; }
-    fieldset { border:0; padding:0; margin:1.2rem 0; }
+    .candidate-details { margin:.85rem 0 0; padding:.7rem .8rem; border:1px solid var(--line); border-radius:8px; background:#181714; }
+    .candidate-details dl { font-size:.9rem; }
+    fieldset { border:0; padding:0; margin:1rem 0; }
     legend { margin-bottom:.55rem; font-weight:650; }
     button,.toggle { border:1px solid var(--line); background:#292824; color:var(--ink); border-radius:7px; padding:.65rem .85rem; cursor:pointer; }
     button:hover,.toggle:hover { border-color:var(--accent); }
@@ -41,12 +47,14 @@
     .toggle input { margin-right:.45rem; }
     .toggle.reject.active { border-color:var(--danger); color:var(--danger); }
     .toggle.select.active { border-color:var(--ok); color:var(--ok); }
-    textarea { width:100%; min-height:7rem; resize:vertical; background:#121210; color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.7rem; font:inherit; }
-    .navigation { justify-content:space-between; margin-top:1.25rem; }
-    .status { min-height:1.4rem; color:var(--ok); margin:.6rem 0 0; }
+    textarea { width:100%; min-height:10rem; max-height:34vh; resize:vertical; background:#121210; color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.7rem; font:inherit; }
+    .navigation { justify-content:space-between; margin-top:.75rem; }
+    .navigation button { min-width:7.5rem; }
+    .status { min-height:1.25rem; color:var(--ok); margin:.35rem 0 0; }
     .provenance { color:var(--accent); }
     kbd { border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:.05rem .3rem; color:var(--muted); }
-    @media (max-width:760px) { main { grid-template-columns:1fr; padding:.8rem; } video { width:min(76vw, 280px); max-height:52vh; } header { padding:.8rem; flex-wrap:wrap; } .header-controls { width:100%; justify-content:space-between; } dl { grid-template-columns:7rem 1fr; } }
+    @media (max-height:760px) and (min-width:901px) { video { width:min(100%,250px); } textarea { min-height:7rem; } .panel { font-size:.94rem; } }
+    @media (max-width:900px) { html,body { height:auto; } body { overflow:auto; } header { position:sticky; top:0; z-index:2; padding:.7rem .8rem; flex-wrap:wrap; } .header-controls { width:100%; justify-content:space-between; } select { max-width:78vw; } main { height:auto; min-height:calc(100dvh - 96px); grid-template-columns:1fr; padding:.8rem; overflow:visible; } .visual-column,.panel { height:auto; overflow:visible; } video { width:min(76vw,280px); max-height:58vh; } dl { grid-template-columns:7rem 1fr; } }
   </style>
 </head>
 <body>
@@ -54,7 +62,8 @@
   <main id="app" hidden>
     <section class="visual-column">
       <video id="video" muted loop autoplay playsinline controls></video>
-      <div id="diagnostics" class="diagnostics" hidden>
+      <details id="diagnostics" class="diagnostics" hidden>
+        <summary>Effect settings</summary>
         <div id="whiteBalanceDiagnostics" class="diagnostic-section" hidden>
           <h3>White-balance reference</h3>
           <div class="muted">Synchronized HPR deltas. The approved Lightroom export is 0; these are not Lightroom slider units.</div>
@@ -103,28 +112,32 @@
             <dt>Signal gain</dt><dd id="grainSignalGain">—</dd>
             <dt>Grain size</dt><dd id="grainTextureScale">—</dd>
             <dt>Motion smoothing</dt><dd id="grainTemporalSmooth">—</dd>
+            <dt>Loop blend</dt><dd id="grainLoopBlend">—</dd>
             <dt>Plate file</dt><dd id="grainPlateFilename">—</dd>
             <dt>Starting frame</dt><dd id="grainStartFrame">—</dd>
             <dt>Color</dt><dd>Luma only</dd>
             <dt>Parent visual</dt><dd id="grainParentVisual">—</dd>
           </dl>
         </div>
-      </div>
+      </details>
     </section>
     <section class="panel">
       <div class="eyebrow" id="source"></div>
       <h2 id="portrait"></h2>
       <div class="muted" id="recipe"></div>
-      <dl>
-        <dt>Episode</dt><dd>Not assigned — sequencing happens after final masters</dd>
-        <dt>Portrait ID</dt><dd id="portraitId"></dd>
-        <dt>Revision</dt><dd id="revisionId"></dd>
-        <dt>Candidate</dt><dd id="visualId"></dd>
-        <dt>Comparison</dt><dd id="comparison"></dd>
-        <dt>Render</dt><dd id="renderStatus"></dd>
-        <dt>Review</dt><dd id="reviewStatus"></dd>
-        <dt>Provenance</dt><dd><a id="manifest" class="provenance" target="_blank">Open JSON manifest</a></dd>
-      </dl>
+      <details class="candidate-details">
+        <summary>Candidate details and provenance</summary>
+        <dl>
+          <dt>Episode</dt><dd>Not assigned — sequencing happens after final masters</dd>
+          <dt>Portrait ID</dt><dd id="portraitId"></dd>
+          <dt>Revision</dt><dd id="revisionId"></dd>
+          <dt>Candidate</dt><dd id="visualId"></dd>
+          <dt>Comparison</dt><dd id="comparison"></dd>
+          <dt>Render</dt><dd id="renderStatus"></dd>
+          <dt>Review</dt><dd id="reviewStatus"></dd>
+          <dt>Provenance</dt><dd><a id="manifest" class="provenance" target="_blank">Open JSON manifest</a></dd>
+        </dl>
+      </details>
       <fieldset><legend>Rating <span class="muted">(<kbd>1</kbd>–<kbd>5</kbd>)</span></legend><div id="ratings" class="ratings"></div></fieldset>
       <fieldset><legend>Decision</legend><div class="actions">
         <label id="rejectLabel" class="toggle reject"><input id="reject" type="checkbox">Reject <kbd>R</kbd></label>
@@ -208,9 +221,11 @@
       if(filmGrainVisibility)return filmGrainVisibility;
       const filmGrainSlowSwim=({'FGS-001':'No-grain composite control','FGS-002':'FGV-002 reference — native motion','FGS-003':'Same grain — gently slowed','FGS-004':'Same grain — calmer swim','FGS-005':'Calmer swim — 60% mix','FGS-006':'Calmer swim — 1.15× grain','FGS-007':'Slowest swim — 67% and 1.25×'})[id];
       if(filmGrainSlowSwim)return filmGrainSlowSwim;
+      const filmGrainDecision=({'FGD-001':'No-grain control','FGD-002':'Super 35 Light — moderate gentle swim','FGD-003':'Super 35 Light — clear calm swim','FGD-004':'Super 35 Light — bold slowest swim','FGD-005':'35mm Light — moderate gentle swim','FGD-006':'35mm Light — clear calm swim','FGD-007':'35mm Light — bold slowest swim','FGD-008':'16mm Light — moderate gentle swim','FGD-009':'16mm Light — clear calm swim','FGD-010':'16mm Light — bold slowest swim','FGD-011':'Super 35 Heavy — moderate gentle swim','FGD-012':'Super 35 Heavy — clear calm swim','FGD-013':'Super 35 Heavy — bold slowest swim'})[id];
+      if(filmGrainDecision)return filmGrainDecision;
       return id;
     }
-    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions','infinity-background-flat-fields-v13':'Infinity Backgrounds — flat fields','infinity-background-directed-variations-v14':'Infinity Backgrounds — directed variations','infinity-background-fixed-palette-v15':'Infinity Backgrounds — fixed palette','infinity-background-contrast-calibration-v16':'Infinity Backgrounds — contrast calibration','infinity-background-number-blobs-v17':'Infinity Backgrounds — number and blob system','infinity-background-static-number-blobs-v18':'Infinity Backgrounds — static numbers and blobs','film-grain-character-strength-v19':'Film Grain — 10000 composite test','film-grain-isolation-v20':'Film Grain — grain-only diagnostic (superseded)','film-grain-composite-v21':'Film Grain — all three locked visuals (failed visibility)','film-grain-visibility-v22':'Film Grain — visibility calibration','film-grain-slow-swim-v23':'Film Grain — slow-swim refinement'})[id]||id; }
+    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions','infinity-background-flat-fields-v13':'Infinity Backgrounds — flat fields','infinity-background-directed-variations-v14':'Infinity Backgrounds — directed variations','infinity-background-fixed-palette-v15':'Infinity Backgrounds — fixed palette','infinity-background-contrast-calibration-v16':'Infinity Backgrounds — contrast calibration','infinity-background-number-blobs-v17':'Infinity Backgrounds — number and blob system','infinity-background-static-number-blobs-v18':'Infinity Backgrounds — static numbers and blobs','film-grain-character-strength-v19':'Film Grain — 10000 composite test','film-grain-isolation-v20':'Film Grain — grain-only diagnostic (superseded)','film-grain-composite-v21':'Film Grain — all three locked visuals (failed visibility)','film-grain-visibility-v22':'Film Grain — visibility calibration','film-grain-slow-swim-v23':'Film Grain — slow-swim refinement','film-grain-decision-v24':'Film Grain — final keep-or-drop comparison'})[id]||id; }
     async function loadTelemetry(c){
       const token=++telemetryToken; telemetry=null; $('diagnostics').hidden=true; $('whiteBalanceDiagnostics').hidden=true; $('developmentDiagnostics').hidden=true; $('developmentSettings').hidden=true; $('backgroundSettings').hidden=true; $('filmGrainSettings').hidden=true;
       $('temperatureSlider').value=0; $('tintSlider').value=0; $('temperatureValue').textContent='0.00'; $('tintValue').textContent='0.00';
@@ -256,6 +271,7 @@
           $('grainSignalGain').textContent=`${Number(grain.signalGain||1).toFixed(1)}×`;
           $('grainTextureScale').textContent=`${Number(grain.textureScale||1).toFixed(2)}×`;
           $('grainTemporalSmooth').textContent=`${Number(grain.temporalSmoothFrames||1)} frame${Number(grain.temporalSmoothFrames||1)===1?'':'s'}`;
+          $('grainLoopBlend').textContent=Number(grain.loopCrossfadeFrames||0)?`${(Number(grain.loopCrossfadeFrames)/Number(manifest.fps||24)).toFixed(1)} seconds`:'None';
           $('grainPlateFilename').textContent=grain.plateFilename||'None';
           $('grainStartFrame').textContent=grain.plateFilename?String(grain.startFrame??0):'Not applicable';
           $('grainParentVisual').textContent=manifest.parentVisualId||'—';
@@ -320,6 +336,7 @@
       allCandidates=data.candidates; if(!allCandidates.length)throw new Error('No visual candidates are registered.');
       const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
       const choices=[];
+      if(experiments.includes('film-grain-decision-v24'))choices.push(['film-grain-decision-v24','Film Grain — final keep-or-drop comparison']);
       if(experiments.includes('film-grain-slow-swim-v23'))choices.push(['film-grain-slow-swim-v23','Film Grain — slow-swim refinement']);
       if(experiments.includes('infinity-background-static-number-blobs-v18'))choices.push(['infinity-background-static-number-blobs-v18','Infinity Backgrounds — static numbers and blobs']);
       if(experiments.includes('infinity-background-number-blobs-v17'))choices.push(['infinity-background-number-blobs-v17','Infinity Backgrounds — number and blob system']);

@@ -52,14 +52,19 @@ path. Portrait-specific deterministic number layouts and starting phases keep
 the 40 Infinity videos related without making a future grid move in lockstep.
 `PDE-002` remains unchanged; grain, audio, and editorial text are absent.
 
-The active film-grain review set is `film-grain-slow-swim-v23`. It contains
-seven 10000 candidates, `FGS-001`–`FGS-007`. `FGS-002` is byte-for-byte
-identical to the prior preferred `FGV-002`; `FGS-003`–`FGS-007` progressively
-increase temporal correlation while mix rises only to 67% and grain size only
-to 1.25×. A read-only panel explains and displays signal gain, grain size, and
-the temporal-smoothing window. Signal gain is grain-pattern contrast, not
-portrait exposure. Raw grain plates are never served. Superseded grain rounds
-remain registered but are omitted from the normal review-set menu.
+The active film-grain review set is `film-grain-decision-v24`. It contains a
+no-grain control and twelve grained 10000 candidates: four different scan
+plates at moderate, clear, and bold calm-swim treatments. A read-only panel
+explains and displays source, mix, signal gain, grain size, temporal window, and
+the one-second loop blend. Signal gain is grain-pattern contrast, not portrait
+exposure. Raw grain plates are never served. Earlier grain rounds remain
+registered as research history; only V23 remains in the normal review menu.
+
+The desktop layout is constrained to the browser viewport and verified for the
+default 14-inch MacBook Pro scale. Candidate details and effect settings are
+collapsible, leaving the portrait, rating, decisions, notes, and navigation in
+one uncluttered review surface. At smaller windows, each column scrolls inside
+the viewport; phones continue to use the stacked layout.
 
 ## Start it
 

@@ -80,6 +80,28 @@ class FilmGrainConfigTests(unittest.TestCase):
         self.assertEqual(1.25, endpoint.texture_scale)
         self.assertEqual(7, endpoint.temporal_smooth_frames)
 
+    def test_decision_round_compares_four_sources_at_three_calm_speeds(self):
+        config = load_film_grain_config(
+            ROOT / "config/film-grain-decision-recipes.json"
+        )
+        self.assertEqual("film-grain-decision-v24", config.experiment_id)
+        self.assertEqual(1, len(config.base_visuals))
+        self.assertEqual(13, len(config.recipes))
+        self.assertEqual(
+            {"35mm-light", "super35-light", "16mm-light", "super35-heavy"},
+            set(config.plates),
+        )
+        self.assertIsNone(config.recipes[0].plate_id)
+        grained = config.recipes[1:]
+        self.assertEqual({0.67, 0.86}, {recipe.opacity for recipe in grained})
+        self.assertEqual({1.25}, {recipe.texture_scale for recipe in grained})
+        self.assertEqual(
+            {3, 5, 7}, {recipe.temporal_smooth_frames for recipe in grained}
+        )
+        self.assertEqual(
+            {24}, {recipe.loop_crossfade_frames for recipe in grained}
+        )
+
 
 class FilmGrainFilterTests(unittest.TestCase):
     def test_control_uses_same_delivery_transcode_without_grain_input(self):
@@ -129,7 +151,37 @@ class FilmGrainFilterTests(unittest.TestCase):
             start_frame=10,
             crop_fraction=0.5,
         )
+        self.assertIn("trim=start_frame=10:end_frame=278", value)
         self.assertIn("tmix=frames=5:weights='1 1 1 1 1'", value)
+        self.assertIn(
+            "trim=start_frame=4:end_frame=268,setpts=PTS-STARTPTS", value
+        )
+
+    def test_loop_crossfade_returns_grain_to_its_first_frame(self):
+        recipe = FilmGrainRecipe(
+            "FGD-003",
+            "Calm loop",
+            "super35-light",
+            0.67,
+            4.0,
+            1.25,
+            5,
+            126.1,
+            24,
+        )
+        value = build_filter(
+            width=1080,
+            height=1920,
+            fps=24,
+            frames=264,
+            recipe=recipe,
+            start_frame=10,
+            crop_fraction=0.5,
+        )
+        self.assertIn("[grain_preloop]split=3", value)
+        self.assertIn("trim=start_frame=240:end_frame=264", value)
+        self.assertIn("trim=end_frame=24,reverse", value)
+        self.assertIn("concat=n=2:v=1:a=0[grain_y]", value)
 
     def test_sample_window_is_repeatable_and_in_bounds(self):
         first = sample_window(123456, source_frames=360, output_frames=264)

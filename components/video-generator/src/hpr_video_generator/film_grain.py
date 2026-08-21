@@ -36,6 +36,7 @@ class FilmGrainRecipe:
     texture_scale: float = 1.0
     temporal_smooth_frames: int = 1
     signal_pivot: float = 128.0
+    loop_crossfade_frames: int = 0
 
 
 @dataclass(frozen=True)
@@ -113,6 +114,11 @@ def load_film_grain_config(path: Path) -> FilmGrainConfig:
         signal_pivot = float(item.get("signalPivot", 128.0))
         if not 96.0 <= signal_pivot <= 160.0:
             raise ValueError(f"Recipe {recipe_id} signalPivot must be between 96 and 160")
+        loop_crossfade_frames = int(item.get("loopCrossfadeFrames", 0))
+        if not 0 <= loop_crossfade_frames <= 48:
+            raise ValueError(
+                f"Recipe {recipe_id} loopCrossfadeFrames must be between 0 and 48"
+            )
         recipes.append(
             FilmGrainRecipe(
                 id=recipe_id,
@@ -123,6 +129,7 @@ def load_film_grain_config(path: Path) -> FilmGrainConfig:
                 texture_scale=texture_scale,
                 temporal_smooth_frames=temporal_smooth_frames,
                 signal_pivot=signal_pivot,
+                loop_crossfade_frames=loop_crossfade_frames,
             )
         )
     if not recipes:
@@ -205,6 +212,8 @@ def build_filter(
 ) -> str:
     if not 0.0 <= crop_fraction <= 1.0:
         raise ValueError("crop_fraction must be between 0 and 1")
+    if recipe.loop_crossfade_frames >= frames:
+        raise ValueError("loop_crossfade_frames must be shorter than the output")
     base = (
         f"[0:v]fps={fps},trim=end_frame={frames},setpts=PTS-STARTPTS,"
         f"scale={width}:{height}:flags=lanczos,setsar=1,format=yuv444p"
@@ -220,27 +229,58 @@ def build_filter(
     crop_width = max(2, round(width / recipe.texture_scale / 2) * 2)
     crop_height = max(2, round(height / recipe.texture_scale / 2) * 2)
     temporal_filter = ""
+    temporal_preroll = max(0, recipe.temporal_smooth_frames - 1)
     if recipe.temporal_smooth_frames > 1:
         weights = " ".join("1" for _ in range(recipe.temporal_smooth_frames))
         temporal_filter = (
-            f",tmix=frames={recipe.temporal_smooth_frames}:weights='{weights}'"
+            f",tmix=frames={recipe.temporal_smooth_frames}:weights='{weights}',"
+            f"trim=start_frame={temporal_preroll}:"
+            f"end_frame={temporal_preroll + frames},setpts=PTS-STARTPTS"
         )
+    source_frames = frames + temporal_preroll
+    preloop_label = "grain_preloop" if recipe.loop_crossfade_frames else "grain_y"
     grain = (
-        f"[1:v]trim=start_frame={start_frame}:end_frame={start_frame + frames},"
+        f"[1:v]trim=start_frame={start_frame}:end_frame={start_frame + source_frames},"
         f"setpts=PTS-STARTPTS,fps={fps},scale=-2:{height}:flags=lanczos,"
         f"format=gray,crop={crop_width}:{crop_height}:"
         f"x='(iw-{crop_width})*{crop_fraction:.4f}':y='(ih-{crop_height})/2',"
         f"scale={width}:{height}:flags=lanczos,"
         f"lut=y='clip({recipe.signal_pivot:.4f}+(val-{recipe.signal_pivot:.4f})*"
         f"{recipe.signal_gain:.4f},0,255)'"
-        f"{temporal_filter}[grain_y]"
+        f"{temporal_filter}[{preloop_label}]"
     )
+    loop_filter = ""
+    if recipe.loop_crossfade_frames:
+        crossfade = recipe.loop_crossfade_frames
+        crossfade_start = frames - crossfade
+        denominator = crossfade - 1
+        pivot = recipe.signal_pivot
+        alpha = f"N/{denominator}"
+        normalization = (
+            f"sqrt((1-{alpha})*(1-{alpha})+({alpha})*({alpha}))"
+        )
+        expression = (
+            f"{pivot:.4f}+((A-{pivot:.4f})*(1-{alpha})+"
+            f"(B-{pivot:.4f})*({alpha}))/{normalization}"
+        )
+        loop_filter = (
+            f";[grain_preloop]split=3[grain_head_source][grain_outro_source]"
+            f"[grain_intro_source];"
+            f"[grain_head_source]trim=end_frame={crossfade_start},"
+            f"setpts=PTS-STARTPTS[grain_head];"
+            f"[grain_outro_source]trim=start_frame={crossfade_start}:"
+            f"end_frame={frames},setpts=PTS-STARTPTS[grain_outro];"
+            f"[grain_intro_source]trim=end_frame={crossfade},reverse,"
+            f"setpts=PTS-STARTPTS[grain_intro_reverse];"
+            f"[grain_outro][grain_intro_reverse]blend=all_expr='{expression}'"
+            f"[grain_tail];[grain_head][grain_tail]concat=n=2:v=1:a=0[grain_y]"
+        )
     composite = (
         f"[base_y][grain_y]blend=all_mode=overlay:all_opacity={recipe.opacity:.4f}[textured_y];"
         f"[textured_y][base_u][base_v]mergeplanes=0x001020:yuv444p,format=yuv420p,"
         "setparams=range=tv:color_primaries=bt709:color_trc=bt709:colorspace=bt709[out]"
     )
-    return ";".join((base, grain, composite))
+    return ";".join((base, grain + loop_filter, composite))
 
 
 def generate_film_grain_candidate(
@@ -278,10 +318,13 @@ def generate_film_grain_candidate(
         plate_probe = _probe_video(candidate.plate_path, ffprobe)
         if plate_probe["r_frame_rate"] != f"{fps}/1":
             raise ValueError(f"Grain plate must be {fps} fps: {candidate.plate_path}")
+        source_frames_needed = frames + max(
+            0, candidate.recipe.temporal_smooth_frames - 1
+        )
         start_frame, crop_fraction = sample_window(
             candidate.sample_seed,
             source_frames=int(plate_probe["nb_frames"]),
-            output_frames=frames,
+            output_frames=source_frames_needed,
         )
 
     candidate.output.parent.mkdir(parents=True, exist_ok=True)
@@ -371,13 +414,17 @@ def generate_film_grain_candidate(
             "signalGain": candidate.recipe.signal_gain,
             "textureScale": candidate.recipe.texture_scale,
             "temporalSmoothFrames": candidate.recipe.temporal_smooth_frames,
+            "temporalPrerollFrames": max(
+                0, candidate.recipe.temporal_smooth_frames - 1
+            ),
+            "loopCrossfadeFrames": candidate.recipe.loop_crossfade_frames,
             "signalPivot": candidate.recipe.signal_pivot,
             "startFrame": start_frame,
             "cropFraction": crop_fraction,
             "plateFilename": None if candidate.plate is None else candidate.plate.filename,
             "platePath": None if candidate.plate_path is None else str(candidate.plate_path.resolve()),
             "plateSha256": None if candidate.plate_path is None else sha256(candidate.plate_path),
-            "loopBehavior": "random-frame continuity; boundary must be judged against ordinary adjacent grain changes",
+            "loopBehavior": "fully populated temporal pre-roll plus a normalized reverse-intro grain crossfade; the final grain frame returns to the first without an amplitude dip or boundary flash",
         },
         "output": str(candidate.output.resolve()),
         "outputSha256": sha256(candidate.output),

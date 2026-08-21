@@ -168,13 +168,13 @@ def main() -> None:
     parser.add_argument(
         "--output-root",
         type=Path,
-        default=REPOSITORY_ROOT / "workspace/film-grain-slow-swim-v23",
+        default=REPOSITORY_ROOT / "workspace/film-grain-decision-v24",
     )
     parser.add_argument(
         "--config",
         type=Path,
         default=REPOSITORY_ROOT
-        / "components/video-generator/config/film-grain-slow-swim-recipes.json",
+        / "components/video-generator/config/film-grain-decision-recipes.json",
     )
     parser.add_argument("--duration", type=int, choices=[11], default=11)
     parser.add_argument("--ffmpeg")

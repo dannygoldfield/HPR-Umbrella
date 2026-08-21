@@ -1,7 +1,7 @@
 # Film Grain Animation
 
-Status: active finishing test after the Development Animation and Infinity
-background decisions were locked on 2026-08-20.
+Status: final keep-or-drop comparison after the Development Animation and
+Infinity background decisions were locked on 2026-08-20.
 
 ## Creative purpose
 
@@ -112,7 +112,7 @@ change in `FGV-002` to 12.436 in `FGV-007`; the share of pixels changing by
 more than four values rises from 0.22% to 73.62%. This is a genuine visible
 range. Grain size and signal gain are recorded separately in every manifest.
 
-## Active slow-swim refinement: `film-grain-slow-swim-v23`
+## Prior slow-swim refinement: `film-grain-slow-swim-v23`
 
 Review found `FGV-002` closest and every candidate from `FGV-003` upward too
 strong. The desired temporal character is also calmer than ordinary 24-frame
@@ -135,6 +135,42 @@ At review size, adjacent-frame grain correlation rises from 0.473 in the exact
 reference to 0.884 in `FGS-007`. Mean visible difference rises much more gently,
 from 1.125 to 1.953 display-code values. This makes temporal ease the main
 change instead of another leap in visual strength.
+
+Review did not rate this round. The notes reported visible grain only under
+close inspection in `FGS-002`, diminishing or uncertain grain through
+`FGS-003`–`FGS-006`, and a bad end-of-loop flash in `FGS-007`. V23 therefore did
+not settle the layer.
+
+## Active keep-or-drop comparison: `film-grain-decision-v24`
+
+V24 is a decision matrix rather than another narrow ladder. It contains a
+no-grain control plus all four locally held scan plates—Super 35 Light, 35mm
+Light, 16mm Light, and Super 35 Heavy—at three treatments per plate:
+
+| Profile | Temporal window | Intended reading |
+| --- | ---: | --- |
+| Moderate gentle swim | 3 frames | Clearly above the too-faint V23 range |
+| Clear calm swim | 5 frames | Confidently visible but still photographic |
+| Bold slowest swim | 7 frames | Upper boundary for deciding whether grain belongs at all |
+
+Most candidates retain the requested 67% mix and 1.25× texture size. Signal
+gain is calibrated separately for each plate because the supplied 35mm scan is
+far finer than 16mm or the Heavy plate. `FGD-007` uses an 86% mix because the
+fine 35mm source reaches the renderer's safe signal-gain ceiling before it
+matches the bold comparison level.
+
+At the 270 × 480 laptop-review size, the twelve grained candidates span 2.083
+to 2.908 average display-code values of change from the control. This begins
+above V23 and remains below the 3.917 value of `FGV-005`, which review found too
+noticeable at native grain speed.
+
+The loop is now part of the rendering model rather than a subjective hope.
+Every grained candidate receives temporal pre-roll before the visible first
+frame and a one-second, RMS-normalized blend from the outgoing grain into a
+reversed copy of the opening grain. The last-frame-to-first-frame change
+measures 0.618–0.943 times an ordinary adjacent change across V24, while first
+and last grain amplitude remain within 8% of the median. This removes both the
+V23 warm-up flash and a conspicuous slow-grain reset.
 
 ## Review questions
 
@@ -167,6 +203,8 @@ share one material character but do not display identical grain patterns.
 The earlier seven-candidate 10000 round v19 remains reproducible. A temporary
 v20 grain-only diagnostic removed Development Animation to isolate the apparent
 motion report; that was not the desired creative test. V21 restored the proper
-three-layer stack but failed visibility. V22 found the visible range; V23 is the
-current temporal refinement. Once one slow-swim treatment is selected, confirm
-it on NYChildren and the complete Infinity composite.
+three-layer stack but failed visibility. V22 found the visible range; V23 found
+that simple smoothing became too faint and exposed a loop flaw. V24 is the
+final multi-source keep-or-drop comparison. If one treatment is selected,
+confirm it on NYChildren and the complete Infinity composite before pairing
+audio. If no treatment improves the portrait, ship without grain.
