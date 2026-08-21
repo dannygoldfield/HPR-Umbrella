@@ -12,12 +12,16 @@ from hpr_registry.registry import (
     ingest_metadata_report,
     initialize_registry,
     list_current_portrait_revisions,
+    list_pair_candidates_for_review,
     list_portraits,
     list_visual_candidates_for_review,
     lock_sequence,
+    register_audio_candidate,
     register_final_master,
+    register_pair_candidate,
     register_visual_candidate,
     save_candidate_review,
+    save_pair_review,
     set_sequence_order,
 )
 
@@ -96,7 +100,7 @@ class RegistryTests(unittest.TestCase):
             version = connection.execute(
                 "SELECT MAX(version) FROM schema_migrations"
             ).fetchone()[0]
-        self.assertEqual(2, version)
+        self.assertEqual(3, version)
 
     def test_ingest_assigns_portrait_not_episode_and_is_idempotent(self) -> None:
         report, intake, _ = self.write_inputs()
@@ -290,6 +294,137 @@ class RegistryTests(unittest.TestCase):
                 "SELECT COUNT(*) FROM candidate_reviews"
             ).fetchone()[0]
         self.assertEqual(2, history_count)
+
+    def test_pair_review_keeps_unused_audio_banked_and_moves_selection(self) -> None:
+        report, intake, _ = self.write_inputs()
+        ingested = ingest_metadata_report(self.db, report, intake, self.manifests)[0]
+        register_visual_candidate(
+            self.db,
+            visual_id="VIS-PAIR",
+            portrait_id=ingested["portrait_id"],
+            revision_id=ingested["revision_id"],
+            motion_recipe_id="PDE-002",
+            duration_sec=11,
+            seed=123,
+            generator_version="0.1.0",
+            media_path=self.root / "visual.mp4",
+            manifest_path=self.root / "visual.json",
+        )
+        for index in (1, 2):
+            audio_id = f"AUD-{index}"
+            pair_id = f"PAIR-{index}"
+            register_audio_candidate(
+                self.db,
+                audio_id=audio_id,
+                recipe_id="AR-010",
+                duration_sec=11,
+                seed=100 + index,
+                generator_version="0.3.0",
+                media_path=self.root / f"{audio_id}.wav",
+                manifest_path=self.root / f"{audio_id}.json",
+            )
+            register_pair_candidate(
+                self.db,
+                pair_id=pair_id,
+                portrait_id=ingested["portrait_id"],
+                visual_id="VIS-PAIR",
+                audio_id=audio_id,
+                media_path=self.root / f"{pair_id}.mp4",
+                manifest_path=self.root / f"{pair_id}.json",
+            )
+
+        save_pair_review(
+            self.db,
+            pair_id="PAIR-1",
+            pair_rating=5,
+            audio_rating=4,
+            rejected=False,
+            selected=True,
+            retire_audio=False,
+            notes="First choice",
+        )
+        first = {item["pair_id"]: item for item in list_pair_candidates_for_review(self.db)}
+        self.assertTrue(first["PAIR-1"]["pair_selected"])
+        self.assertEqual("retired_selected", first["PAIR-1"]["audio_status"])
+        self.assertEqual("banked", first["PAIR-2"]["audio_status"])
+
+        save_pair_review(
+            self.db,
+            pair_id="PAIR-2",
+            pair_rating=5,
+            audio_rating=5,
+            rejected=False,
+            selected=True,
+            retire_audio=False,
+            notes="New choice",
+        )
+        second = {item["pair_id"]: item for item in list_pair_candidates_for_review(self.db)}
+        self.assertFalse(second["PAIR-1"]["pair_selected"])
+        self.assertEqual("banked", second["PAIR-1"]["audio_status"])
+        self.assertTrue(second["PAIR-2"]["pair_selected"])
+        self.assertEqual("retired_selected", second["PAIR-2"]["audio_status"])
+
+        save_pair_review(
+            self.db,
+            pair_id="PAIR-1",
+            pair_rating=2,
+            audio_rating=3,
+            rejected=True,
+            selected=False,
+            retire_audio=False,
+            notes="Pair fails, audio remains useful",
+        )
+        final = {item["pair_id"]: item for item in list_pair_candidates_for_review(self.db)}
+        self.assertTrue(final["PAIR-1"]["pair_rejected"])
+        self.assertEqual("banked", final["PAIR-1"]["audio_status"])
+
+    def test_pair_review_can_explicitly_retire_audio(self) -> None:
+        report, intake, _ = self.write_inputs()
+        ingested = ingest_metadata_report(self.db, report, intake, self.manifests)[0]
+        register_visual_candidate(
+            self.db,
+            visual_id="VIS-PAIR",
+            portrait_id=ingested["portrait_id"],
+            revision_id=ingested["revision_id"],
+            motion_recipe_id="PDE-002",
+            duration_sec=11,
+            seed=123,
+            generator_version="0.1.0",
+            media_path=self.root / "visual.mp4",
+            manifest_path=self.root / "visual.json",
+        )
+        register_audio_candidate(
+            self.db,
+            audio_id="AUD-RETIRE",
+            recipe_id="AR-010",
+            duration_sec=11,
+            seed=456,
+            generator_version="0.3.0",
+            media_path=self.root / "audio.wav",
+            manifest_path=self.root / "audio.json",
+        )
+        register_pair_candidate(
+            self.db,
+            pair_id="PAIR-RETIRE",
+            portrait_id=ingested["portrait_id"],
+            visual_id="VIS-PAIR",
+            audio_id="AUD-RETIRE",
+            media_path=self.root / "pair.mp4",
+            manifest_path=self.root / "pair.json",
+        )
+        save_pair_review(
+            self.db,
+            pair_id="PAIR-RETIRE",
+            pair_rating=1,
+            audio_rating=1,
+            rejected=True,
+            selected=False,
+            retire_audio=True,
+            notes="Audio itself is not reusable",
+        )
+        candidate = list_pair_candidates_for_review(self.db)[0]
+        self.assertEqual("retired", candidate["audio_status"])
+        self.assertTrue(candidate["audio_rejected"])
 
     def test_episode_numbers_appear_only_when_complete_sequence_locks(self) -> None:
         report, intake, _ = self.write_inputs(2)

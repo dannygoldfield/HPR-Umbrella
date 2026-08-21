@@ -12,7 +12,12 @@ from typing import Any
 from urllib.parse import unquote, urlparse
 import webbrowser
 
-from hpr_registry import list_visual_candidates_for_review, save_candidate_review
+from hpr_registry import (
+    list_pair_candidates_for_review,
+    list_visual_candidates_for_review,
+    save_candidate_review,
+    save_pair_review,
+)
 
 
 RANGE_RE = re.compile(r"bytes=(\d*)-(\d*)$")
@@ -23,6 +28,13 @@ def _candidate(db_path: Path, visual_id: str) -> dict[str, Any]:
         if candidate["visual_id"] == visual_id:
             return candidate
     raise ValueError(f"Unknown visual candidate: {visual_id}")
+
+
+def _pair(db_path: Path, pair_id: str) -> dict[str, Any]:
+    for candidate in list_pair_candidates_for_review(db_path):
+        if candidate["pair_id"] == pair_id:
+            return candidate
+    raise ValueError(f"Unknown pair candidate: {pair_id}")
 
 
 class ReviewHandler(BaseHTTPRequestHandler):
@@ -108,6 +120,14 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 candidate["manifest_url"] = f"/manifest/{visual_id}"
             self._json(HTTPStatus.OK, {"candidates": candidates})
             return
+        if parsed.path == "/api/pairs":
+            candidates = list_pair_candidates_for_review(self.db_path)
+            for candidate in candidates:
+                pair_id = candidate["pair_id"]
+                candidate["media_url"] = f"/pair-media/{pair_id}"
+                candidate["manifest_url"] = f"/pair-manifest/{pair_id}"
+            self._json(HTTPStatus.OK, {"candidates": candidates})
+            return
         for prefix, field, allow_range in (
             ("/media/", "media_path", True),
             ("/manifest/", "manifest_path", False),
@@ -119,10 +139,44 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 except ValueError as error:
                     self._json(HTTPStatus.NOT_FOUND, {"error": str(error)})
                 return
+        for prefix, field, allow_range in (
+            ("/pair-media/", "media_path", True),
+            ("/pair-manifest/", "manifest_path", False),
+        ):
+            if parsed.path.startswith(prefix):
+                try:
+                    item = _pair(self.db_path, unquote(parsed.path[len(prefix) :]))
+                    self._file(Path(item[field]), allow_range=allow_range)
+                except ValueError as error:
+                    self._json(HTTPStatus.NOT_FOUND, {"error": str(error)})
+                return
         self.send_error(HTTPStatus.NOT_FOUND)
 
     def do_POST(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
+        pair_prefix = "/api/pair-reviews/"
+        if parsed.path.startswith(pair_prefix):
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if length < 1 or length > 1024 * 1024:
+                    raise ValueError("Invalid request size")
+                payload = json.loads(self.rfile.read(length))
+                if not isinstance(payload, dict):
+                    raise ValueError("Review must be a JSON object")
+                review_id = save_pair_review(
+                    self.db_path,
+                    pair_id=unquote(parsed.path[len(pair_prefix) :]),
+                    pair_rating=payload.get("pair_rating"),
+                    audio_rating=payload.get("audio_rating"),
+                    rejected=payload.get("rejected") is True,
+                    selected=payload.get("selected") is True,
+                    retire_audio=payload.get("retire_audio") is True,
+                    notes=payload.get("notes", ""),
+                )
+                self._json(HTTPStatus.CREATED, {"review_id": review_id})
+            except (ValueError, TypeError, json.JSONDecodeError) as error:
+                self._json(HTTPStatus.BAD_REQUEST, {"error": str(error)})
+            return
         prefix = "/api/reviews/"
         if not parsed.path.startswith(prefix):
             self.send_error(HTTPStatus.NOT_FOUND)

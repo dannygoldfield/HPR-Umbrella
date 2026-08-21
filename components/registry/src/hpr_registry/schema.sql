@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS audio_candidates (
 
 CREATE TABLE IF NOT EXISTS pair_candidates (
     pair_id TEXT PRIMARY KEY,
+    experiment_id TEXT NOT NULL DEFAULT 'unspecified',
     portrait_id TEXT NOT NULL REFERENCES portraits(portrait_id),
     visual_id TEXT NOT NULL REFERENCES visual_candidates(visual_id),
     audio_id TEXT NOT NULL REFERENCES audio_candidates(audio_id),

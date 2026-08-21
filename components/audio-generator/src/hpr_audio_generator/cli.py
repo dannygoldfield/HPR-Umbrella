@@ -12,6 +12,11 @@ from .generator import generate
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="hpr-audio")
     parser.add_argument("--config", type=Path, default=Path("config/generator.xml"))
+    parser.add_argument(
+        "--asset-root",
+        type=Path,
+        help="Private media-library root used to resolve asset paths in the config",
+    )
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("validate")
     generate_parser = commands.add_parser("generate")
@@ -24,7 +29,7 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = _parser().parse_args()
-    config = load_config(args.config)
+    config = load_config(args.config, asset_root=args.asset_root)
     if args.command == "validate":
         print(f"Valid: {len(config.assets)} assets, {len(config.profiles)} profiles, {len(config.recipes)} recipes")
         return

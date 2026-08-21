@@ -64,6 +64,29 @@ def initialize_registry(db_path: Path) -> None:
             "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(2, ?)",
             (_now(),),
         )
+        pair_columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(pair_candidates)")
+        }
+        if "experiment_id" not in pair_columns:
+            connection.execute(
+                """
+                ALTER TABLE pair_candidates
+                ADD COLUMN experiment_id TEXT NOT NULL DEFAULT 'unspecified'
+                """
+            )
+        connection.execute(
+            """
+            UPDATE pair_candidates
+            SET experiment_id='pairing-nychildren-v27'
+            WHERE experiment_id='unspecified'
+              AND manifest_path LIKE '%/pairing-nychildren-v27/%'
+            """
+        )
+        connection.execute(
+            "INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(3, ?)",
+            (_now(),),
+        )
 
 
 def _sha256(path: Path) -> str:
@@ -492,6 +515,385 @@ def list_visual_candidates_for_review(db_path: Path) -> list[dict[str, Any]]:
         candidate["episode_number"] = None
         candidates.append(candidate)
     return candidates
+
+
+def register_audio_candidate(
+    db_path: Path,
+    *,
+    audio_id: str,
+    recipe_id: str,
+    duration_sec: float,
+    seed: int,
+    generator_version: str,
+    media_path: Path,
+    manifest_path: Path,
+    status: str = "banked",
+) -> None:
+    """Register reusable audio idempotently without changing its provenance."""
+    if duration_sec <= 0:
+        raise ValueError("duration_sec must be positive")
+    initialize_registry(db_path)
+    values = {
+        "recipe_id": recipe_id,
+        "duration_sec": float(duration_sec),
+        "seed": seed,
+        "generator_version": generator_version,
+    }
+    with _connect(db_path) as connection:
+        existing = connection.execute(
+            """
+            SELECT recipe_id, duration_sec, seed, generator_version
+            FROM audio_candidates WHERE audio_id=?
+            """,
+            (audio_id,),
+        ).fetchone()
+        if existing:
+            changed = [
+                field for field, value in values.items() if existing[field] != value
+            ]
+            if changed:
+                raise ValueError(
+                    f"Audio candidate {audio_id} already has different provenance: "
+                    + ", ".join(changed)
+                )
+            connection.execute(
+                """
+                UPDATE audio_candidates
+                SET media_path=?, manifest_path=?,
+                    status=CASE
+                        WHEN status IN ('retired', 'retired_selected') THEN status
+                        ELSE ?
+                    END
+                WHERE audio_id=?
+                """,
+                (
+                    str(media_path.resolve()),
+                    str(manifest_path.resolve()),
+                    status,
+                    audio_id,
+                ),
+            )
+            return
+        connection.execute(
+            """
+            INSERT INTO audio_candidates(
+                audio_id, recipe_id, duration_sec, seed, generator_version,
+                media_path, manifest_path, status, created_at
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                audio_id,
+                recipe_id,
+                duration_sec,
+                seed,
+                generator_version,
+                str(media_path.resolve()),
+                str(manifest_path.resolve()),
+                status,
+                _now(),
+            ),
+        )
+
+
+def register_pair_candidate(
+    db_path: Path,
+    *,
+    pair_id: str,
+    experiment_id: str = "unspecified",
+    portrait_id: str,
+    visual_id: str,
+    audio_id: str,
+    media_path: Path,
+    manifest_path: Path,
+    status: str = "ready_for_review",
+) -> None:
+    """Register a visual/audio pairing idempotently."""
+    initialize_registry(db_path)
+    values = {
+        "experiment_id": experiment_id,
+        "portrait_id": portrait_id,
+        "visual_id": visual_id,
+        "audio_id": audio_id,
+    }
+    with _connect(db_path) as connection:
+        existing = connection.execute(
+            """
+            SELECT experiment_id, portrait_id, visual_id, audio_id
+            FROM pair_candidates WHERE pair_id=?
+            """,
+            (pair_id,),
+        ).fetchone()
+        if existing:
+            changed = [
+                field for field, value in values.items() if existing[field] != value
+            ]
+            if changed:
+                raise ValueError(
+                    f"Pair candidate {pair_id} already has different provenance: "
+                    + ", ".join(changed)
+                )
+            connection.execute(
+                """
+                UPDATE pair_candidates
+                SET media_path=?, manifest_path=?,
+                    status=CASE
+                        WHEN status IN (
+                            'reviewed', 'rejected_pair', 'selected', 'superseded'
+                        ) THEN status
+                        ELSE ?
+                    END
+                WHERE pair_id=?
+                """,
+                (
+                    str(media_path.resolve()),
+                    str(manifest_path.resolve()),
+                    status,
+                    pair_id,
+                ),
+            )
+            return
+        visual = connection.execute(
+            "SELECT portrait_id FROM visual_candidates WHERE visual_id=?",
+            (visual_id,),
+        ).fetchone()
+        if not visual:
+            raise ValueError(f"Unknown visual candidate: {visual_id}")
+        if visual["portrait_id"] != portrait_id:
+            raise ValueError(f"Visual {visual_id} does not belong to {portrait_id}")
+        if not connection.execute(
+            "SELECT 1 FROM audio_candidates WHERE audio_id=?", (audio_id,)
+        ).fetchone():
+            raise ValueError(f"Unknown audio candidate: {audio_id}")
+        connection.execute(
+            """
+            INSERT INTO pair_candidates(
+                pair_id, experiment_id, portrait_id, visual_id, audio_id, media_path,
+                manifest_path, status, created_at
+            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                pair_id,
+                experiment_id,
+                portrait_id,
+                visual_id,
+                audio_id,
+                str(media_path.resolve()),
+                str(manifest_path.resolve()),
+                status,
+                _now(),
+            ),
+        )
+
+
+def list_pair_candidates_for_review(db_path: Path) -> list[dict[str, Any]]:
+    """Return visual/audio pairs and their separate latest review states."""
+    if not db_path.is_file():
+        initialize_registry(db_path)
+    with _connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            WITH latest_pair_review AS (
+                SELECT subject_id, MAX(review_id) AS review_id
+                FROM candidate_reviews
+                WHERE subject_kind='pair'
+                GROUP BY subject_id
+            ), latest_audio_review AS (
+                SELECT subject_id, MAX(review_id) AS review_id
+                FROM candidate_reviews
+                WHERE subject_kind='audio'
+                GROUP BY subject_id
+            )
+            SELECT pc.pair_id, pc.experiment_id, pc.portrait_id,
+                   pc.visual_id, pc.audio_id,
+                   pc.media_path, pc.manifest_path,
+                   pc.status AS render_status,
+                   v.revision_id, v.motion_recipe_id,
+                   a.recipe_id AS audio_recipe_id,
+                   a.duration_sec, a.seed AS audio_seed,
+                   a.generator_version AS audio_generator_version,
+                   a.media_path AS audio_media_path,
+                   a.manifest_path AS audio_manifest_path,
+                   a.status AS audio_status,
+                   p.intake_filename, p.original_base_filename,
+                   p.portrait_group,
+                   pr.file_path AS revision_file_path,
+                   sp.code AS source_project_code,
+                   sp.display_name AS source_project_display_name,
+                   pcr.review_id AS pair_review_id,
+                   pcr.rating AS pair_rating,
+                   pcr.rejected AS pair_rejected,
+                   pcr.selected AS pair_selected,
+                   pcr.notes AS pair_notes,
+                   acr.review_id AS audio_review_id,
+                   acr.rating AS audio_rating,
+                   acr.rejected AS audio_rejected,
+                   acr.selected AS audio_selected,
+                   acr.notes AS audio_notes
+            FROM pair_candidates pc
+            JOIN visual_candidates v USING(visual_id)
+            JOIN audio_candidates a USING(audio_id)
+            JOIN portraits p USING(portrait_id)
+            JOIN portrait_revisions pr ON pr.revision_id=v.revision_id
+            JOIN source_projects sp USING(source_project_id)
+            LEFT JOIN latest_pair_review lpr ON lpr.subject_id=pc.pair_id
+            LEFT JOIN candidate_reviews pcr ON pcr.review_id=lpr.review_id
+            LEFT JOIN latest_audio_review lar ON lar.subject_id=pc.audio_id
+            LEFT JOIN candidate_reviews acr ON acr.review_id=lar.review_id
+            ORDER BY pc.created_at, pc.pair_id
+            """
+        ).fetchall()
+    candidates = []
+    for row in rows:
+        candidate = dict(row)
+        candidate["revision_filename"] = Path(candidate["revision_file_path"]).name
+        for name in ("pair_rejected", "pair_selected", "audio_rejected", "audio_selected"):
+            candidate[name] = bool(candidate[name] or 0)
+        candidate["pair_notes"] = candidate["pair_notes"] or ""
+        candidate["audio_notes"] = candidate["audio_notes"] or ""
+        if candidate["pair_selected"]:
+            candidate["review_status"] = "selected"
+        elif candidate["pair_rejected"]:
+            candidate["review_status"] = "rejected pair"
+        elif candidate["pair_rating"] is not None or candidate["pair_notes"]:
+            candidate["review_status"] = "reviewed"
+        else:
+            candidate["review_status"] = "unreviewed"
+        candidate["episode_number"] = None
+        candidates.append(candidate)
+    return candidates
+
+
+def save_pair_review(
+    db_path: Path,
+    *,
+    pair_id: str,
+    pair_rating: int | None,
+    audio_rating: int | None,
+    rejected: bool,
+    selected: bool,
+    retire_audio: bool,
+    notes: str,
+) -> int:
+    """Save a pair decision while keeping unused audio available by default."""
+    for name, rating in (("pair_rating", pair_rating), ("audio_rating", audio_rating)):
+        if rating is not None and rating not in range(1, 6):
+            raise ValueError(f"{name} must be between 1 and 5")
+    if rejected and selected:
+        raise ValueError("A pair cannot be both rejected and selected")
+    if selected and retire_audio:
+        raise ValueError("Selected audio cannot also be retired")
+    if not isinstance(notes, str):
+        raise ValueError("notes must be text")
+    initialize_registry(db_path)
+    with _connect(db_path) as connection:
+        pair = connection.execute(
+            "SELECT pair_id, portrait_id, audio_id FROM pair_candidates WHERE pair_id=?",
+            (pair_id,),
+        ).fetchone()
+        if not pair:
+            raise ValueError(f"Unknown pair candidate: {pair_id}")
+        now = _now()
+        if selected:
+            previous = connection.execute(
+                """
+                WITH latest_review AS (
+                    SELECT subject_id, MAX(review_id) AS review_id
+                    FROM candidate_reviews
+                    WHERE subject_kind='pair'
+                    GROUP BY subject_id
+                )
+                SELECT pc.pair_id, pc.audio_id, cr.rating, cr.notes
+                FROM pair_candidates pc
+                JOIN latest_review lr ON lr.subject_id=pc.pair_id
+                JOIN candidate_reviews cr ON cr.review_id=lr.review_id
+                WHERE pc.portrait_id=? AND pc.pair_id<>? AND cr.selected=1
+                """,
+                (pair["portrait_id"], pair_id),
+            ).fetchall()
+            for old in previous:
+                connection.execute(
+                    """
+                    INSERT INTO candidate_reviews(
+                        subject_kind, subject_id, rating, rejected, selected,
+                        notes, created_at
+                    ) VALUES('pair', ?, ?, 0, 0, ?, ?)
+                    """,
+                    (old["pair_id"], old["rating"], old["notes"], now),
+                )
+                connection.execute(
+                    "UPDATE pair_candidates SET status='superseded' WHERE pair_id=?",
+                    (old["pair_id"],),
+                )
+                connection.execute(
+                    "UPDATE audio_candidates SET status='banked' WHERE audio_id=?",
+                    (old["audio_id"],),
+                )
+                old_audio = connection.execute(
+                    """
+                    SELECT rating, notes FROM candidate_reviews
+                    WHERE subject_kind='audio' AND subject_id=?
+                    ORDER BY review_id DESC LIMIT 1
+                    """,
+                    (old["audio_id"],),
+                ).fetchone()
+                connection.execute(
+                    """
+                    INSERT INTO candidate_reviews(
+                        subject_kind, subject_id, rating, rejected, selected,
+                        notes, created_at
+                    ) VALUES('audio', ?, ?, 0, 0, ?, ?)
+                    """,
+                    (
+                        old["audio_id"],
+                        old_audio["rating"] if old_audio else None,
+                        old_audio["notes"] if old_audio else "",
+                        now,
+                    ),
+                )
+        cursor = connection.execute(
+            """
+            INSERT INTO candidate_reviews(
+                subject_kind, subject_id, rating, rejected, selected, notes,
+                created_at
+            ) VALUES('pair', ?, ?, ?, ?, ?, ?)
+            """,
+            (pair_id, pair_rating, int(rejected), int(selected), notes, now),
+        )
+        existing_audio = connection.execute(
+            """
+            SELECT notes FROM candidate_reviews
+            WHERE subject_kind='audio' AND subject_id=?
+            ORDER BY review_id DESC LIMIT 1
+            """,
+            (pair["audio_id"],),
+        ).fetchone()
+        connection.execute(
+            """
+            INSERT INTO candidate_reviews(
+                subject_kind, subject_id, rating, rejected, selected, notes,
+                created_at
+            ) VALUES('audio', ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                pair["audio_id"],
+                audio_rating,
+                int(retire_audio),
+                int(selected),
+                existing_audio["notes"] if existing_audio else "",
+                now,
+            ),
+        )
+        pair_status = "selected" if selected else "rejected_pair" if rejected else "reviewed"
+        audio_status = "retired_selected" if selected else "retired" if retire_audio else "banked"
+        connection.execute(
+            "UPDATE pair_candidates SET status=? WHERE pair_id=?",
+            (pair_status, pair_id),
+        )
+        connection.execute(
+            "UPDATE audio_candidates SET status=? WHERE audio_id=?",
+            (audio_status, pair["audio_id"]),
+        )
+        return int(cursor.lastrowid)
 
 
 def save_candidate_review(

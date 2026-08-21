@@ -53,12 +53,16 @@ Each candidate can be recreated from its portrait, duration, presets, recipes, g
   history.
 - **HPR Registry:** initial SQLite implementation ingests unsequenced Lightroom exports, preserves portrait revisions and metadata provenance, and assigns episode numbers only when an approved-master sequence is locked.
 - **Candidate Engine:** implements the earlier 120-slot archive dry-run planner, separate Audio/Visual/Pair/Publishing banks, deterministic option sets, independent component review fields, and replaceable photo sources. Its early `EpisodeRecord` model is legacy and must be integrated with the Registry before production planning.
-- **Human review:** a functional local visual-review screen records 1–5 rating,
-  reject, notes, and selection directly in SQLite. White Balance candidates add
+- **Human review:** the local screen reviews visuals and complete visual/audio
+  pairs. The first production pairing round combines the locked NYChildren
+  visual with 10 distinct, native 11-second `AR-010` audio candidates. It
+  records audio and pair ratings separately, keeps unused audio banked
+  automatically, and retires the audio only when its pair is selected or the
+  reviewer explicitly retires it. White Balance candidates add
   exact frame-synchronized Temperature and Tint references outside the
   image-only video. Development candidates add a synchronized final-image
-  reveal reference and local spatial range. Audio and pair views remain to be
-  connected; decisions remain outside automation.
+  reveal reference and local spatial range. Artistic decisions remain outside
+  automation.
 - **Text Plugin:** deferred until selected audio-video masters are ready.
 - **Now mode:** explicitly deferred; the archive workflow is the production focus.
 
@@ -78,6 +82,7 @@ tools/
   render_motion_pilot/
   render_white_balance_pilot/
   render_film_grain_test/
+  render_pair_pilot/
 docs/
   architecture.md
   creative-principles.md

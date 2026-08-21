@@ -171,6 +171,15 @@ Record visual, audio, and pair ratings separately. Rejected combinations return
 unselected components to their banks. Selecting a final pair retires its audio
 from future final use.
 
+The first implemented round uses the selected NYChildren `PDE-002` visual and
+10 deterministic `AR-010` **Air / Presence / Seamless** tracks. Every audio
+file and finished pair is natively 11 seconds; no seven-second candidate is
+stretched or looped to fit. The review screen exposes separate Audio and
+Complete pair ratings plus three decisions: Reject pair, Select pair, and the
+exceptional Retire audio action. There is intentionally no Bank toggle. Audio
+remains banked unless a selected final pair consumes it or the reviewer says
+the audio itself should be retired.
+
 ## 10. Last look and photo replacement
 
 If skin tone, color, or another photographic issue is discovered, replace the

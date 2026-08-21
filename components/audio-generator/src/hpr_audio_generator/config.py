@@ -8,9 +8,11 @@ import xml.etree.ElementTree as ET
 @dataclass(frozen=True)
 class Asset:
     asset_id: str
+    name: str
     role: str
     family: str
     path: Path
+    source: str
     status: str
 
 
@@ -30,6 +32,7 @@ class Profile:
 @dataclass(frozen=True)
 class Recipe:
     recipe_id: str
+    name: str
     profile_id: str
     duration_sec: int
     bed_family: str | None
@@ -49,9 +52,9 @@ class Config:
     recipes: dict[str, Recipe]
 
 
-def load_config(path: Path) -> Config:
+def load_config(path: Path, *, asset_root: Path | None = None) -> Config:
     path = path.resolve()
-    root = path.parent.parent
+    root = asset_root.resolve() if asset_root is not None else path.parent.parent
     document = ET.parse(path)
     config = document.getroot()
     fmt = config.find("outputFormat")
@@ -61,9 +64,11 @@ def load_config(path: Path) -> Config:
     assets = tuple(
         Asset(
             asset_id=node.attrib["id"],
+            name=node.attrib.get("name", node.attrib["id"]),
             role=node.attrib["role"],
             family=node.attrib["family"],
             path=root / node.attrib["path"],
+            source=node.attrib.get("source", "Unknown"),
             status=node.attrib.get("status", "Active"),
         )
         for node in config.findall("./assets/asset")
@@ -85,6 +90,7 @@ def load_config(path: Path) -> Config:
     recipes = {
         node.attrib["id"]: Recipe(
             recipe_id=node.attrib["id"],
+            name=node.attrib.get("name", node.attrib["id"]),
             profile_id=node.attrib["profileId"],
             duration_sec=int(node.attrib["durationSec"]),
             bed_family=node.attrib.get("bedFamily") or None,

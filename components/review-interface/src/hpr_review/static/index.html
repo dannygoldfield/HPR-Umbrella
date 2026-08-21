@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>HPR Visual Review</title>
+  <title>HPR Review</title>
   <style>
     :root { color-scheme:dark; --ink:#f5f1e9; --muted:#aaa59c; --panel:#1d1c1a; --line:#3b3935; --accent:#e9a85d; --ok:#7ac99a; --danger:#ea847d; }
     * { box-sizing:border-box; }
@@ -47,6 +47,9 @@
     .toggle input { margin-right:.45rem; }
     .toggle.reject.active { border-color:var(--danger); color:var(--danger); }
     .toggle.select.active { border-color:var(--ok); color:var(--ok); }
+    .toggle.retire.active { border-color:var(--danger); color:var(--danger); }
+    .bank-status { margin:.75rem 0; padding:.65rem .75rem; border:1px solid var(--line); border-radius:7px; background:#171714; }
+    .bank-status strong { color:var(--ok); }
     textarea { width:100%; min-height:10rem; max-height:34vh; resize:vertical; background:#121210; color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.7rem; font:inherit; }
     .navigation { justify-content:space-between; margin-top:.75rem; }
     .navigation button { min-width:7.5rem; }
@@ -58,7 +61,7 @@
   </style>
 </head>
 <body>
-  <header><h1>HPR Visual Review</h1><div class="header-controls"><select id="experiment" aria-label="Review set"></select><div id="counter" class="muted">Loading…</div></div></header>
+  <header><h1>HPR Review</h1><div class="header-controls"><select id="experiment" aria-label="Review set"></select><div id="counter" class="muted">Loading…</div></div></header>
   <main id="app" hidden>
     <section class="visual-column">
       <video id="video" muted loop autoplay playsinline controls></video>
@@ -131,18 +134,23 @@
           <dt>Episode</dt><dd>Not assigned — sequencing happens after final masters</dd>
           <dt>Portrait ID</dt><dd id="portraitId"></dd>
           <dt>Revision</dt><dd id="revisionId"></dd>
-          <dt>Candidate</dt><dd id="visualId"></dd>
+          <dt id="candidateLabel">Candidate</dt><dd id="visualId"></dd>
+          <dt id="pairIdLabel" hidden>Pair ID</dt><dd id="pairId" hidden></dd>
+          <dt id="audioIdLabel" hidden>Audio ID</dt><dd id="audioId" hidden></dd>
           <dt>Comparison</dt><dd id="comparison"></dd>
           <dt>Render</dt><dd id="renderStatus"></dd>
           <dt>Review</dt><dd id="reviewStatus"></dd>
           <dt>Provenance</dt><dd><a id="manifest" class="provenance" target="_blank">Open JSON manifest</a></dd>
         </dl>
       </details>
-      <fieldset><legend>Rating <span class="muted">(<kbd>1</kbd>–<kbd>5</kbd>)</span></legend><div id="ratings" class="ratings"></div></fieldset>
+      <fieldset id="audioRatingField" hidden><legend>Audio rating</legend><div id="audioRatings" class="ratings"></div></fieldset>
+      <fieldset><legend><span id="ratingLabel">Rating</span> <span class="muted">(<kbd>1</kbd>–<kbd>5</kbd>)</span></legend><div id="ratings" class="ratings"></div></fieldset>
       <fieldset><legend>Decision</legend><div class="actions">
-        <label id="rejectLabel" class="toggle reject"><input id="reject" type="checkbox">Reject <kbd>R</kbd></label>
-        <label id="selectLabel" class="toggle select"><input id="select" type="checkbox">Select visual <kbd>S</kbd></label>
+        <label id="rejectLabel" class="toggle reject"><input id="reject" type="checkbox"><span id="rejectText">Reject</span> <kbd>R</kbd></label>
+        <label id="selectLabel" class="toggle select"><input id="select" type="checkbox"><span id="selectText">Select visual</span> <kbd>S</kbd></label>
+        <label id="retireLabel" class="toggle retire" hidden><input id="retire" type="checkbox">Retire audio <kbd>T</kbd></label>
       </div></fieldset>
+      <div id="bankStatus" class="bank-status" hidden></div>
       <label for="notes"><strong>Notes</strong></label>
       <textarea id="notes" placeholder="What works or does not work?"></textarea>
       <div id="saveStatus" class="status"></div>
@@ -151,7 +159,7 @@
     </section>
   </main>
   <script>
-    let allCandidates=[], candidates=[], position=0, saveTimer=null, saveSequence=0, dirty=false, telemetry=null, telemetryToken=0;
+    let allCandidates=[], allPairs=[], candidates=[], position=0, saveTimer=null, saveSequence=0, dirty=false, telemetry=null, telemetryToken=0, reviewMode='visual';
     const productionVisualIds=['VIS-30FE48FB73CE-PDE-002','VIS-90500D66EBBF-PDE-002','VIS-4DF5D853ACDA-IBN-001'];
     const $=id=>document.getElementById(id);
     function current(){ return candidates[position]; }
@@ -159,18 +167,27 @@
     function render(){
       const c=current(); if(!c) return;
       $('counter').textContent=`${position+1} of ${candidates.length}`;
-      $('video').src=c.media_url; $('video').play().catch(()=>{});
+      $('video').muted=reviewMode!=='pair'; $('video').src=c.media_url;
+      if(reviewMode==='visual')$('video').play().catch(()=>{});
       loadTelemetry(c);
       $('source').textContent=`${c.source_project_display_name} · ${c.portrait_group.replaceAll('_',' ')}`;
       $('portrait').textContent=c.revision_filename || c.intake_filename;
-      $('recipe').textContent=`${c.motion_recipe_id} · ${c.motion_recipe_name || recipeName(c.motion_recipe_id)} · ${c.duration_sec} seconds`;
-      $('portraitId').textContent=c.portrait_id; $('revisionId').textContent=c.revision_id; $('visualId').textContent=c.visual_id;
+      $('recipe').textContent=reviewMode==='pair'
+        ? `${c.audio_recipe_id} · Audio option ${position+1} of ${candidates.length} · ${c.duration_sec} native seconds · press Play to hear`
+        : `${c.motion_recipe_id} · ${c.motion_recipe_name || recipeName(c.motion_recipe_id)} · ${c.duration_sec} seconds`;
+      $('portraitId').textContent=c.portrait_id; $('revisionId').textContent=c.revision_id;
+      $('visualId').textContent=c.visual_id;
+      $('candidateLabel').textContent=reviewMode==='pair'?'Visual ID':'Candidate';
+      $('pairIdLabel').hidden=reviewMode!=='pair'; $('pairId').hidden=reviewMode!=='pair';
+      $('audioIdLabel').hidden=reviewMode!=='pair'; $('audioId').hidden=reviewMode!=='pair';
+      $('pairId').textContent=c.pair_id||''; $('audioId').textContent=c.audio_id||'';
       $('comparison').textContent=c.comparison_label || experimentName(c.experiment_id);
       $('renderStatus').textContent=c.render_status; $('reviewStatus').textContent=reviewStatus(c);
       $('manifest').href=c.manifest_url;
-      [...$('ratings').children].forEach((b,i)=>b.classList.toggle('active',c.rating===i+1));
-      $('reject').checked=c.rejected; $('select').checked=c.selected; $('notes').value=c.notes;
-      $('rejectLabel').classList.toggle('active',c.rejected); $('selectLabel').classList.toggle('active',c.selected);
+      $('audioRatingField').hidden=reviewMode!=='pair'; $('ratingLabel').textContent=reviewMode==='pair'?'Complete pair rating':'Rating';
+      $('rejectText').textContent=reviewMode==='pair'?'Reject pair':'Reject'; $('selectText').textContent=reviewMode==='pair'?'Select pair':'Select visual';
+      $('retireLabel').hidden=reviewMode!=='pair'; $('bankStatus').hidden=reviewMode!=='pair';
+      renderControls();
       $('previous').disabled=position===0; $('next').disabled=position===candidates.length-1; $('saveStatus').textContent=''; dirty=false;
     }
     function recipeName(id){
@@ -302,7 +319,11 @@
       requestAnimationFrame(updateTelemetry);
     }
     function setReviewSet(value){
-      if(value==='production-visuals-no-grain'){
+      reviewMode=value==='pairing-nychildren-v27'?'pair':'visual';
+      if(reviewMode==='pair'){
+        candidates=allPairs.filter(c=>c.experiment_id===value);
+        candidates.forEach(c=>c.comparison_label='Locked selected visual + native 11-second audio');
+      } else if(value==='production-visuals-no-grain'){
         candidates=productionVisualIds.map(id=>allCandidates.find(c=>c.visual_id===id)).filter(Boolean);
         candidates.forEach(c=>c.comparison_label='Shippable visual — film grain disabled');
       } else if(value==='motion-variable-pilot-v2'){
@@ -325,25 +346,43 @@
     }
     async function save(){
       clearTimeout(saveTimer); dirty=false; const c=current(), sequence=++saveSequence; $('saveStatus').textContent='Saving…';
-      try { const response=await fetch(`/api/reviews/${encodeURIComponent(c.visual_id)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rating:c.rating,rejected:c.rejected,selected:c.selected,notes:c.notes})}); if(!response.ok) throw new Error((await response.json()).error); if(sequence===saveSequence) $('saveStatus').textContent='Saved'; }
+      const endpoint=reviewMode==='pair'?`/api/pair-reviews/${encodeURIComponent(c.pair_id)}`:`/api/reviews/${encodeURIComponent(c.visual_id)}`;
+      const payload=reviewMode==='pair'?{pair_rating:c.rating,audio_rating:c.audio_rating,rejected:c.rejected,selected:c.selected,retire_audio:c.retire_audio,notes:c.notes}:{rating:c.rating,rejected:c.rejected,selected:c.selected,notes:c.notes};
+      try { const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); if(!response.ok) throw new Error((await response.json()).error); if(sequence===saveSequence) $('saveStatus').textContent='Saved'; }
       catch(error){ $('saveStatus').textContent=`Not saved: ${error.message}`; }
       $('reviewStatus').textContent=reviewStatus(c);
     }
     function queueSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(save,600); }
     function setRating(rating){ const c=current(); c.rating=c.rating===rating?null:rating; renderControls(); save(); }
-    function renderControls(){ const c=current(); [...$('ratings').children].forEach((b,i)=>b.classList.toggle('active',c.rating===i+1)); $('reject').checked=c.rejected; $('select').checked=c.selected; $('notes').value=c.notes; $('rejectLabel').classList.toggle('active',c.rejected); $('selectLabel').classList.toggle('active',c.selected); $('reviewStatus').textContent=reviewStatus(c); }
+    function setAudioRating(rating){ const c=current(); c.audio_rating=c.audio_rating===rating?null:rating; renderControls(); save(); }
+    function renderControls(){
+      const c=current();
+      [...$('ratings').children].forEach((b,i)=>b.classList.toggle('active',c.rating===i+1));
+      [...$('audioRatings').children].forEach((b,i)=>b.classList.toggle('active',c.audio_rating===i+1));
+      $('reject').checked=c.rejected; $('select').checked=c.selected; $('retire').checked=Boolean(c.retire_audio); $('notes').value=c.notes;
+      $('rejectLabel').classList.toggle('active',c.rejected); $('selectLabel').classList.toggle('active',c.selected); $('retireLabel').classList.toggle('active',Boolean(c.retire_audio));
+      if(reviewMode==='pair'){
+        const message=c.audio_status==='retired_selected'?'<strong>Selected final audio</strong> — retired from future final use.':c.audio_status==='retired'?'<strong style="color:var(--danger)">Audio retired</strong> — removed from the reusable bank.':'<strong>Available in audio bank</strong> — it stays reusable automatically unless this pair is selected or you retire the audio.';
+        $('bankStatus').innerHTML=message;
+      }
+      $('reviewStatus').textContent=reviewStatus(c);
+    }
     function navigate(delta){ const next=Math.max(0,Math.min(candidates.length-1,position+delta)); if(next!==position){ clearTimeout(saveTimer); current().notes=$('notes').value; if(dirty)save(); position=next; render(); } }
     for(let i=1;i<=5;i++){ const b=document.createElement('button'); b.textContent=i; b.onclick=()=>setRating(i); $('ratings').appendChild(b); }
-    $('reject').onchange=()=>{ const c=current(); c.rejected=$('reject').checked; if(c.rejected)c.selected=false; renderControls(); save(); };
-    $('select').onchange=()=>{ const c=current(); c.selected=$('select').checked; if(c.selected){c.rejected=false;allCandidates.filter(other=>other.portrait_id===c.portrait_id&&other.visual_id!==c.visual_id).forEach(other=>other.selected=false);} renderControls(); save(); };
+    for(let i=1;i<=5;i++){ const b=document.createElement('button'); b.textContent=i; b.onclick=()=>setAudioRating(i); $('audioRatings').appendChild(b); }
+    $('reject').onchange=()=>{ const c=current(); c.rejected=$('reject').checked; if(c.rejected){c.selected=false;if(reviewMode==='pair'&&c.audio_status==='retired_selected')c.audio_status='banked';} renderControls(); save(); };
+    $('select').onchange=()=>{ const c=current(); c.selected=$('select').checked; if(c.selected){c.rejected=false;c.retire_audio=false;const pool=reviewMode==='pair'?allPairs:allCandidates;pool.filter(other=>other.portrait_id===c.portrait_id&&(reviewMode==='pair'?other.pair_id!==c.pair_id:other.visual_id!==c.visual_id)).forEach(other=>{other.selected=false;if(reviewMode==='pair'&&other.audio_status==='retired_selected')other.audio_status='banked';});if(reviewMode==='pair')c.audio_status='retired_selected';}else if(reviewMode==='pair'&&c.audio_status==='retired_selected')c.audio_status='banked'; renderControls(); save(); };
+    $('retire').onchange=()=>{ const c=current(); c.retire_audio=$('retire').checked; if(c.retire_audio){c.selected=false;c.audio_status='retired';}else c.audio_status='banked'; renderControls(); save(); };
     $('notes').oninput=()=>{ current().notes=$('notes').value; dirty=true; queueSave(); };
     $('previous').onclick=()=>navigate(-1); $('next').onclick=()=>navigate(1);
     $('experiment').onchange=()=>setReviewSet($('experiment').value);
-    document.addEventListener('keydown',event=>{ if(event.target.matches('textarea,input'))return; if(event.key>='1'&&event.key<='5')setRating(Number(event.key)); else if(event.key.toLowerCase()==='r'){$('reject').click();} else if(event.key.toLowerCase()==='s'){$('select').click();} else if(event.key==='ArrowLeft')navigate(-1); else if(event.key==='ArrowRight')navigate(1); else if(event.key===' '){event.preventDefault(); const v=$('video'); v.paused?v.play():v.pause();} });
-    fetch('/api/candidates').then(r=>r.json()).then(data=>{
-      allCandidates=data.candidates; if(!allCandidates.length)throw new Error('No visual candidates are registered.');
+    document.addEventListener('keydown',event=>{ if(event.target.matches('textarea,input'))return; if(event.key>='1'&&event.key<='5')setRating(Number(event.key)); else if(event.key.toLowerCase()==='r'){$('reject').click();} else if(event.key.toLowerCase()==='s'){$('select').click();} else if(event.key.toLowerCase()==='t'&&reviewMode==='pair'){$('retire').click();} else if(event.key==='ArrowLeft')navigate(-1); else if(event.key==='ArrowRight')navigate(1); else if(event.key===' '){event.preventDefault(); const v=$('video'); v.paused?v.play():v.pause();} });
+    Promise.all([fetch('/api/candidates').then(r=>r.json()),fetch('/api/pairs').then(r=>r.json())]).then(([visualData,pairData])=>{
+      allCandidates=visualData.candidates; allPairs=pairData.candidates.map(c=>({...c,rating:c.pair_rating,rejected:c.pair_rejected,selected:c.pair_selected,notes:c.pair_notes,retire_audio:c.audio_status==='retired'}));
+      if(!allCandidates.length&&!allPairs.length)throw new Error('No candidates are registered.');
       const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
       const choices=[];
+      if(allPairs.length)choices.push(['pairing-nychildren-v27','Pair Review — NYChildren (10 audio options)']);
       if(productionVisualIds.every(id=>allCandidates.some(c=>c.visual_id===id)))choices.push(['production-visuals-no-grain','Production visuals — no film grain']);
       if(experiments.includes('infinity-background-static-production-v26'))choices.push(['infinity-background-static-production-v26','Infinity Background — static production']);
       if(experiments.includes('film-grain-opacity-v25'))choices.push(['film-grain-opacity-v25','Film Grain — opacity-only comparison']);

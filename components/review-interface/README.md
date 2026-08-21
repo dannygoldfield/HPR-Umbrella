@@ -1,6 +1,6 @@
 # HPR local review interface
 
-This is the smallest functional review surface for HPR candidates. It runs
+This is the functional review surface for HPR candidates. It runs
 only on the local computer and writes every human decision directly to the
 SQLite Registry. JSON manifests remain provenance records, not forms Danny has
 to edit.
@@ -55,7 +55,16 @@ no background phase or motion path. `PDE-002` remains the only visual motion;
 film grain is disabled under the production policy, while audio and editorial
 text remain pending.
 
-The default review set is **Production visuals — no film grain**. It contains
+The default review set is now **Pair Review — NYChildren (10 audio options)**.
+It uses one locked, selected 11-second visual and ten distinct, native
+11-second `AR-010` audio candidates. The video player is unmuted in pair mode;
+press Play to hear each option. Audio and complete-pair ratings are independent.
+Unused audio is visibly marked **Available in audio bank** and requires no
+manual Bank toggle. **Select pair** retires that audio from future final use,
+**Reject pair** leaves its audio banked, and **Retire audio** is reserved for
+sound that should not be reused with another portrait.
+
+The **Production visuals — no film grain** set contains
 the selected NYChildren and 10000 `PDE-002` candidates and the selected
 Infinity `IBN-001` composite. The completed `film-grain-opacity-v25` set remains
 available as research history: 13 10000 candidates using the same Super 35
@@ -83,5 +92,7 @@ start a second instance with `--host 0.0.0.0 --port 8766 --no-browser`, open the
 Mac's local-network address ending in `:8766` on the phone, and stop that server
 after review.
 
-Keyboard shortcuts: 1–5 set the rating, R toggles reject, S toggles selection,
-left/right arrows navigate, and Space pauses or resumes the video.
+Keyboard shortcuts: 1–5 set the visual or complete-pair rating, R toggles
+reject, S toggles selection, T retires audio in pair mode, left/right arrows
+navigate, and Space pauses or resumes the video. Audio ratings use their own
+visible buttons so the two judgments cannot be confused.
