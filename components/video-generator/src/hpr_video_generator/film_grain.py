@@ -34,6 +34,8 @@ class FilmGrainRecipe:
     opacity: float
     signal_gain: float = 1.0
     texture_scale: float = 1.0
+    temporal_smooth_frames: int = 1
+    signal_pivot: float = 128.0
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,7 @@ class FilmGrainConfig:
     version: str
     experiment_id: str
     purpose: str
+    sample_seed_namespace: str
     source: dict[str, str]
     base_visuals: tuple[dict[str, str], ...]
     plates: dict[str, FilmGrainPlate]
@@ -102,6 +105,14 @@ def load_film_grain_config(path: Path) -> FilmGrainConfig:
             raise ValueError(f"Recipe {recipe_id} signalGain must be between 0.25 and 8")
         if not 1.0 <= texture_scale <= 4.0:
             raise ValueError(f"Recipe {recipe_id} textureScale must be between 1 and 4")
+        temporal_smooth_frames = int(item.get("temporalSmoothFrames", 1))
+        if not 1 <= temporal_smooth_frames <= 15:
+            raise ValueError(
+                f"Recipe {recipe_id} temporalSmoothFrames must be between 1 and 15"
+            )
+        signal_pivot = float(item.get("signalPivot", 128.0))
+        if not 96.0 <= signal_pivot <= 160.0:
+            raise ValueError(f"Recipe {recipe_id} signalPivot must be between 96 and 160")
         recipes.append(
             FilmGrainRecipe(
                 id=recipe_id,
@@ -110,6 +121,8 @@ def load_film_grain_config(path: Path) -> FilmGrainConfig:
                 opacity=opacity,
                 signal_gain=signal_gain,
                 texture_scale=texture_scale,
+                temporal_smooth_frames=temporal_smooth_frames,
+                signal_pivot=signal_pivot,
             )
         )
     if not recipes:
@@ -123,6 +136,9 @@ def load_film_grain_config(path: Path) -> FilmGrainConfig:
         version=str(raw["version"]),
         experiment_id=str(raw["experimentId"]),
         purpose=str(raw["purpose"]),
+        sample_seed_namespace=str(
+            raw.get("sampleSeedNamespace", raw["experimentId"])
+        ),
         source={str(key): str(value) for key, value in source.items()},
         base_visuals=tuple(_object(item, "base visual") for item in base_visuals),
         plates=plates,
@@ -203,13 +219,21 @@ def build_filter(
     base += ",extractplanes=y+u+v[base_y][base_u][base_v]"
     crop_width = max(2, round(width / recipe.texture_scale / 2) * 2)
     crop_height = max(2, round(height / recipe.texture_scale / 2) * 2)
+    temporal_filter = ""
+    if recipe.temporal_smooth_frames > 1:
+        weights = " ".join("1" for _ in range(recipe.temporal_smooth_frames))
+        temporal_filter = (
+            f",tmix=frames={recipe.temporal_smooth_frames}:weights='{weights}'"
+        )
     grain = (
         f"[1:v]trim=start_frame={start_frame}:end_frame={start_frame + frames},"
         f"setpts=PTS-STARTPTS,fps={fps},scale=-2:{height}:flags=lanczos,"
         f"format=gray,crop={crop_width}:{crop_height}:"
         f"x='(iw-{crop_width})*{crop_fraction:.4f}':y='(ih-{crop_height})/2',"
         f"scale={width}:{height}:flags=lanczos,"
-        f"lut=y='clip(128+(val-128)*{recipe.signal_gain:.4f},0,255)'[grain_y]"
+        f"lut=y='clip({recipe.signal_pivot:.4f}+(val-{recipe.signal_pivot:.4f})*"
+        f"{recipe.signal_gain:.4f},0,255)'"
+        f"{temporal_filter}[grain_y]"
     )
     composite = (
         f"[base_y][grain_y]blend=all_mode=overlay:all_opacity={recipe.opacity:.4f}[textured_y];"
@@ -346,6 +370,8 @@ def generate_film_grain_candidate(
             "opacity": candidate.recipe.opacity,
             "signalGain": candidate.recipe.signal_gain,
             "textureScale": candidate.recipe.texture_scale,
+            "temporalSmoothFrames": candidate.recipe.temporal_smooth_frames,
+            "signalPivot": candidate.recipe.signal_pivot,
             "startFrame": start_frame,
             "cropFraction": crop_fraction,
             "plateFilename": None if candidate.plate is None else candidate.plate.filename,

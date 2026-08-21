@@ -64,6 +64,22 @@ class FilmGrainConfigTests(unittest.TestCase):
         self.assertEqual(4.0, boundary.signal_gain)
         self.assertEqual(2.5, boundary.texture_scale)
 
+    def test_slow_swim_round_keeps_reference_and_requested_endpoint(self):
+        config = load_film_grain_config(
+            ROOT / "config/film-grain-slow-swim-recipes.json"
+        )
+        self.assertEqual("film-grain-slow-swim-v23", config.experiment_id)
+        self.assertEqual("film-grain-visibility-v22", config.sample_seed_namespace)
+        reference = config.recipes[1]
+        self.assertEqual("FGS-002", reference.id)
+        self.assertEqual(0.5, reference.opacity)
+        self.assertEqual(1, reference.temporal_smooth_frames)
+        endpoint = config.recipes[-1]
+        self.assertEqual("FGS-007", endpoint.id)
+        self.assertEqual(0.67, endpoint.opacity)
+        self.assertEqual(1.25, endpoint.texture_scale)
+        self.assertEqual(7, endpoint.temporal_smooth_frames)
+
 
 class FilmGrainFilterTests(unittest.TestCase):
     def test_control_uses_same_delivery_transcode_without_grain_input(self):
@@ -94,9 +110,26 @@ class FilmGrainFilterTests(unittest.TestCase):
         self.assertIn("format=gray", value)
         self.assertIn("extractplanes=y+u+v", value)
         self.assertIn("crop=720:1280", value)
-        self.assertIn("lut=y='clip(128+(val-128)*1.5000,0,255)'", value)
+        self.assertIn(
+            "lut=y='clip(128.0000+(val-128.0000)*1.5000,0,255)'", value
+        )
         self.assertIn("all_mode=overlay:all_opacity=0.6500", value)
         self.assertIn("[textured_y][base_u][base_v]mergeplanes", value)
+
+    def test_temporal_smoothing_correlates_neighboring_grain_frames(self):
+        recipe = FilmGrainRecipe(
+            "FGS-004", "Calmer", "super35-light", 0.5, 2.2, 1.0, 5
+        )
+        value = build_filter(
+            width=1080,
+            height=1920,
+            fps=24,
+            frames=264,
+            recipe=recipe,
+            start_frame=10,
+            crop_fraction=0.5,
+        )
+        self.assertIn("tmix=frames=5:weights='1 1 1 1 1'", value)
 
     def test_sample_window_is_repeatable_and_in_bounds(self):
         first = sample_window(123456, source_frames=360, output_frames=264)

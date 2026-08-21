@@ -70,7 +70,7 @@ def render_round(
                 config.experiment_id, parent_visual_id, recipe.id
             )
             sample_seed = _seed(
-                config.experiment_id,
+                config.sample_seed_namespace,
                 parent_visual_id,
                 recipe.plate_id or "control",
             )
@@ -139,6 +139,7 @@ def render_round(
         "experimentId": config.experiment_id,
         "createdAt": datetime.now(timezone.utc).isoformat(),
         "purpose": config.purpose,
+        "sampleSeedNamespace": config.sample_seed_namespace,
         "sourceRights": config.source,
         "durationSec": duration_sec,
         "frameRate": 24,
@@ -167,13 +168,13 @@ def main() -> None:
     parser.add_argument(
         "--output-root",
         type=Path,
-        default=REPOSITORY_ROOT / "workspace/film-grain-visibility-v22",
+        default=REPOSITORY_ROOT / "workspace/film-grain-slow-swim-v23",
     )
     parser.add_argument(
         "--config",
         type=Path,
         default=REPOSITORY_ROOT
-        / "components/video-generator/config/film-grain-visibility-recipes.json",
+        / "components/video-generator/config/film-grain-slow-swim-recipes.json",
     )
     parser.add_argument("--duration", type=int, choices=[11], default=11)
     parser.add_argument("--ffmpeg")

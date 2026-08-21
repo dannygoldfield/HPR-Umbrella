@@ -47,9 +47,10 @@ Each candidate can be recreated from its portrait, duration, presets, recipes, g
 - **Video Generator:** legacy camera-motion and White Balance prototypes remain
   reproducible. `PDE-002` is the locked Development Animation; Infinity adds
   the locked `IBK-001` moving-number background. The active seven-candidate
-  grain-visibility calibration deliberately enlarges and strengthens Super 35
-  Light grain until it survives mobile-size display. All 218 visuals in the
-  Registry remain reproducible, including superseded research rounds.
+  slow-swim grain refinement keeps the preferred visibility reference and
+  progressively correlates neighboring frames for calmer motion. All 225
+  visuals in the Registry remain reproducible, including superseded research
+  rounds.
 - **HPR Registry:** initial SQLite implementation ingests unsequenced Lightroom exports, preserves portrait revisions and metadata provenance, and assigns episode numbers only when an approved-master sequence is locked.
 - **Candidate Engine:** implements the earlier 120-slot archive dry-run planner, separate Audio/Visual/Pair/Publishing banks, deterministic option sets, independent component review fields, and replaceable photo sources. Its early `EpisodeRecord` model is legacy and must be integrated with the Registry before production planning.
 - **Human review:** a functional local visual-review screen records 1–5 rating,

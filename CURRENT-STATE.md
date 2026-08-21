@@ -251,6 +251,14 @@ Updated: 2026-08-20
   than four codes. All seven pass the locked 1080 × 1920, 24-fps, 11-second,
   264-frame, and BT.709 delivery audits. The Registry now contains 218 visuals,
   including retained research history.
+- V22 review found `FGV-002` closest and `FGV-003` through `FGV-007` too strong.
+  V23 registers seven slow-swim candidates under `FGS-001`–`FGS-007`.
+  `FGS-002` is byte-for-byte identical to `FGV-002`; later candidates average
+  overlapping groups of three, five, or seven film frames to increase temporal
+  correlation from 0.473 to as much as 0.884. Mix rises only to the requested
+  67% and grain size only to 1.25×. The grain signal is centered on the scan's
+  neutral value so smoothing cannot darken the portrait. All seven pass the
+  locked delivery audit. The Registry now contains 225 visuals.
 
 ## Earlier implemented work
 
@@ -269,9 +277,9 @@ Updated: 2026-08-20
 2. Continue using embedded-profile 16-bit TIFF as the preferred portrait
    source. Seven Lightroom stage exports remain an optional calibration
    experiment, not a requirement for every portrait or video.
-3. Review the seven-candidate v22 grain-visibility calibration. Use the result
-   to define a narrow cross-portrait confirmation on NYChildren and the
-   complete Infinity composite before locking production grain.
+3. Review the seven-candidate v23 slow-swim refinement. Use the result to define
+   a narrow cross-portrait confirmation on NYChildren and the complete Infinity
+   composite before locking production grain.
 4. Connect the locked visuals to selected Audio
    Generator tracks and complete pair review.
 5. Render, verify, and register final masters only after grain and audio pairing

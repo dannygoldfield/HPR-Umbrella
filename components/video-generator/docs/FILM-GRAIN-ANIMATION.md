@@ -112,6 +112,30 @@ change in `FGV-002` to 12.436 in `FGV-007`; the share of pixels changing by
 more than four values rises from 0.22% to 73.62%. This is a genuine visible
 range. Grain size and signal gain are recorded separately in every manifest.
 
+## Active slow-swim refinement: `film-grain-slow-swim-v23`
+
+Review found `FGV-002` closest and every candidate from `FGV-003` upward too
+strong. The desired temporal character is also calmer than ordinary 24-frame
+grain flicker. V23 therefore keeps `FGS-002` byte-for-byte identical to
+`FGV-002` and uses overlapping temporal averages to correlate neighboring grain
+frames. Signal gain compensates only for the contrast lost through averaging;
+it does not change portrait exposure.
+
+| ID | Mix | Texture scale | Temporal window | Purpose |
+| --- | ---: | ---: | ---: | --- |
+| `FGS-001` | 0% | 1.0× | 1 frame | No-grain control |
+| `FGS-002` | 50% | 1.0× | 1 frame | Exact `FGV-002` reference |
+| `FGS-003` | 50% | 1.0× | 3 frames | Slow motion only |
+| `FGS-004` | 50% | 1.0× | 5 frames | Calmer motion only |
+| `FGS-005` | 60% | 1.0× | 5 frames | Modest mix increase |
+| `FGS-006` | 60% | 1.15× | 5 frames | Modest size increase |
+| `FGS-007` | 67% | 1.25× | 7 frames | Danny's requested upper endpoint |
+
+At review size, adjacent-frame grain correlation rises from 0.473 in the exact
+reference to 0.884 in `FGS-007`. Mean visible difference rises much more gently,
+from 1.125 to 1.953 display-code values. This makes temporal ease the main
+change instead of another leap in visual strength.
+
 ## Review questions
 
 - Does the surface feel alive before the viewer consciously identifies grain?
@@ -143,6 +167,6 @@ share one material character but do not display identical grain patterns.
 The earlier seven-candidate 10000 round v19 remains reproducible. A temporary
 v20 grain-only diagnostic removed Development Animation to isolate the apparent
 motion report; that was not the desired creative test. V21 restored the proper
-three-layer stack but failed visibility. V22 is the current decision set. Once
-a credible visible range is found, test only that range on NYChildren and the
-complete Infinity composite.
+three-layer stack but failed visibility. V22 found the visible range; V23 is the
+current temporal refinement. Once one slow-swim treatment is selected, confirm
+it on NYChildren and the complete Infinity composite.

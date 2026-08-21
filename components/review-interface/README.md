@@ -52,16 +52,14 @@ path. Portrait-specific deterministic number layouts and starting phases keep
 the 40 Infinity videos related without making a future grid move in lockstep.
 `PDE-002` remains unchanged; grain, audio, and editorial text are absent.
 
-The active film-grain review set is `film-grain-visibility-v22`. It contains
-seven 10000 candidates, `FGV-001`–`FGV-007`, spanning a no-grain control,
-native-size grain, enlarged grain, stronger signal gain, and an intentionally
-excessive boundary. The prior 21-candidate v21 round failed because its grain
-collapsed to less than one display-code change on average at review size. A
-read-only panel shows film format, Light/Heavy source, mix percentage, signal
-gain, grain-size scale, plate filename, starting frame, luma-only color
-handling, and the unchanged parent visual. Raw grain plates are never served.
-Superseded v20 and v21 diagnostics remain registered but are omitted from the
-normal review-set menu.
+The active film-grain review set is `film-grain-slow-swim-v23`. It contains
+seven 10000 candidates, `FGS-001`–`FGS-007`. `FGS-002` is byte-for-byte
+identical to the prior preferred `FGV-002`; `FGS-003`–`FGS-007` progressively
+increase temporal correlation while mix rises only to 67% and grain size only
+to 1.25×. A read-only panel explains and displays signal gain, grain size, and
+the temporal-smoothing window. Signal gain is grain-pattern contrast, not
+portrait exposure. Raw grain plates are never served. Superseded grain rounds
+remain registered but are omitted from the normal review-set menu.
 
 ## Start it
 
