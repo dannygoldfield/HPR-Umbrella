@@ -25,7 +25,7 @@ components/audio-generator/audio/source/
   music-stems/
 workspace/
   portraits/
-  grain/
+  grain/  # research history only; production grain is disabled
   output/
 ```
 

@@ -1,22 +1,41 @@
 # Film Grain Animation
 
-Status: final opacity-only comparison after the Development Animation and
-Infinity background decisions were locked on 2026-08-20.
+Status: production layer rejected on 2026-08-21. Shipping visuals contain no
+film grain. All test recipes and renders remain reproducible research history.
 
-## Creative purpose
+## Production decision
 
-Film Grain Animation should make the photographed surface feel continuously
-alive even when the subject and camera do not move. It is the smallest and
-fastest visual event in the HPR system. It must support human presence rather
-than announce a vintage treatment.
+Danny reviewed the film-grain work on both the 14-inch MacBook Pro and iPhone,
+including the final 13-step opacity ladder from 10% through 40%, and concluded
+that the layer did not add enough to the portrait. The shipping decision is:
+
+- film grain: disabled;
+- opacity: 0%;
+- source plate: none;
+- approved visuals: the selected `PDE-002` Development Animation for
+  NYChildren and 10000, and the complete `PDE-002` plus `IBK-001` Infinity
+  composite;
+- next stage: audio pairing without another visual texture layer.
+
+The machine-readable decision is
+`components/video-generator/config/production-visual-policy.json`. A zero-grain
+test transcode is not substituted for the approved base visual; production
+uses the already selected no-grain visual candidates directly.
+
+## Research purpose
+
+Film Grain Animation asked whether the photographed surface could feel
+continuously alive even when the subject and camera did not move. It was tested
+as the smallest and fastest visual event in the HPR system, with the requirement
+that it support human presence rather than announce a vintage treatment.
 
 The active reference is Steven Spielberg's description of grain as always
 moving or “swimming,” allowing a still subject to remain alive. HPR adopts the
 underlying principle, not a period-film look.
 
-## Order of operations
+## Research order of operations
 
-Grain is a finishing layer:
+The completed tests treated grain as a finishing layer:
 
 1. Render the locked `PDE-002` Development Animation.
 2. For Infinity, composite the locked `IBK-001` number background.
@@ -24,9 +43,9 @@ Grain is a finishing layer:
 4. Add and review audio.
 5. Create the release master only after both visual and audio decisions lock.
 
-Applying grain last lets one treatment unify the portrait, background, and
-graphic field. It also means the Development Animation and Infinity background
-remain independently reproducible.
+Applying grain last isolated it from the Development Animation and Infinity
+background. The shipping path now skips step 3 and proceeds directly from the
+approved silent visual to audio review.
 
 ## Source and rights record
 
@@ -172,7 +191,7 @@ measures 0.618–0.943 times an ordinary adjacent change across V24, while first
 and last grain amplitude remain within 8% of the median. This removes both the
 V23 warm-up flash and a conspicuous slow-grain reset.
 
-## Active opacity-only comparison: `film-grain-opacity-v25`
+## Final opacity-only comparison: `film-grain-opacity-v25`
 
 Review of V24 reframed the decision as a finishing-layer adjustment: choose one
 grain material and lower its opacity until it improves skin texture without
@@ -191,10 +210,9 @@ signal gain, 1.25× texture scale, seven-frame temporal smoothing, and a
 settings also remain unchanged. The V24 no-grain control remains available in
 the preceding review set.
 
-The intended selection criterion is tactile skin, not visible noise. A useful
-candidate should be felt as a slight improvement in surface life before the
-viewer identifies grain. If none improves the portrait over the prior no-grain
-control, the production system omits the grain layer.
+The intended selection criterion was tactile skin, not visible noise. No
+candidate improved the portrait enough over the prior no-grain control, so the
+production system omits the grain layer.
 
 ## Review questions
 
@@ -212,24 +230,23 @@ Reject a candidate for color drift, dirt or scratches, gate weave, flicker,
 skin harshness, a visible loop pulse, or grain that disappears after ordinary
 web playback.
 
-## Production uniqueness after selection
+## Research reproducibility
 
-The chosen stock, opacity, and playback speed remain consistent across the 120
-portraits. Each portrait receives deterministic variation in only two places:
+Had grain been selected, stock, opacity, and playback speed would have remained
+consistent across the 120 portraits, with deterministic variation in only two
+places:
 
 - the starting frame within the 15-second scan;
 - the horizontal crop within the wide 4K plate.
 
-Those variations keep the grain realization unique without creating a new
-style or tempo for every portrait. Multiple videos viewed together therefore
-share one material character but do not display identical grain patterns.
+Those controls remain documented for reproducibility, but production creates
+neither variation because film grain is disabled.
 
 The earlier seven-candidate 10000 round v19 remains reproducible. A temporary
 v20 grain-only diagnostic removed Development Animation to isolate the apparent
 motion report; that was not the desired creative test. V21 restored the proper
 three-layer stack but failed visibility. V22 found the visible range; V23 found
 that simple smoothing became too faint and exposed a loop flaw. V24 completed
-the multi-source comparison; V25 is the final opacity-only ladder. If one
-opacity is selected, confirm it on NYChildren and the complete Infinity
-composite before pairing audio. If no treatment improves the portrait, ship
-without grain.
+the multi-source comparison; V25 completed the final opacity-only ladder. No
+treatment improved the portrait enough, so HPR ships without grain and moves
+directly to audio pairing.

@@ -56,7 +56,6 @@ Input:
 - one finished Registry portrait revision; an optional aligned Lightroom
   development-state set may be used later for calibration research;
 - one versioned surface-development recipe and exact field timeline;
-- optional film grain or a restrained texture treatment;
 - a duration and random seed.
 
 Output:
@@ -70,6 +69,10 @@ structure stay fixed while the untouched finished portrait is revealed from a
 deterministic under-resolved surrogate through global, sweep, band, or
 activation fields. The first development pilot omits grain so review isolates
 tone, texture, and perceived surface energy.
+
+Film-grain research remains reproducible, but the production visual policy
+disables that layer. Shipping visuals use the selected Development Animation
+and Infinity background without scanned grain or synthetic noise.
 
 Earlier motion-rhythm, motion-variable, and White Balance-only renderers remain
 available for provenance and research comparison but do not define the active

@@ -46,11 +46,11 @@ Each candidate can be recreated from its portrait, duration, presets, recipes, g
 - **Audio Generator:** implemented with deterministic recipes for 7-, 9-, and 11-second loops.
 - **Video Generator:** legacy camera-motion and White Balance prototypes remain
   reproducible. `PDE-002` is the locked Development Animation; Infinity adds
-  the locked `IBK-001` moving-number background. The active seven-candidate
-  slow-swim grain refinement keeps the preferred visibility reference and
-  progressively correlates neighboring frames for calmer motion. All 225
-  visuals in the Registry remain reproducible, including superseded research
-  rounds.
+  the locked `IBK-001` moving-number background. Film grain was evaluated
+  through multiple visibility, motion, source, and opacity comparisons and was
+  rejected as a production layer on 2026-08-21. Shipping visuals contain no
+  film grain. All registered test visuals remain reproducible as research
+  history.
 - **HPR Registry:** initial SQLite implementation ingests unsequenced Lightroom exports, preserves portrait revisions and metadata provenance, and assigns episode numbers only when an approved-master sequence is locked.
 - **Candidate Engine:** implements the earlier 120-slot archive dry-run planner, separate Audio/Visual/Pair/Publishing banks, deterministic option sets, independent component review fields, and replaceable photo sources. Its early `EpisodeRecord` model is legacy and must be integrated with the Registry before production planning.
 - **Human review:** a functional local visual-review screen records 1–5 rating,
@@ -101,7 +101,10 @@ python -m hpr_candidate_generator.cli plan \
   --count 3
 ```
 
-Production rendering requires Python 3.11 or newer, FFmpeg, and the locally managed portrait, grain, and licensed audio libraries. See [Workflow](docs/workflow.md) for setup and use.
+Production rendering requires Python 3.11 or newer, FFmpeg, and the locally
+managed portrait and licensed audio libraries. The grain library is required
+only to reproduce completed research tests. See [Workflow](docs/workflow.md)
+for setup and use.
 
 ## Legacy 120-slot dry run
 

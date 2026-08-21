@@ -259,7 +259,8 @@ production.
 
 The selected `IBK-001` render is already a complete visual composite, not a
 background-only asset: it includes the isolated subject, the number field, and
-`PDE-002`. Grain and audio remain intentionally absent.
+`PDE-002`. Film grain is permanently absent under the production policy; audio
+remains a separate pending pairing decision.
 
 ## Output and safeguards
 

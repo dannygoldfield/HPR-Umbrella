@@ -15,12 +15,12 @@ See the complete
 [Portrait Development Animation specification](docs/PORTRAIT-DEVELOPMENT-ANIMATION.md).
 
 The shared five-star `PDE-002` Development Animation is now locked. Infinity
-adds the locked `IBK-001` moving-number background. The active finishing test
-refines the preferred grain visibility into a calmer slow swim by correlating
-neighboring grain frames. The photographed image remains fixed in the frame;
-only Development Animation, Infinity's approved background, and film grain
-move;
-see [Film Grain Animation](docs/FILM-GRAIN-ANIMATION.md).
+adds the locked `IBK-001` moving-number background. Film grain was tested as a
+finishing layer and rejected on 2026-08-21 because it did not improve the
+portrait enough to justify the added effect. The photographed image remains
+fixed in the frame; shipping visuals contain Development Animation and, for
+Infinity, the approved number background, with no film grain. See the completed
+[Film Grain Animation research record](docs/FILM-GRAIN-ANIMATION.md).
 
 The older camera-motion, texture, and White Balance-only renderers remain
 reproducible research tools; they are not the active production direction.
@@ -32,7 +32,7 @@ reproducible research tools; they are not the active production direction.
 - 24 frames per second
 - 11-second active portrait format; earlier 7-second research retained
 - fixed geometry with loop-safe tonal and surface development
-- optional luma-only scanned grain applied after visual compositing
+- no film grain in the approved production visual policy
 - deterministic seeds and complete provenance
 
 ## Local media

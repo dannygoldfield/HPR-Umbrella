@@ -152,6 +152,7 @@
   </main>
   <script>
     let allCandidates=[], candidates=[], position=0, saveTimer=null, saveSequence=0, dirty=false, telemetry=null, telemetryToken=0;
+    const productionVisualIds=['VIS-30FE48FB73CE-PDE-002','VIS-90500D66EBBF-PDE-002','VIS-4DF5D853ACDA-IBK-001'];
     const $=id=>document.getElementById(id);
     function current(){ return candidates[position]; }
     function reviewStatus(c){ return c.selected?'selected':c.rejected?'rejected':(c.rating!==null||c.notes)?'reviewed':'unreviewed'; }
@@ -227,7 +228,7 @@
       if(opacityMatch){const opacity=7.5+Number(opacityMatch[1])*2.5;return `Super 35 Light — ${Number.isInteger(opacity)?opacity:opacity.toFixed(1)}% opacity`;}
       return id;
     }
-    function experimentName(id){ return ({'motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions','infinity-background-flat-fields-v13':'Infinity Backgrounds — flat fields','infinity-background-directed-variations-v14':'Infinity Backgrounds — directed variations','infinity-background-fixed-palette-v15':'Infinity Backgrounds — fixed palette','infinity-background-contrast-calibration-v16':'Infinity Backgrounds — contrast calibration','infinity-background-number-blobs-v17':'Infinity Backgrounds — number and blob system','infinity-background-static-number-blobs-v18':'Infinity Backgrounds — static numbers and blobs','film-grain-character-strength-v19':'Film Grain — 10000 composite test','film-grain-isolation-v20':'Film Grain — grain-only diagnostic (superseded)','film-grain-composite-v21':'Film Grain — all three locked visuals (failed visibility)','film-grain-visibility-v22':'Film Grain — visibility calibration','film-grain-slow-swim-v23':'Film Grain — slow-swim refinement','film-grain-decision-v24':'Film Grain — final keep-or-drop comparison','film-grain-opacity-v25':'Film Grain — opacity-only comparison'})[id]||id; }
+    function experimentName(id){ return ({'production-visuals-no-grain':'Production visuals — no film grain','motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions','infinity-background-flat-fields-v13':'Infinity Backgrounds — flat fields','infinity-background-directed-variations-v14':'Infinity Backgrounds — directed variations','infinity-background-fixed-palette-v15':'Infinity Backgrounds — fixed palette','infinity-background-contrast-calibration-v16':'Infinity Backgrounds — contrast calibration','infinity-background-number-blobs-v17':'Infinity Backgrounds — number and blob system','infinity-background-static-number-blobs-v18':'Infinity Backgrounds — static numbers and blobs','film-grain-character-strength-v19':'Film Grain — 10000 composite test','film-grain-isolation-v20':'Film Grain — grain-only diagnostic (superseded)','film-grain-composite-v21':'Film Grain — all three locked visuals (failed visibility)','film-grain-visibility-v22':'Film Grain — visibility calibration','film-grain-slow-swim-v23':'Film Grain — slow-swim refinement','film-grain-decision-v24':'Film Grain — final keep-or-drop comparison','film-grain-opacity-v25':'Film Grain — opacity-only comparison'})[id]||id; }
     async function loadTelemetry(c){
       const token=++telemetryToken; telemetry=null; $('diagnostics').hidden=true; $('whiteBalanceDiagnostics').hidden=true; $('developmentDiagnostics').hidden=true; $('developmentSettings').hidden=true; $('backgroundSettings').hidden=true; $('filmGrainSettings').hidden=true;
       $('temperatureSlider').value=0; $('tintSlider').value=0; $('temperatureValue').textContent='0.00'; $('tintValue').textContent='0.00';
@@ -300,7 +301,10 @@
       requestAnimationFrame(updateTelemetry);
     }
     function setReviewSet(value){
-      if(value==='motion-variable-pilot-v2'){
+      if(value==='production-visuals-no-grain'){
+        candidates=productionVisualIds.map(id=>allCandidates.find(c=>c.visual_id===id)).filter(Boolean);
+        candidates.forEach(c=>c.comparison_label='Shippable visual — film grain disabled');
+      } else if(value==='motion-variable-pilot-v2'){
         const variants=allCandidates.filter(c=>c.experiment_id===value), parentIds=new Set(variants.map(c=>c.parent_visual_id));
         const variableOrder={'LOW-SCALE':1,'HIGH-SCALE':2,'HORIZONTAL':3,'VERTICAL':4};
         candidates=[];
@@ -339,6 +343,7 @@
       allCandidates=data.candidates; if(!allCandidates.length)throw new Error('No visual candidates are registered.');
       const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
       const choices=[];
+      if(productionVisualIds.every(id=>allCandidates.some(c=>c.visual_id===id)))choices.push(['production-visuals-no-grain','Production visuals — no film grain']);
       if(experiments.includes('film-grain-opacity-v25'))choices.push(['film-grain-opacity-v25','Film Grain — opacity-only comparison']);
       if(experiments.includes('film-grain-decision-v24'))choices.push(['film-grain-decision-v24','Film Grain — final keep-or-drop comparison']);
       if(experiments.includes('film-grain-slow-swim-v23'))choices.push(['film-grain-slow-swim-v23','Film Grain — slow-swim refinement']);

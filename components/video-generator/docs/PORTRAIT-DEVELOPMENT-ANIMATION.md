@@ -444,9 +444,9 @@ keeps portrait geometry fixed while the finished Lightroom pixels are revealed
 through an 11-second, 24 fps, exactly closed tonal field. It contains no camera
 movement, facial distortion, grain, audio, or editorial text.
 
-The approved files are shippable silent visual components. They become final
-audio-video release masters only after the separate grain decision and an
-approved audio pairing.
+The approved files are shippable silent visual components. The separate grain
+decision is complete: production uses no grain layer. They become final
+audio-video release masters after an approved audio pairing.
 
 The registered experiment is `portrait-development-settlement-v9`: nine
 silent, image-only candidates at 1080 × 1920, 24 fps, and 264 frames. All nine

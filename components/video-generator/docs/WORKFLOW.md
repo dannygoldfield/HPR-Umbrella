@@ -16,9 +16,10 @@
 ## Calibration rule
 
 Human presence, skin accuracy, tactile realism, organic emergence, effect
-invisibility, loop continuity, grain, and overall quality are rated separately.
-Existing recipe IDs remain reproducible; calibration creates new recipe IDs
-rather than silently changing old ones.
+invisibility, loop continuity, and overall quality are rated separately.
+Film grain was evaluated separately and rejected as a production layer on
+2026-08-21. Existing research recipe IDs remain reproducible; calibration
+creates new recipe IDs rather than silently changing old ones.
 
 ## Historical organic texture experiments
 

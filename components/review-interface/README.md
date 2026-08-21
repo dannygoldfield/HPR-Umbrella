@@ -50,16 +50,15 @@ between two tests without estimating from memory.
 For production, `IBK-001` uses one fixed speed and closed two-dimensional motion
 path. Portrait-specific deterministic number layouts and starting phases keep
 the 40 Infinity videos related without making a future grid move in lockstep.
-`PDE-002` remains unchanged; grain, audio, and editorial text are absent.
+`PDE-002` remains unchanged; film grain is disabled under the production
+policy, while audio and editorial text remain pending.
 
-The active film-grain review set is `film-grain-opacity-v25`. It contains 13
-10000 candidates using the same Super 35 Light scan sample and treatment at
-opacities from 10% through 40% in 2.5-point steps. Opacity is the only changing
-variable. A read-only panel displays the exact mix, source, signal gain, grain
-size, temporal window, and one-second loop blend. Signal gain is grain-pattern
-contrast, not portrait exposure. Raw grain plates are never served. The V24
-multi-source comparison and its no-grain control remain available in the
-review menu.
+The default review set is **Production visuals — no film grain**. It contains
+the selected NYChildren and 10000 `PDE-002` candidates and the selected
+Infinity `IBK-001` composite. The completed `film-grain-opacity-v25` set remains
+available as research history: 13 10000 candidates using the same Super 35
+Light sample at opacities from 10% through 40%. Its read-only panel records the
+exact settings; raw grain plates are never served.
 
 The desktop layout is constrained to the browser viewport and verified for the
 default 14-inch MacBook Pro scale. Candidate details and effect settings are

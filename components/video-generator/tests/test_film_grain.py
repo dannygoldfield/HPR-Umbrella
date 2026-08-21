@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -14,6 +15,25 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class FilmGrainConfigTests(unittest.TestCase):
+    def test_production_policy_disables_film_grain(self):
+        policy = json.loads(
+            (ROOT / "config/production-visual-policy.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertFalse(policy["filmGrain"]["enabled"])
+        self.assertEqual(0, policy["filmGrain"]["opacity"])
+        self.assertIsNone(policy["filmGrain"]["source"])
+        self.assertEqual("rejected", policy["filmGrain"]["decision"])
+        self.assertEqual(
+            [
+                "VIS-30FE48FB73CE-PDE-002",
+                "VIS-90500D66EBBF-PDE-002",
+                "VIS-4DF5D853ACDA-IBK-001",
+            ],
+            [item["visualId"] for item in policy["finalVisualCandidates"]],
+        )
+
     def test_composite_round_has_three_locked_visuals_and_seven_recipes(self):
         config = load_film_grain_config(
             ROOT / "config/film-grain-composite-recipes.json"
