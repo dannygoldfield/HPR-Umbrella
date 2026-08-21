@@ -52,13 +52,14 @@ path. Portrait-specific deterministic number layouts and starting phases keep
 the 40 Infinity videos related without making a future grid move in lockstep.
 `PDE-002` remains unchanged; grain, audio, and editorial text are absent.
 
-The active film-grain review set is `film-grain-decision-v24`. It contains a
-no-grain control and twelve grained 10000 candidates: four different scan
-plates at moderate, clear, and bold calm-swim treatments. A read-only panel
-explains and displays source, mix, signal gain, grain size, temporal window, and
-the one-second loop blend. Signal gain is grain-pattern contrast, not portrait
-exposure. Raw grain plates are never served. Earlier grain rounds remain
-registered as research history; only V23 remains in the normal review menu.
+The active film-grain review set is `film-grain-opacity-v25`. It contains 13
+10000 candidates using the same Super 35 Light scan sample and treatment at
+opacities from 10% through 40% in 2.5-point steps. Opacity is the only changing
+variable. A read-only panel displays the exact mix, source, signal gain, grain
+size, temporal window, and one-second loop blend. Signal gain is grain-pattern
+contrast, not portrait exposure. Raw grain plates are never served. The V24
+multi-source comparison and its no-grain control remain available in the
+review menu.
 
 The desktop layout is constrained to the browser viewport and verified for the
 default 14-inch MacBook Pro scale. Candidate details and effect settings are
@@ -76,7 +77,10 @@ python -m hpr_review.server --db workspace/registry/hpr.sqlite3
 ```
 
 It opens `http://127.0.0.1:8765/` in the default browser. Nothing is sent to a
-public server.
+public server. To review temporarily from an iPhone on the same trusted Wi-Fi,
+start a second instance with `--host 0.0.0.0 --port 8766 --no-browser`, open the
+Mac's local-network address ending in `:8766` on the phone, and stop that server
+after review.
 
 Keyboard shortcuts: 1–5 set the rating, R toggles reject, S toggles selection,
 left/right arrows navigate, and Space pauses or resumes the video.

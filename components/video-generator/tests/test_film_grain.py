@@ -102,6 +102,24 @@ class FilmGrainConfigTests(unittest.TestCase):
             {24}, {recipe.loop_crossfade_frames for recipe in grained}
         )
 
+    def test_opacity_round_changes_only_opacity_in_even_steps(self):
+        config = load_film_grain_config(
+            ROOT / "config/film-grain-opacity-recipes.json"
+        )
+        self.assertEqual("film-grain-opacity-v25", config.experiment_id)
+        self.assertEqual("film-grain-decision-v24", config.sample_seed_namespace)
+        self.assertEqual(1, len(config.base_visuals))
+        self.assertEqual(13, len(config.recipes))
+        self.assertEqual(
+            [round(0.10 + index * 0.025, 3) for index in range(13)],
+            [recipe.opacity for recipe in config.recipes],
+        )
+        self.assertEqual({"super35-light"}, {recipe.plate_id for recipe in config.recipes})
+        self.assertEqual({5.9}, {recipe.signal_gain for recipe in config.recipes})
+        self.assertEqual({1.25}, {recipe.texture_scale for recipe in config.recipes})
+        self.assertEqual({7}, {recipe.temporal_smooth_frames for recipe in config.recipes})
+        self.assertEqual({24}, {recipe.loop_crossfade_frames for recipe in config.recipes})
+
 
 class FilmGrainFilterTests(unittest.TestCase):
     def test_control_uses_same_delivery_transcode_without_grain_input(self):

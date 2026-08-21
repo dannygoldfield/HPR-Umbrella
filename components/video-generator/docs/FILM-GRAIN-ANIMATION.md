@@ -1,6 +1,6 @@
 # Film Grain Animation
 
-Status: final keep-or-drop comparison after the Development Animation and
+Status: final opacity-only comparison after the Development Animation and
 Infinity background decisions were locked on 2026-08-20.
 
 ## Creative purpose
@@ -141,7 +141,7 @@ close inspection in `FGS-002`, diminishing or uncertain grain through
 `FGS-003`–`FGS-006`, and a bad end-of-loop flash in `FGS-007`. V23 therefore did
 not settle the layer.
 
-## Active keep-or-drop comparison: `film-grain-decision-v24`
+## Prior keep-or-drop comparison: `film-grain-decision-v24`
 
 V24 is a decision matrix rather than another narrow ladder. It contains a
 no-grain control plus all four locally held scan plates—Super 35 Light, 35mm
@@ -171,6 +171,30 @@ reversed copy of the opening grain. The last-frame-to-first-frame change
 measures 0.618–0.943 times an ordinary adjacent change across V24, while first
 and last grain amplitude remain within 8% of the median. This removes both the
 V23 warm-up flash and a conspicuous slow-grain reset.
+
+## Active opacity-only comparison: `film-grain-opacity-v25`
+
+Review of V24 reframed the decision as a finishing-layer adjustment: choose one
+grain material and lower its opacity until it improves skin texture without
+reading as a separate effect. V25 therefore uses 13 Super 35 Light candidates
+at these opacity values:
+
+```text
+10%, 12.5%, 15%, 17.5%, 20%, 22.5%, 25%,
+27.5%, 30%, 32.5%, 35%, 37.5%, 40%
+```
+
+Opacity is the only changing parameter. Every candidate uses the exact
+`FGD-004` plate sample: starting frame 90, horizontal crop 0.9512, 5.9× grain
+signal gain, 1.25× texture scale, seven-frame temporal smoothing, and a
+24-frame loop blend. The locked `PDE-002` Development Animation and all output
+settings also remain unchanged. The V24 no-grain control remains available in
+the preceding review set.
+
+The intended selection criterion is tactile skin, not visible noise. A useful
+candidate should be felt as a slight improvement in surface life before the
+viewer identifies grain. If none improves the portrait over the prior no-grain
+control, the production system omits the grain layer.
 
 ## Review questions
 
@@ -204,7 +228,8 @@ The earlier seven-candidate 10000 round v19 remains reproducible. A temporary
 v20 grain-only diagnostic removed Development Animation to isolate the apparent
 motion report; that was not the desired creative test. V21 restored the proper
 three-layer stack but failed visibility. V22 found the visible range; V23 found
-that simple smoothing became too faint and exposed a loop flaw. V24 is the
-final multi-source keep-or-drop comparison. If one treatment is selected,
-confirm it on NYChildren and the complete Infinity composite before pairing
-audio. If no treatment improves the portrait, ship without grain.
+that simple smoothing became too faint and exposed a loop flaw. V24 completed
+the multi-source comparison; V25 is the final opacity-only ladder. If one
+opacity is selected, confirm it on NYChildren and the complete Infinity
+composite before pairing audio. If no treatment improves the portrait, ship
+without grain.

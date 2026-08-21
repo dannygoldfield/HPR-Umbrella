@@ -1,14 +1,15 @@
-# Film-grain character and strength test
+# Film-grain opacity test
 
 This tool adds scanned film grain after the locked HPR visual treatment. It does
 not rerun or change Portrait Development Animation, Infinity backgrounds,
 geometry, audio, or text.
 
-The active keep-or-drop round uses 10000 and four different scan plates. Each
-plate is calibrated at three, five, and seven-frame temporal windows so Danny
-can compare source character, visibility, and calmness in one 13-candidate
-matrix. The photographed image never translates, scales, or rotates;
-`PDE-002` remains active underneath the grain.
+The active round uses 10000 and the exact Super 35 Light scan sample from
+`FGD-004`. Thirteen candidates move from 10% to 40% opacity in even 2.5-point
+steps. Plate sample, grain size, signal contrast, temporal smoothing, loop,
+Development Animation, camera, and delivery settings remain identical. The
+photographed image never translates, scales, or rotates; `PDE-002` remains
+active underneath the grain.
 
 Source plates remain outside Git in Danny's local media library. The tracked
 recipe file records their filenames and the TDCatTech/LightKino download page;
@@ -25,7 +26,7 @@ python3 tools/render_film_grain_test/render_film_grain_test.py \
 ```
 
 The outputs are written to
-`workspace/film-grain-decision-v24/` and registered in
+`workspace/film-grain-opacity-v25/` and registered in
 `workspace/registry/hpr.sqlite3`. Both are intentionally excluded from Git.
 
 ## Guardrails
@@ -35,6 +36,7 @@ The outputs are written to
 - Luma-only grain; the approved chroma planes pass through unchanged.
 - No grain plate shorter than the selected 11-second sample window.
 - Identical plate sample for recipes that differ only in opacity.
+- Exactly 13 opacities from 10% through 40%; opacity is the sole test variable.
 - Explicit grain-signal gain and texture scale recorded in every manifest.
 - Explicit temporal-smoothing window recorded in every manifest.
 - Temporal pre-roll prevents the smoothing window from creating a start flash.
