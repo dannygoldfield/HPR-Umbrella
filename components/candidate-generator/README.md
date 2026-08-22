@@ -25,4 +25,4 @@ hpr-candidate plan \
 
 Use `generate` instead of `plan` after the private portrait, grain, and audio libraries have been supplied locally.
 
-If `--audio-recipe` is omitted, the generator selects a seamless ambient recipe for the requested duration: AR-008 for 7 seconds, AR-009 for 9 seconds, or AR-010 for 11 seconds.
+If `--audio-recipe` is omitted, the generator selects the current production recipe for the requested duration: AR-008 for 7 seconds, AR-009 for 9 seconds, or the stem-based AR-011 for 11 seconds.

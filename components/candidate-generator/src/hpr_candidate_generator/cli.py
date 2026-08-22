@@ -16,7 +16,7 @@ from .engine import (
 
 
 ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_AUDIO_RECIPES = {7: "AR-008", 9: "AR-009", 11: "AR-010"}
+DEFAULT_AUDIO_RECIPES = {7: "AR-008", 9: "AR-009", 11: "AR-011"}
 
 
 def _parser() -> argparse.ArgumentParser:

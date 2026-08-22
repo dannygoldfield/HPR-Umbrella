@@ -16,6 +16,7 @@ from .registry import (
     save_candidate_review,
     save_pair_review,
     set_sequence_order,
+    supersede_pair_experiment,
 )
 
 __all__ = [
@@ -34,4 +35,5 @@ __all__ = [
     "save_candidate_review",
     "save_pair_review",
     "set_sequence_order",
+    "supersede_pair_experiment",
 ]

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from array import array
 from dataclasses import dataclass
-from math import pow
+from math import cos, pi, pow, sin
 from pathlib import Path
 import random
 import wave
@@ -16,6 +16,7 @@ class GeneratedTrack:
     seed: int
     recipe_id: str
     bed_id: str
+    bed_start_sec: float
     gesture_id: str
     gesture_start_sec: float
     music_stem_id: str | None = None
@@ -60,7 +61,57 @@ def _music_excerpt(samples: array, target_samples: int, extra_samples: int, chan
     return excerpt, start_frame / sample_rate
 
 
-def _seamless_loop(samples: array, target_samples: int, fade_frames: int, channels: int) -> array:
+def _best_loop_excerpt(
+    samples: array,
+    target_samples: int,
+    extra_samples: int,
+    channels: int,
+    sample_rate: int,
+    step_sec: float,
+) -> tuple[array, float]:
+    """Choose an excerpt whose post-loop continuation most closely matches its start."""
+    if not samples:
+        raise ValueError("Continuous layer contains no samples")
+    required_samples = target_samples + extra_samples
+    if len(samples) < required_samples:
+        return _fit_bed(samples, required_samples), 0.0
+
+    max_start_frame = (len(samples) - required_samples) // channels
+    step_frames = max(1, round(step_sec * sample_rate))
+    starts = list(range(0, max_start_frame + 1, step_frames))
+    if starts[-1] != max_start_frame:
+        starts.append(max_start_frame)
+    comparison_stride = channels * 128
+
+    def cost(start_frame: int) -> float:
+        start = start_frame * channels
+        continuation = start + target_samples
+        squared_error = 0.0
+        signal_energy = 1.0
+        for offset in range(0, extra_samples, comparison_stride):
+            for channel in range(channels):
+                head = samples[start + offset + channel]
+                tail = samples[continuation + offset + channel]
+                difference = head - tail
+                squared_error += difference * difference
+                signal_energy += head * head + tail * tail
+        return squared_error / signal_energy
+
+    best_start_frame = min(starts, key=cost)
+    best_start = best_start_frame * channels
+    return (
+        array("h", samples[best_start:best_start + required_samples]),
+        best_start_frame / sample_rate,
+    )
+
+
+def _seamless_loop(
+    samples: array,
+    target_samples: int,
+    fade_frames: int,
+    channels: int,
+    curve: str = "linear",
+) -> array:
     if fade_frames <= 0:
         return array("h", samples[:target_samples])
     fade_samples = fade_frames * channels
@@ -69,13 +120,27 @@ def _seamless_loop(samples: array, target_samples: int, fade_frames: int, channe
     result = array("h", samples[:target_samples])
     denominator = max(1, fade_frames - 1)
     for frame in range(fade_frames):
-        blend = frame / denominator
+        progress = frame / denominator
+        if curve == "equalPower":
+            tail_weight = cos(progress * pi / 2.0)
+            head_weight = sin(progress * pi / 2.0)
+        elif curve == "linear":
+            tail_weight = 1.0 - progress
+            head_weight = progress
+        else:
+            raise ValueError(f"Unknown loop curve: {curve}")
         head = frame * channels
         tail = target_samples + head
         for channel in range(channels):
-            result[head + channel] = round(
-                samples[tail + channel] * (1.0 - blend)
-                + samples[head + channel] * blend
+            result[head + channel] = max(
+                -32768,
+                min(
+                    32767,
+                    round(
+                        samples[tail + channel] * tail_weight
+                        + samples[head + channel] * head_weight
+                    ),
+                ),
             )
     result[fade_samples:] = samples[fade_samples:target_samples]
     return result
@@ -105,11 +170,26 @@ def generate(config: Config, recipe_id: str, seed: int, output_path: Path) -> Ge
     target_samples = total_frames * config.channels
     fade_frames = round(profile.loop_crossfade_sec * config.sample_rate)
     fade_samples = fade_frames * config.channels
-    bed_source = _fit_bed(
-        _gain(_read_pcm(bed, config), profile.bed_gain_db),
-        target_samples + fade_samples,
+    gained_bed = _gain(_read_pcm(bed, config), profile.bed_gain_db)
+    if profile.optimize_loop_excerpt:
+        bed_source, bed_start_sec = _best_loop_excerpt(
+            gained_bed,
+            target_samples,
+            fade_samples,
+            config.channels,
+            config.sample_rate,
+            profile.loop_search_step_sec,
+        )
+    else:
+        bed_source = _fit_bed(gained_bed, target_samples + fade_samples)
+        bed_start_sec = 0.0
+    mix = _seamless_loop(
+        bed_source,
+        target_samples,
+        fade_frames,
+        config.channels,
+        profile.loop_crossfade_curve,
     )
-    mix = _seamless_loop(bed_source, target_samples, fade_frames, config.channels)
     gesture_samples = _gain(_read_pcm(gesture, config), profile.gesture_gain_db)
 
     earliest = profile.avoid_first_sec
@@ -124,19 +204,31 @@ def generate(config: Config, recipe_id: str, seed: int, output_path: Path) -> Ge
             if item.role == "Music" and item.status == "Active"
         ]
         music_stem = rng.choice(music_stems)
-        music_samples, music_start_sec = _music_excerpt(
-            _gain(_read_pcm(music_stem, config), profile.music_gain_db),
-            target_samples,
-            fade_samples,
-            config.channels,
-            config.sample_rate,
-            rng,
-        )
+        gained_music = _gain(_read_pcm(music_stem, config), profile.music_gain_db)
+        if profile.optimize_loop_excerpt:
+            music_samples, music_start_sec = _best_loop_excerpt(
+                gained_music,
+                target_samples,
+                fade_samples,
+                config.channels,
+                config.sample_rate,
+                profile.loop_search_step_sec,
+            )
+        else:
+            music_samples, music_start_sec = _music_excerpt(
+                gained_music,
+                target_samples,
+                fade_samples,
+                config.channels,
+                config.sample_rate,
+                rng,
+            )
         music_samples = _seamless_loop(
             music_samples,
             target_samples,
             fade_frames,
             config.channels,
+            profile.loop_crossfade_curve,
         )
         for index, value in enumerate(music_samples):
             mix[index] = max(-32768, min(32767, mix[index] + value))
@@ -154,12 +246,13 @@ def generate(config: Config, recipe_id: str, seed: int, output_path: Path) -> Ge
         output.writeframes(mix.tobytes())
 
     return GeneratedTrack(
-        output_path,
-        seed,
-        recipe_id,
-        bed.asset_id,
-        gesture.asset_id,
-        gesture_start_sec,
-        music_stem.asset_id if music_stem else None,
-        music_start_sec,
+        path=output_path,
+        seed=seed,
+        recipe_id=recipe_id,
+        bed_id=bed.asset_id,
+        bed_start_sec=bed_start_sec,
+        gesture_id=gesture.asset_id,
+        gesture_start_sec=gesture_start_sec,
+        music_stem_id=music_stem.asset_id if music_stem else None,
+        music_start_sec=music_start_sec,
     )

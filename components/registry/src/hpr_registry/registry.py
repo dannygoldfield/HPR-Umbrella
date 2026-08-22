@@ -561,7 +561,9 @@ def register_audio_candidate(
                 UPDATE audio_candidates
                 SET media_path=?, manifest_path=?,
                     status=CASE
-                        WHEN status IN ('retired', 'retired_selected') THEN status
+                        WHEN status IN (
+                            'retired', 'retired_selected', 'superseded_setup'
+                        ) THEN status
                         ELSE ?
                     END
                 WHERE audio_id=?
@@ -638,7 +640,8 @@ def register_pair_candidate(
                 SET media_path=?, manifest_path=?,
                     status=CASE
                         WHEN status IN (
-                            'reviewed', 'rejected_pair', 'selected', 'superseded'
+                            'reviewed', 'rejected_pair', 'selected', 'superseded',
+                            'superseded_setup'
                         ) THEN status
                         ELSE ?
                     END
@@ -683,6 +686,53 @@ def register_pair_candidate(
                 _now(),
             ),
         )
+
+
+def supersede_pair_experiment(db_path: Path, experiment_id: str) -> int:
+    """Retain a setup-error pair round for audit while removing it from active use."""
+    initialize_registry(db_path)
+    with _connect(db_path) as connection:
+        pairs = connection.execute(
+            """
+            SELECT pair_id, audio_id, status
+            FROM pair_candidates
+            WHERE experiment_id=?
+            """,
+            (experiment_id,),
+        ).fetchall()
+        if any(pair["status"] == "selected" for pair in pairs):
+            raise ValueError(f"Cannot supersede selected experiment: {experiment_id}")
+        if not pairs:
+            return 0
+        connection.execute(
+            """
+            UPDATE pair_candidates
+            SET status='superseded_setup'
+            WHERE experiment_id=?
+            """,
+            (experiment_id,),
+        )
+        for pair in pairs:
+            used_elsewhere = connection.execute(
+                """
+                SELECT 1
+                FROM pair_candidates
+                WHERE audio_id=? AND experiment_id<>?
+                  AND status NOT IN ('superseded', 'superseded_setup')
+                LIMIT 1
+                """,
+                (pair["audio_id"], experiment_id),
+            ).fetchone()
+            if not used_elsewhere:
+                connection.execute(
+                    """
+                    UPDATE audio_candidates
+                    SET status='superseded_setup'
+                    WHERE audio_id=? AND status='banked'
+                    """,
+                    (pair["audio_id"],),
+                )
+        return len(pairs)
 
 
 def list_pair_candidates_for_review(db_path: Path) -> list[dict[str, Any]]:

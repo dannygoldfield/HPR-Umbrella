@@ -55,14 +55,19 @@ no background phase or motion path. `PDE-002` remains the only visual motion;
 film grain is disabled under the production policy, while audio and editorial
 text remain pending.
 
-The default review set is now **Pair Review — NYChildren (10 audio options)**.
-It uses one locked, selected 11-second visual and ten distinct, native
-11-second `AR-010` audio candidates. The video player is unmuted in pair mode;
+The default review set is now **Pair Review — NYChildren stems (10 native
+11-second options)**. It uses one locked, selected 11-second visual and ten
+distinct `AR-011` candidates containing an ambient bed, a tactile gesture, and
+a prepared Suno stem. The video player is unmuted in pair mode;
 press Play to hear each option. Audio and complete-pair ratings are independent.
 Unused audio is visibly marked **Available in audio bank** and requires no
 manual Bank toggle. **Select pair** retires that audio from future final use,
 **Reject pair** leaves its audio banked, and **Retire audio** is reserved for
 sound that should not be reused with another portrait.
+
+The earlier `pairing-nychildren-v27` no-stem setup error remains selectable as
+audit history and is clearly labeled **Superseded**. Its audio is not available
+in the reusable bank.
 
 The **Production visuals — no film grain** set contains
 the selected NYChildren and 10000 `PDE-002` candidates and the selected

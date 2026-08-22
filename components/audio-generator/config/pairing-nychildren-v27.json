@@ -1,6 +1,8 @@
 {
   "schemaVersion": "1.0",
   "experimentId": "pairing-nychildren-v27",
+  "status": "superseded_setup",
+  "supersededReason": "No-stem setup error; replaced by pairing-nychildren-stems-v28",
   "portraitId": "POR-30FE48FB73CE",
   "portraitRevisionId": "POR-30FE48FB73CE-R002",
   "visualId": "VIS-30FE48FB73CE-PDE-002",

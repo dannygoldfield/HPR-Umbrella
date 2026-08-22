@@ -319,7 +319,7 @@
       requestAnimationFrame(updateTelemetry);
     }
     function setReviewSet(value){
-      reviewMode=value==='pairing-nychildren-v27'?'pair':'visual';
+      reviewMode=value.startsWith('pairing-')?'pair':'visual';
       if(reviewMode==='pair'){
         candidates=allPairs.filter(c=>c.experiment_id===value);
         candidates.forEach(c=>c.comparison_label='Locked selected visual + native 11-second audio');
@@ -362,7 +362,7 @@
       $('reject').checked=c.rejected; $('select').checked=c.selected; $('retire').checked=Boolean(c.retire_audio); $('notes').value=c.notes;
       $('rejectLabel').classList.toggle('active',c.rejected); $('selectLabel').classList.toggle('active',c.selected); $('retireLabel').classList.toggle('active',Boolean(c.retire_audio));
       if(reviewMode==='pair'){
-        const message=c.audio_status==='retired_selected'?'<strong>Selected final audio</strong> — retired from future final use.':c.audio_status==='retired'?'<strong style="color:var(--danger)">Audio retired</strong> — removed from the reusable bank.':'<strong>Available in audio bank</strong> — it stays reusable automatically unless this pair is selected or you retire the audio.';
+        const message=c.audio_status==='retired_selected'?'<strong>Selected final audio</strong> — retired from future final use.':c.audio_status==='retired'?'<strong style="color:var(--danger)">Audio retired</strong> — removed from the reusable bank.':c.audio_status==='superseded_setup'?'<strong>Superseded setup</strong> — retained for audit only; this audio is not in the bank.':'<strong>Available in audio bank</strong> — it stays reusable automatically unless this pair is selected or you retire the audio.';
         $('bankStatus').innerHTML=message;
       }
       $('reviewStatus').textContent=reviewStatus(c);
@@ -382,7 +382,10 @@
       if(!allCandidates.length&&!allPairs.length)throw new Error('No candidates are registered.');
       const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
       const choices=[];
-      if(allPairs.length)choices.push(['pairing-nychildren-v27','Pair Review — NYChildren (10 audio options)']);
+      const pairExperiments=[...new Set(allPairs.map(c=>c.experiment_id))];
+      if(pairExperiments.includes('pairing-nychildren-stems-v28'))choices.push(['pairing-nychildren-stems-v28','Pair Review — NYChildren stems (10 native 11-second options)']);
+      if(pairExperiments.includes('pairing-nychildren-v27'))choices.push(['pairing-nychildren-v27','Superseded — NYChildren no-stem setup error']);
+      pairExperiments.filter(id=>!['pairing-nychildren-stems-v28','pairing-nychildren-v27'].includes(id)).forEach(id=>choices.push([id,`Pair Review — ${id}`]));
       if(productionVisualIds.every(id=>allCandidates.some(c=>c.visual_id===id)))choices.push(['production-visuals-no-grain','Production visuals — no film grain']);
       if(experiments.includes('infinity-background-static-production-v26'))choices.push(['infinity-background-static-production-v26','Infinity Background — static production']);
       if(experiments.includes('film-grain-opacity-v25'))choices.push(['film-grain-opacity-v25','Film Grain — opacity-only comparison']);

@@ -171,10 +171,16 @@ Record visual, audio, and pair ratings separately. Rejected combinations return
 unselected components to their banks. Selecting a final pair retires its audio
 from future final use.
 
-The first implemented round uses the selected NYChildren `PDE-002` visual and
-10 deterministic `AR-010` **Air / Presence / Seamless** tracks. Every audio
-file and finished pair is natively 11 seconds; no seven-second candidate is
-stretched or looped to fit. The review screen exposes separate Audio and
+The active round uses the selected NYChildren `PDE-002` visual and 10
+deterministic `AR-011` **Open Field / Tactile / Music / Perceptually
+Seamless** tracks. Each contains an ambient bed, one tactile gesture, and one
+prepared Suno stem. It preserves the ingredient selections from the successful
+seven-second stem experiment but renders every audio file and finished pair
+natively at 11 seconds; no seven-second candidate is stretched or repeated to
+fit. Continuous layers use content-selected low-discontinuity excerpts and a
+two-second equal-power overlap to soften the repeat. The earlier `AR-010`
+NYChildren round is retained as `superseded_setup` because it accidentally
+omitted music stems. The review screen exposes separate Audio and
 Complete pair ratings plus three decisions: Reject pair, Select pair, and the
 exceptional Retire audio action. There is intentionally no Bank toggle. Audio
 remains banked unless a selected final pair consumes it or the reviewer says

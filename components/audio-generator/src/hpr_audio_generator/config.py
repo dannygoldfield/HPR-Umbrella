@@ -13,6 +13,7 @@ class Asset:
     family: str
     path: Path
     source: str
+    duration_sec: float | None
     status: str
 
 
@@ -23,6 +24,9 @@ class Profile:
     gesture_gain_db: float
     music_gain_db: float
     loop_crossfade_sec: float
+    loop_crossfade_curve: str
+    optimize_loop_excerpt: bool
+    loop_search_step_sec: float
     min_gestures: int
     max_gestures: int
     avoid_first_sec: float
@@ -69,6 +73,11 @@ def load_config(path: Path, *, asset_root: Path | None = None) -> Config:
             family=node.attrib["family"],
             path=root / node.attrib["path"],
             source=node.attrib.get("source", "Unknown"),
+            duration_sec=(
+                float(node.attrib["durationSec"])
+                if "durationSec" in node.attrib
+                else None
+            ),
             status=node.attrib.get("status", "Active"),
         )
         for node in config.findall("./assets/asset")
@@ -80,6 +89,9 @@ def load_config(path: Path, *, asset_root: Path | None = None) -> Config:
             gesture_gain_db=float(node.attrib["gestureGainDb"]),
             music_gain_db=float(node.attrib.get("musicGainDb", "-24")),
             loop_crossfade_sec=float(node.attrib.get("loopCrossfadeSec", "0")),
+            loop_crossfade_curve=node.attrib.get("loopCrossfadeCurve", "linear"),
+            optimize_loop_excerpt=node.attrib.get("optimizeLoopExcerpt", "No") == "Yes",
+            loop_search_step_sec=float(node.attrib.get("loopSearchStepSec", "0.25")),
             min_gestures=int(node.attrib["minGestures"]),
             max_gestures=int(node.attrib["maxGestures"]),
             avoid_first_sec=float(node.attrib["avoidFirstSec"]),
@@ -129,3 +141,10 @@ def validate_config(config: Config) -> None:
             asset.role == "Music" and asset.status == "Active" for asset in config.assets
         ):
             raise ValueError(f"{recipe.recipe_id} requires an active music stem")
+    for profile in config.profiles.values():
+        if profile.loop_crossfade_curve not in {"linear", "equalPower"}:
+            raise ValueError(
+                f"{profile.profile_id} has unknown loop curve {profile.loop_crossfade_curve}"
+            )
+        if profile.loop_search_step_sec <= 0:
+            raise ValueError(f"{profile.profile_id} loop search step must be positive")

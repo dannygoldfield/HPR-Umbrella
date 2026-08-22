@@ -6,7 +6,7 @@ import wave
 from hpr_audio_generator.config import load_config
 from array import array
 
-from hpr_audio_generator.generator import _seamless_loop, generate
+from hpr_audio_generator.generator import _best_loop_excerpt, _seamless_loop, generate
 from support import AudioFixture
 
 
@@ -15,6 +15,27 @@ class GeneratorTests(unittest.TestCase):
         source = array("h", [10, 20, 30, 40, 50, 60, 70])
         loop = _seamless_loop(source, target_samples=5, fade_frames=2, channels=1)
         self.assertEqual(array("h", [60, 20, 30, 40, 50]), loop)
+
+    def test_equal_power_loop_preserves_more_midpoint_energy(self) -> None:
+        source = array("h", [100, 100, 100, 100, 100, 100, 100, 100])
+        linear = _seamless_loop(source, 4, 4, 1, "linear")
+        equal_power = _seamless_loop(source, 4, 4, 1, "equalPower")
+        self.assertGreater(equal_power[1], linear[1])
+        self.assertEqual(100, equal_power[0])
+        self.assertEqual(100, equal_power[3])
+
+    def test_best_loop_excerpt_selects_matching_continuation(self) -> None:
+        samples = array("h", [100, 200, 900, 900, 900, 900, 100, 200])
+        excerpt, start_sec = _best_loop_excerpt(
+            samples,
+            target_samples=6,
+            extra_samples=2,
+            channels=1,
+            sample_rate=1,
+            step_sec=1,
+        )
+        self.assertEqual(0.0, start_sec)
+        self.assertEqual(samples, excerpt)
 
     def test_seed_is_reproducible(self) -> None:
         with AudioFixture() as config_path:
@@ -54,6 +75,16 @@ class GeneratorTests(unittest.TestCase):
                     (seamless.bed_id, seamless.gesture_id, seamless.gesture_start_sec, seamless.music_stem_id, seamless.music_start_sec),
                 )
                 self.assertNotEqual((Path(directory) / "original.wav").read_bytes(), (Path(directory) / "seamless.wav").read_bytes())
+
+    def test_native_eleven_second_recipe_uses_music_stem(self) -> None:
+        with AudioFixture() as config_path:
+            config = load_config(config_path)
+            with TemporaryDirectory() as directory:
+                path = Path(directory) / "native-eleven.wav"
+                track = generate(config, "AR-011", 2026073001, path)
+                self.assertIsNotNone(track.music_stem_id)
+                with wave.open(str(path), "rb") as audio:
+                    self.assertEqual(11 * 48000, audio.getnframes())
 
 
 if __name__ == "__main__":

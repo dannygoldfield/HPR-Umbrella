@@ -25,12 +25,13 @@ from hpr_registry import (  # noqa: E402
     list_visual_candidates_for_review,
     register_audio_candidate,
     register_pair_candidate,
+    supersede_pair_experiment,
 )
 
 
-EXPERIMENT_ID = "pairing-nychildren-v27"
+DEFAULT_EXPERIMENT_ID = "pairing-nychildren-stems-v28"
 DEFAULT_VISUAL_ID = "VIS-30FE48FB73CE-PDE-002"
-DEFAULT_RECIPE_ID = "AR-010"
+DEFAULT_RECIPE_ID = "AR-011"
 
 
 def _sha256(path: Path) -> str:
@@ -166,6 +167,7 @@ def _validate_pair(probe: dict, duration_sec: int) -> dict:
 
 def render_round(
     *,
+    experiment_id: str,
     db_path: Path,
     visual_id: str,
     config_path: Path,
@@ -176,6 +178,8 @@ def render_round(
     ffmpeg: str,
     ffprobe: str,
     reuse_existing: bool,
+    seed_start: int | None = None,
+    supersede_experiment: str | None = None,
 ) -> dict:
     initialize_registry(db_path)
     config = load_config(config_path, asset_root=asset_root)
@@ -201,8 +205,12 @@ def render_round(
     pair_root = output_root / "pairs"
     audio_root.mkdir(exist_ok=True)
     pair_root.mkdir(exist_ok=True)
-    base_seed = _seed_base(EXPERIMENT_ID, visual_id, recipe_id)
-    seeds = distinct_seeds(config, recipe_id, count, base_seed)
+    base_seed = _seed_base(experiment_id, visual_id, recipe_id)
+    seeds = (
+        list(range(seed_start, seed_start + count))
+        if seed_start is not None
+        else distinct_seeds(config, recipe_id, count, base_seed)
+    )
     rendered = []
     for index, seed in enumerate(seeds, start=1):
         audio_id = _stable_id("AUD", recipe_id, seed, config.generator_version)
@@ -219,11 +227,12 @@ def render_round(
             _validate_wav(audio_path, config, recipe.duration_sec)
             bed = _asset(config, track.bed_id)
             gesture = _asset(config, track.gesture_id)
+            music = _asset(config, track.music_stem_id) if track.music_stem_id else None
             audio_manifest = {
                 "schemaVersion": "1.0",
                 "candidateType": "audio",
                 "audioId": audio_id,
-                "experimentId": EXPERIMENT_ID,
+                "experimentId": experiment_id,
                 "recipe": {"id": recipe_id, "name": recipe.name},
                 "durationSec": recipe.duration_sec,
                 "seed": seed,
@@ -234,6 +243,7 @@ def render_round(
                         "name": bed.name,
                         "family": bed.family,
                         "source": bed.source,
+                        "startSec": round(track.bed_start_sec, 6),
                     },
                     "gesture": {
                         "id": gesture.asset_id,
@@ -242,7 +252,13 @@ def render_round(
                         "source": gesture.source,
                         "startSec": round(track.gesture_start_sec, 6),
                     },
-                    "music": None,
+                    "music": {
+                        "id": music.asset_id,
+                        "name": music.name,
+                        "family": music.family,
+                        "source": music.source,
+                        "startSec": round(track.music_start_sec or 0.0, 6),
+                    } if music else None,
                 },
                 "format": {
                     "container": "WAV",
@@ -308,7 +324,7 @@ def render_round(
                 "schemaVersion": "1.0",
                 "candidateType": "visual_audio_pair",
                 "pairId": pair_id,
-                "experimentId": EXPERIMENT_ID,
+                "experimentId": experiment_id,
                 "optionNumber": index,
                 "portraitId": visual["portrait_id"],
                 "portraitRevisionId": visual["revision_id"],
@@ -346,7 +362,7 @@ def render_round(
         register_pair_candidate(
             db_path,
             pair_id=pair_id,
-            experiment_id=EXPERIMENT_ID,
+            experiment_id=experiment_id,
             portrait_id=visual["portrait_id"],
             visual_id=visual_id,
             audio_id=audio_id,
@@ -362,6 +378,11 @@ def render_round(
                 "seed": seed,
                 "bedId": audio_manifest["ingredients"]["bed"]["id"],
                 "gestureId": audio_manifest["ingredients"]["gesture"]["id"],
+                "musicStemId": (
+                    audio_manifest["ingredients"]["music"]["id"]
+                    if audio_manifest["ingredients"]["music"]
+                    else None
+                ),
                 "pair": str(pair_path.resolve()),
                 "manifest": str(pair_manifest_path.resolve()),
                 "technicalValidation": technical,
@@ -370,7 +391,7 @@ def render_round(
 
     summary = {
         "schemaVersion": "1.0",
-        "experimentId": EXPERIMENT_ID,
+        "experimentId": experiment_id,
         "createdAt": datetime.now(timezone.utc).isoformat(),
         "portraitId": visual["portrait_id"],
         "portraitRevisionId": visual["revision_id"],
@@ -382,6 +403,12 @@ def render_round(
         "audioBankPolicy": "Unused audio remains available automatically; no bank toggle is required.",
         "candidates": rendered,
     }
+    if supersede_experiment:
+        summary["supersededExperiment"] = {
+            "id": supersede_experiment,
+            "candidateCount": supersede_pair_experiment(db_path, supersede_experiment),
+            "reason": "No-stem setup error; retained for audit only",
+        }
     (output_root / "experiment-summary.json").write_text(
         json.dumps(summary, indent=2) + "\n", encoding="utf-8"
     )
@@ -395,6 +422,7 @@ def main() -> None:
         type=Path,
         default=REPOSITORY_ROOT / "workspace/registry/hpr.sqlite3",
     )
+    parser.add_argument("--experiment-id", default=DEFAULT_EXPERIMENT_ID)
     parser.add_argument("--visual-id", default=DEFAULT_VISUAL_ID)
     parser.add_argument(
         "--config",
@@ -406,14 +434,17 @@ def main() -> None:
     parser.add_argument(
         "--output-root",
         type=Path,
-        default=REPOSITORY_ROOT / "workspace/pairing-nychildren-v27",
+        default=REPOSITORY_ROOT / "workspace/pairing-nychildren-stems-v28",
     )
     parser.add_argument("--count", type=int, choices=range(1, 33), default=10)
     parser.add_argument("--ffmpeg", default="ffmpeg")
     parser.add_argument("--ffprobe", default="ffprobe")
     parser.add_argument("--reuse-existing", action="store_true")
+    parser.add_argument("--seed-start", type=int)
+    parser.add_argument("--supersede-experiment")
     args = parser.parse_args()
     summary = render_round(
+        experiment_id=args.experiment_id,
         db_path=args.db,
         visual_id=args.visual_id,
         config_path=args.config,
@@ -424,6 +455,8 @@ def main() -> None:
         ffmpeg=args.ffmpeg,
         ffprobe=args.ffprobe,
         reuse_existing=args.reuse_existing,
+        seed_start=args.seed_start,
+        supersede_experiment=args.supersede_experiment,
     )
     print(json.dumps(summary, indent=2))
 

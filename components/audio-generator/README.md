@@ -15,6 +15,11 @@ Each candidate is generated from:
 
 The generator creates constrained surprises. A human listens, rates, and decides what enters the approved library.
 
+The current production 11-second recipe is `AR-011`. It combines one bed, one
+gesture, and one prepared Suno stem, selects low-discontinuity excerpts, and
+uses a two-second equal-power loop overlap. `AR-010` remains only as the
+auditable no-stem comparison.
+
 ## What is included
 
 - `config/generator.xml`: the machine-readable source of truth for 90 locally managed audio assets
