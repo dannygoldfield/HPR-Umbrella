@@ -101,3 +101,12 @@ Keyboard shortcuts: 1–5 set the visual or complete-pair rating, R toggles
 reject, S toggles selection, T retires audio in pair mode, left/right arrows
 navigate, and Space pauses or resumes the video. Audio ratings use their own
 visible buttons so the two judgments cannot be confused.
+
+## Audio-only review
+
+Open `http://127.0.0.1:8765/audio` for the independent Audio Generator review.
+It contains no portrait or video. Playback loops continuously so every
+candidate can cross its eleven-second boundary several times. Ratings, notes,
+rejection, and **Approve for audio bank** save to the same audit registry.
+Multiple audio candidates may be approved; final pairing happens later in the
+AV Assembler.

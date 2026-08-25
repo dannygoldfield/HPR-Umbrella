@@ -517,6 +517,47 @@ def list_visual_candidates_for_review(db_path: Path) -> list[dict[str, Any]]:
     return candidates
 
 
+def list_audio_candidates_for_review(db_path: Path) -> list[dict[str, Any]]:
+    """Return standalone audio candidates with their latest review state."""
+    if not db_path.is_file():
+        initialize_registry(db_path)
+    with _connect(db_path) as connection:
+        rows = connection.execute(
+            """
+            WITH latest_review AS (
+                SELECT subject_id, MAX(review_id) AS review_id
+                FROM candidate_reviews
+                WHERE subject_kind = 'audio'
+                GROUP BY subject_id
+            )
+            SELECT a.audio_id, a.recipe_id, a.duration_sec, a.seed,
+                   a.generator_version, a.media_path, a.manifest_path,
+                   a.status AS render_status, a.created_at,
+                   cr.review_id, cr.rating, cr.rejected, cr.selected, cr.notes
+            FROM audio_candidates a
+            LEFT JOIN latest_review lr ON lr.subject_id = a.audio_id
+            LEFT JOIN candidate_reviews cr ON cr.review_id = lr.review_id
+            ORDER BY a.created_at, a.audio_id
+            """
+        ).fetchall()
+    candidates = []
+    for row in rows:
+        candidate = dict(row)
+        candidate["rejected"] = bool(candidate["rejected"] or 0)
+        candidate["selected"] = bool(candidate["selected"] or 0)
+        candidate["notes"] = candidate["notes"] or ""
+        if candidate["selected"]:
+            candidate["review_status"] = "approved for bank"
+        elif candidate["rejected"]:
+            candidate["review_status"] = "rejected"
+        elif candidate["rating"] is not None or candidate["notes"]:
+            candidate["review_status"] = "reviewed"
+        else:
+            candidate["review_status"] = "unreviewed"
+        candidates.append(candidate)
+    return candidates
+
+
 def register_audio_candidate(
     db_path: Path,
     *,
@@ -1025,6 +1066,14 @@ def save_candidate_review(
                 now,
             ),
         )
+        if subject_kind == "audio":
+            audio_status = (
+                "retired" if rejected else "banked" if selected else "ready_for_review"
+            )
+            connection.execute(
+                "UPDATE audio_candidates SET status=? WHERE audio_id=?",
+                (audio_status, subject_id),
+            )
         return int(cursor.lastrowid)
 
 

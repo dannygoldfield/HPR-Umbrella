@@ -11,6 +11,7 @@ from hpr_registry.registry import (
     get_sequence,
     ingest_metadata_report,
     initialize_registry,
+    list_audio_candidates_for_review,
     list_current_portrait_revisions,
     list_pair_candidates_for_review,
     list_portraits,
@@ -250,6 +251,61 @@ class RegistryTests(unittest.TestCase):
         }
         self.assertFalse(candidates["VIS-A"]["selected"])
         self.assertTrue(candidates["VIS-B"]["selected"])
+
+    def test_audio_only_review_can_approve_multiple_candidates_for_bank(self) -> None:
+        for index in (1, 2):
+            audio_id = f"AUD-REVIEW-{index}"
+            register_audio_candidate(
+                self.db,
+                audio_id=audio_id,
+                recipe_id="AR-008",
+                duration_sec=11,
+                seed=2026073000 + index,
+                generator_version="0.3.1",
+                media_path=self.root / f"{audio_id}.wav",
+                manifest_path=self.root / f"{audio_id}.json",
+                status="ready_for_review",
+            )
+            save_candidate_review(
+                self.db,
+                subject_kind="audio",
+                subject_id=audio_id,
+                rating=5,
+                rejected=False,
+                selected=True,
+                notes="Invisible loop",
+            )
+        candidates = list_audio_candidates_for_review(self.db)
+        self.assertEqual(2, len(candidates))
+        self.assertTrue(all(candidate["selected"] for candidate in candidates))
+        self.assertTrue(
+            all(candidate["render_status"] == "banked" for candidate in candidates)
+        )
+
+    def test_rejecting_audio_removes_it_from_bank(self) -> None:
+        register_audio_candidate(
+            self.db,
+            audio_id="AUD-REJECT",
+            recipe_id="AR-008",
+            duration_sec=11,
+            seed=2026073001,
+            generator_version="0.3.1",
+            media_path=self.root / "AUD-REJECT.wav",
+            manifest_path=self.root / "AUD-REJECT.json",
+            status="ready_for_review",
+        )
+        save_candidate_review(
+            self.db,
+            subject_kind="audio",
+            subject_id="AUD-REJECT",
+            rating=1,
+            rejected=True,
+            selected=False,
+            notes="Audible seam",
+        )
+        candidate = list_audio_candidates_for_review(self.db)[0]
+        self.assertTrue(candidate["rejected"])
+        self.assertEqual("retired", candidate["render_status"])
 
     def test_latest_visual_review_is_separate_and_auditable(self) -> None:
         report, intake, _ = self.write_inputs()

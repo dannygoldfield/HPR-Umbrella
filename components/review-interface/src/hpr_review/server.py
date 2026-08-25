@@ -13,6 +13,7 @@ from urllib.parse import unquote, urlparse
 import webbrowser
 
 from hpr_registry import (
+    list_audio_candidates_for_review,
     list_pair_candidates_for_review,
     list_visual_candidates_for_review,
     save_candidate_review,
@@ -37,6 +38,13 @@ def _pair(db_path: Path, pair_id: str) -> dict[str, Any]:
     raise ValueError(f"Unknown pair candidate: {pair_id}")
 
 
+def _audio_candidate(db_path: Path, audio_id: str) -> dict[str, Any]:
+    for candidate in list_audio_candidates_for_review(db_path):
+        if candidate["audio_id"] == audio_id:
+            return candidate
+    raise ValueError(f"Unknown audio candidate: {audio_id}")
+
+
 class ReviewHandler(BaseHTTPRequestHandler):
     db_path: Path
 
@@ -53,6 +61,19 @@ class ReviewHandler(BaseHTTPRequestHandler):
         body = (
             resources.files("hpr_review")
             .joinpath("static/index.html")
+            .read_bytes()
+        )
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _audio_index(self) -> None:
+        body = (
+            resources.files("hpr_review")
+            .joinpath("static/audio.html")
             .read_bytes()
         )
         self.send_response(HTTPStatus.OK)
@@ -112,6 +133,31 @@ class ReviewHandler(BaseHTTPRequestHandler):
         if parsed.path == "/":
             self._index()
             return
+        if parsed.path in {"/audio", "/audio/"}:
+            self._audio_index()
+            return
+        if parsed.path == "/api/audio-candidates":
+            candidates = list_audio_candidates_for_review(self.db_path)
+            for candidate in candidates:
+                audio_id = candidate["audio_id"]
+                candidate["media_url"] = f"/audio-media/{audio_id}"
+                candidate["manifest_url"] = f"/audio-manifest/{audio_id}"
+                try:
+                    manifest = json.loads(
+                        Path(candidate["manifest_path"]).read_text(encoding="utf-8")
+                    )
+                except (OSError, json.JSONDecodeError):
+                    manifest = {}
+                candidate["batch_id"] = manifest.get("batchId", "Unassigned batch")
+                candidate["review_position"] = manifest.get("reviewPosition")
+                candidate["target_lufs"] = manifest.get("delivery", {}).get(
+                    "targetLufs"
+                )
+                candidate["loop_click_check"] = manifest.get(
+                    "loopValidation", {}
+                ).get("click_check_passed")
+            self._json(HTTPStatus.OK, {"candidates": candidates})
+            return
         if parsed.path == "/api/candidates":
             candidates = list_visual_candidates_for_review(self.db_path)
             for candidate in candidates:
@@ -128,6 +174,19 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 candidate["manifest_url"] = f"/pair-manifest/{pair_id}"
             self._json(HTTPStatus.OK, {"candidates": candidates})
             return
+        for prefix, field, allow_range in (
+            ("/audio-media/", "media_path", True),
+            ("/audio-manifest/", "manifest_path", False),
+        ):
+            if parsed.path.startswith(prefix):
+                try:
+                    item = _audio_candidate(
+                        self.db_path, unquote(parsed.path[len(prefix) :])
+                    )
+                    self._file(Path(item[field]), allow_range=allow_range)
+                except ValueError as error:
+                    self._json(HTTPStatus.NOT_FOUND, {"error": str(error)})
+                return
         for prefix, field, allow_range in (
             ("/media/", "media_path", True),
             ("/manifest/", "manifest_path", False),
@@ -154,6 +213,28 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
+        audio_prefix = "/api/audio-reviews/"
+        if parsed.path.startswith(audio_prefix):
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if length < 1 or length > 1024 * 1024:
+                    raise ValueError("Invalid request size")
+                payload = json.loads(self.rfile.read(length))
+                if not isinstance(payload, dict):
+                    raise ValueError("Review must be a JSON object")
+                review_id = save_candidate_review(
+                    self.db_path,
+                    subject_kind="audio",
+                    subject_id=unquote(parsed.path[len(audio_prefix) :]),
+                    rating=payload.get("rating"),
+                    rejected=payload.get("rejected") is True,
+                    selected=payload.get("selected") is True,
+                    notes=payload.get("notes", ""),
+                )
+                self._json(HTTPStatus.CREATED, {"review_id": review_id})
+            except (ValueError, TypeError, json.JSONDecodeError) as error:
+                self._json(HTTPStatus.BAD_REQUEST, {"error": str(error)})
+            return
         pair_prefix = "/api/pair-reviews/"
         if parsed.path.startswith(pair_prefix):
             try:
