@@ -729,8 +729,15 @@ def register_pair_candidate(
         )
 
 
-def supersede_pair_experiment(db_path: Path, experiment_id: str) -> int:
-    """Retain a setup-error pair round for audit while removing it from active use."""
+def supersede_pair_experiment(
+    db_path: Path, experiment_id: str, *, supersede_audio: bool = True
+) -> int:
+    """Retain a pair round for audit while removing it from active use.
+
+    Setup-error rounds can retire their generated audio with the default
+    behavior. AV assembly rounds must pass ``supersede_audio=False`` because
+    their soundtracks belong to the independently approved audio bank.
+    """
     initialize_registry(db_path)
     with _connect(db_path) as connection:
         pairs = connection.execute(
@@ -753,6 +760,8 @@ def supersede_pair_experiment(db_path: Path, experiment_id: str) -> int:
             """,
             (experiment_id,),
         )
+        if not supersede_audio:
+            return len(pairs)
         for pair in pairs:
             used_elsewhere = connection.execute(
                 """

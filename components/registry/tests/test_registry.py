@@ -523,6 +523,52 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual("superseded_setup", candidate["render_status"])
         self.assertEqual("superseded_setup", candidate["audio_status"])
 
+    def test_superseding_av_round_preserves_independent_audio_bank(self) -> None:
+        report, intake, _ = self.write_inputs()
+        ingested = ingest_metadata_report(self.db, report, intake, self.manifests)[0]
+        register_visual_candidate(
+            self.db,
+            visual_id="VIS-BANKED-PAIR",
+            portrait_id=ingested["portrait_id"],
+            revision_id=ingested["revision_id"],
+            motion_recipe_id="PDE-002",
+            duration_sec=11,
+            seed=123,
+            generator_version="0.1.0",
+            media_path=self.root / "visual.mp4",
+            manifest_path=self.root / "visual.json",
+        )
+        register_audio_candidate(
+            self.db,
+            audio_id="AUD-BANKED-PAIR",
+            recipe_id="AR-012",
+            duration_sec=11,
+            seed=456,
+            generator_version="0.3.1",
+            media_path=self.root / "audio.wav",
+            manifest_path=self.root / "audio.json",
+            status="banked",
+        )
+        register_pair_candidate(
+            self.db,
+            pair_id="PAIR-BANKED",
+            experiment_id="pairing-from-bank",
+            portrait_id=ingested["portrait_id"],
+            visual_id="VIS-BANKED-PAIR",
+            audio_id="AUD-BANKED-PAIR",
+            media_path=self.root / "pair.mp4",
+            manifest_path=self.root / "pair.json",
+        )
+        self.assertEqual(
+            1,
+            supersede_pair_experiment(
+                self.db, "pairing-from-bank", supersede_audio=False
+            ),
+        )
+        candidate = list_pair_candidates_for_review(self.db)[0]
+        self.assertEqual("superseded_setup", candidate["render_status"])
+        self.assertEqual("banked", candidate["audio_status"])
+
     def test_episode_numbers_appear_only_when_complete_sequence_locks(self) -> None:
         report, intake, _ = self.write_inputs(2)
         ingested = ingest_metadata_report(self.db, report, intake, self.manifests)

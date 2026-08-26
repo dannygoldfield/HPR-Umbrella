@@ -28,7 +28,10 @@ from hpr_registry import (  # noqa: E402
 
 LOUDNESS_RE = re.compile(r"I:\s+(-?\d+(?:\.\d+)?) LUFS")
 TRUE_PEAK_RE = re.compile(r"Peak:\s+(-?\d+(?:\.\d+)?) dBFS")
-ELIGIBLE_AUDIO_STATUSES = {"banked", "ready_for_review"}
+# Human approval is the gate between audio review and AV assembly. Automated
+# delivery checks may register a candidate as ready_for_review, but that status
+# must never make the candidate eligible for pairing.
+ELIGIBLE_AUDIO_STATUSES = {"banked"}
 
 
 def _sha256(path: Path) -> str:
@@ -299,7 +302,9 @@ def assemble_round(
         superseded.append(
             {
                 "experimentId": old_experiment,
-                "candidateCount": supersede_pair_experiment(db_path, old_experiment),
+                "candidateCount": supersede_pair_experiment(
+                    db_path, old_experiment, supersede_audio=False
+                ),
             }
         )
     summary = {

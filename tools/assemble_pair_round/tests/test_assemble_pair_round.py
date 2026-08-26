@@ -9,10 +9,17 @@ import wave
 TOOL_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(TOOL_ROOT))
 
-from assemble_pair_round import _stable_id, _validate_source_wav  # noqa: E402
+from assemble_pair_round import (  # noqa: E402
+    ELIGIBLE_AUDIO_STATUSES,
+    _stable_id,
+    _validate_source_wav,
+)
 
 
 class AssemblePairRoundTests(unittest.TestCase):
+    def test_only_human_banked_audio_is_eligible(self) -> None:
+        self.assertEqual({"banked"}, ELIGIBLE_AUDIO_STATUSES)
+
     def test_pair_identity_is_stable_and_asset_specific(self) -> None:
         first = _stable_id("PAIR", "VIS-1", "AUD-1")
         self.assertEqual(first, _stable_id("PAIR", "VIS-1", "AUD-1"))
