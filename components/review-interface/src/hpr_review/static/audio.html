@@ -271,7 +271,7 @@
       registered=data.candidates;
       all=registered.filter(candidate=>['ready_for_review','banked'].includes(candidate.render_status));
       if(!all.length)throw new Error('No standalone audio candidates are registered.');
-      pendingEleven=registered.filter(candidate=>Number(candidate.duration_sec)===11&&candidate.render_status==='ready_for_review').sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||'')).slice(0,10);
+      pendingEleven=registered.filter(candidate=>Number(candidate.duration_sec)===11&&candidate.render_status==='ready_for_review').sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
       updateBankProgress();
       const batches=[...new Set(all.map(candidate=>candidate.batch_id))];
       const newest=batchId=>all.filter(candidate=>candidate.batch_id===batchId).reduce((latest,candidate)=>candidate.created_at>latest?candidate.created_at:latest,'');
