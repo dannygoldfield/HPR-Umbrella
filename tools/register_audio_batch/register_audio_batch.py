@@ -22,6 +22,9 @@ def register_batch(db_path: Path, batch_manifest_path: Path) -> dict[str, object
         raise ValueError("Manifest is not an audio-only review batch")
     if not batch.get("requirements", {}).get("audioOnlyReview"):
         raise ValueError("Batch is not marked for independent audio review")
+    registration_status = batch.get("registrationStatus", "ready_for_review")
+    if registration_status not in {"ready_for_review", "banked"}:
+        raise ValueError(f"Unsupported audio registration status: {registration_status}")
     registered: list[str] = []
     for item in batch["candidates"]:
         manifest_path = Path(item["manifest"]).resolve()
@@ -47,7 +50,7 @@ def register_batch(db_path: Path, batch_manifest_path: Path) -> dict[str, object
             generator_version=manifest["generatorVersion"],
             media_path=media_path,
             manifest_path=manifest_path,
-            status="ready_for_review",
+            status=registration_status,
         )
         registered.append(audio_id)
     return {

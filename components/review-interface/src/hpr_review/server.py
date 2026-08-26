@@ -153,6 +153,10 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 candidate["target_lufs"] = manifest.get("delivery", {}).get(
                     "targetLufs"
                 )
+                candidate["delivered_lufs"] = manifest.get("delivery", {}).get(
+                    "deliveredIntegratedLufs"
+                )
+                candidate["comparison_name"] = manifest.get("comparisonName")
                 candidate["loop_click_check"] = manifest.get(
                     "loopValidation", {}
                 ).get("click_check_passed")

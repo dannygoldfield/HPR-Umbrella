@@ -61,7 +61,7 @@
         <div>
           <div class="eyebrow" id="counter"></div>
           <h2 id="title"></h2>
-          <div class="muted">Listen without video. Let playback cross the loop boundary at least twice.</div>
+          <div class="muted" id="instruction">Listen without video. Let playback cross the loop boundary at least twice.</div>
           <audio id="player" controls loop preload="metadata"></audio>
           <div class="loop-note"><span class="loop-dot"></span>Continuous loop playback is on</div>
         </div>
@@ -124,10 +124,12 @@
     function render(){
       const c=current(); if(!c)return;
       $('counter').textContent=`Candidate ${position+1} of ${candidates.length}`;
-      $('title').textContent=`Audio option ${String(c.review_position||position+1).padStart(2,'0')}`;
+      $('title').textContent=c.comparison_name||`Audio option ${String(c.review_position||position+1).padStart(2,'0')}`;
+      $('instruction').textContent=c.recipe_id==='AR-012'?'These are new eleven-second compositions, not extensions of seven-second tracks. Judge the sound and the loop independently, and let playback cross the boundary at least twice.':c.recipe_id.includes('LOOP-NATIVE')?'Listen in order: A tests ambience, B adds the gesture, and C adds music. Note the first layer where the loop becomes audible.':c.recipe_id.includes('LOOP-REPAIR')?'The sound design is locked. Judge only whether the boundary disappears during continuous playback.':'Listen without video. Let playback cross the loop boundary at least twice.';
       const player=$('player'); player.pause(); player.src=c.media_url; player.currentTime=0; player.load(); player.loop=true;
       $('duration').textContent=`${Number(c.duration_sec).toFixed(0)} native seconds`;
-      $('level').textContent=c.target_lufs==null?'—':`${Number(c.target_lufs).toFixed(0)} LUFS`;
+      const playbackLufs=c.delivered_lufs??c.target_lufs;
+      $('level').textContent=playbackLufs==null?'—':`${Number(playbackLufs).toFixed(1)} LUFS`;
       $('recipe').textContent=c.recipe_id; $('seed').textContent=c.seed;
       $('manifest').href=c.manifest_url; $('audioId').textContent=c.audio_id;
       $('batchId').textContent=c.batch_id; $('generator').textContent=c.generator_version;
@@ -171,14 +173,15 @@
       else if(event.key===' '){ event.preventDefault(); const player=$('player'); player.paused?player.play():player.pause(); }
     });
     fetch('/api/audio-candidates').then(response=>response.json()).then(data=>{
-      all=data.candidates.filter(candidate=>candidate.render_status!=='superseded_setup');
+      all=data.candidates.filter(candidate=>['ready_for_review','banked'].includes(candidate.render_status));
       if(!all.length)throw new Error('No standalone audio candidates are registered.');
       const batches=[...new Set(all.map(candidate=>candidate.batch_id))];
-      batches.sort((a,b)=>a==='AB-20260824-004'?-1:b==='AB-20260824-004'?1:a.localeCompare(b));
+      const newest=batchId=>all.filter(candidate=>candidate.batch_id===batchId).reduce((latest,candidate)=>candidate.created_at>latest?candidate.created_at:latest,'');
+      batches.sort((a,b)=>newest(b).localeCompare(newest(a)));
       for(const batchId of batches){
         const count=all.filter(candidate=>candidate.batch_id===batchId).length;
         const option=document.createElement('option'); option.value=batchId;
-        option.textContent=batchId==='AB-20260824-004'?`Eleven-second recovery — ${count} audio-only candidates`:`${batchId} — ${count} candidates`;
+        option.textContent=batchId.includes('fresh-eleven')?`Fresh native eleven-second batch — ${count} candidates`:batchId==='AB-20260731-003'?`Approved seven-second bank — ${count} tracks`:batchId.includes('loop-native')?`Loop-native diagnosis — ${count} layers`:batchId.includes('loop-repair')?`Loop repair — ${count} versions of audio option 02`:batchId==='AB-20260824-004'?`Eleven-second recovery — ${count} audio-only candidates`:`${batchId} — ${count} candidates`;
         $('batch').appendChild(option);
       }
       $('app').hidden=false; chooseBatch(batches[0]);
