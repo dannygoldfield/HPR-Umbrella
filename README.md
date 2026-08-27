@@ -12,17 +12,21 @@ to the artist.
 
 How People Relate draws from an archive of many thousands of photographs. Publishing a carefully considered video every day requires a system that can generate possibilities without pretending to make artistic judgments.
 
-HPR Umbrella is centered on an operational Registry, a Candidate Engine, and
-focused media plugins:
+HPR Umbrella is centered on an operational Registry, a Candidate Engine and AV
+Assembler, and two separately versioned media generators:
 
 | Component | Responsibility | Does not decide |
 | --- | --- | --- |
 | [HPR Registry](components/registry/) | Preserves portrait identities and revisions, candidates, reviews, final masters, sequence versions, and publication state | The final sequence or any artistic selection |
-| [Candidate Engine](components/candidate-generator/) | Plans finite option sets, maintains separate banks, coordinates plugins, and records human decisions | Which candidate becomes the published work |
-| [Audio Plugin](components/audio-generator/) | Builds reproducible, loop-ready soundtracks from constrained recipes | Which soundtrack is right |
-| [Video Plugin](components/video-generator/) | Builds silent, loop-safe fixed-geometry portrait-development videos | Which surface behavior best serves a portrait |
+| [Candidate Engine and AV Assembler](components/candidate-generator/) | Plans finite option sets and combines selected visuals with human-approved audio | Which candidate becomes the published work |
+| [Standalone Audio Generator](https://github.com/dannygoldfield/HPR-Audio-Generator) | Builds reproducible, loop-ready soundtracks and maintains the Ingredient Audit | Which soundtrack is right |
+| [Standalone Video Generator](https://github.com/dannygoldfield/HPR-Video-Generator) | Builds silent, loop-safe fixed-geometry portrait-development videos | Which surface behavior best serves a portrait |
 | [Review interface](components/review-interface/) | Plays candidates and writes human ratings, rejection, notes, and selections directly to the Registry | Whether a candidate is artistically successful |
 | Text Plugin | Adds optional nondestructive identity treatments after a pair is selected | Whether text is needed for a channel |
+
+`config/component-lock.json` pins the exact generator repositories and commits.
+`tools/verify_production/verify_production.py` is the production gate. Umbrella
+does not contain a second copy of either generator.
 
 ## How the system works
 
@@ -30,10 +34,12 @@ focused media plugins:
 flowchart LR
     L["Lightroom (external authority)"] --> I["JPEG/TIFF + metadata ingest (built)"]
     I --> R["HPR Registry (initial implementation)"]
-    R --> C["Candidate production (partial)"]
-    A["Audio Recipe Library + private media"] --> C
-    C --> H["Human review (visual pilot built)"]
-    H --> M["Final master (schema only)"]
+    R --> V["Standalone Video Generator"]
+    A["Standalone Audio Generator + private media"] --> B["Approved audio bank"]
+    V --> H["Human visual review"]
+    H --> C["AV Assembler: 10 approved audio options"]
+    B --> C
+    C --> M["Human-selected final master"]
     M --> S["Human sequencing (Registry foundation built)"]
     S --> P["Release + publication system (not built)"]
     P --> G["Publication ledger + response (schema only)"]
@@ -43,8 +49,10 @@ Each candidate can be recreated from its portrait, duration, presets, recipes, g
 
 ## Current status
 
-- **Audio Generator:** implemented with deterministic recipes for 7-, 9-, and 11-second loops.
-- **Video Generator:** legacy camera-motion and White Balance prototypes remain
+- **Audio Generator:** the standalone `HPR-Audio-Generator` repository is
+  canonical and protected by an exact commit lock.
+- **Video Generator:** the standalone `HPR-Video-Generator` repository is
+  canonical and protected by an exact commit lock. Legacy camera-motion and White Balance prototypes remain
   reproducible. `PDE-002` is the locked Development Animation; Infinity adds
   the locked `IBN-001` static, portrait-unique number background. Film grain was evaluated
   through multiple visibility, motion, source, and opacity comparisons and was
@@ -77,10 +85,12 @@ Portraits, licensed audio, generated videos, workbooks, and private production d
 components/
   registry/
   review-interface/
-  audio-generator/
-  video-generator/
-  candidate-generator/
+  candidate-generator/  # Candidate Engine and AV Assembler
+config/
+  component-lock.json
+  approved-visual-baseline.json
 tools/
+  verify_production/
   inspect_metadata/
   render_motion_pilot/
   render_white_balance_pilot/
@@ -96,7 +106,7 @@ examples/
 
 ## Plan a batch
 
-The Candidate Generator can plan deterministic outputs without access to private media:
+The Candidate Engine can plan deterministic outputs without access to private media:
 
 ```bash
 python -m hpr_candidate_generator.cli plan \
@@ -137,10 +147,10 @@ approved videos are sequenced.
 - [Production workflow](docs/workflow.md)
 - [Lightroom JPEG metadata contract](docs/metadata-contract.md)
 - [Three-portrait pilot report](docs/pilot-report-2026-08-14.md)
-- [Motion Rhythm specification](components/video-generator/docs/MOTION-RHYTHM.md)
-- [White Balance animation specification](components/video-generator/docs/WHITE-BALANCE-ANIMATION.md)
-- [Portrait Development Animation specification](components/video-generator/docs/PORTRAIT-DEVELOPMENT-ANIMATION.md)
-- [Film Grain Animation specification](components/video-generator/docs/FILM-GRAIN-ANIMATION.md)
+- [Motion Rhythm specification](https://github.com/dannygoldfield/HPR-Video-Generator/blob/main/docs/MOTION-RHYTHM.md)
+- [White Balance animation specification](https://github.com/dannygoldfield/HPR-Video-Generator/blob/main/docs/WHITE-BALANCE-ANIMATION.md)
+- [Portrait Development Animation specification](https://github.com/dannygoldfield/HPR-Video-Generator/blob/main/docs/PORTRAIT-DEVELOPMENT-ANIMATION.md)
+- [Film Grain Animation research record](https://github.com/dannygoldfield/HPR-Video-Generator/blob/main/docs/FILM-GRAIN-ANIMATION.md)
 - [Local review interface](components/review-interface/)
 - [HPR Registry](components/registry/)
 - [Danny Goldfield’s portrait projects](https://dannygoldfield.com/)

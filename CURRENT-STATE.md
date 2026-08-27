@@ -1,6 +1,6 @@
 # Current State
 
-Updated: 2026-08-20
+Updated: 2026-08-26
 
 ## Permanent decisions
 
@@ -8,7 +8,8 @@ Updated: 2026-08-20
 - Portrait identity is permanent; episode number is deferred release order.
 - The final custom sequence is chosen only after completed visual-and-audio masters can be reviewed.
 - Archive production is the current focus; Now mode is deferred.
-- Audio, Video, and future Text are plugins coordinated by the engine.
+- Audio and Video are canonical standalone repositories coordinated by
+  Umbrella; future Text remains a downstream component.
 - The production target is 120 archive videos: 40 portraits of people age 100 or older, 40 portraits of people age 12 or younger, and 40 mixed-age portraits involving the number prop.
 - The active visual direction is Portrait Development Animation: fixed geometry
   with evolving tone, skin color, surface detail, and restrained texture.
@@ -16,14 +17,14 @@ Updated: 2026-08-20
   deformation are outside the active testing plan.
 - The settled soft sweep `PDE-002` is the portrait-surface baseline: it received
   a five-star rating for 10000, NYChildren, and Infinity. Motion-picture grain
-  is the active finishing decision for all three.
+  was tested and rejected as a production layer.
 - The official production name is Portrait Development Animation, or
   Development Animation for short. “Adjustment Animation” is avoided because
   it suggests a software demonstration rather than a living portrait surface.
-- Infinity uses the selected five-star `IBK-001` composite: `PDE-002` plus
-  gently moving Brandon Grotesque Bold numbers in `#edeae3` on `#f7f5ef`.
-  Blobs are rejected. The 40 production versions share one speed and motion
-  path while deterministic digit layouts and starting phases vary by portrait.
+- Infinity uses the selected five-star `IBN-001` composite: `PDE-002` plus a
+  completely static field of Brandon Grotesque Bold numbers in `#edeae3` on
+  `#f7f5ef`. Blobs and number motion are rejected. Deterministic digit layouts
+  vary by portrait.
 - Each portrait initially receives five constrained development candidates;
   visible mechanism or novelty is a failure mode.
 - The audio bank contains 150 unique tracks: 50 per duration.
@@ -76,7 +77,7 @@ Updated: 2026-08-20
   remains unchanged for comparison.
 - The review screen now uses a compact, mobile-first portrait preview: up to
   300 pixels wide on larger screens and 280 pixels wide on phones.
-- The [Portrait Development Animation](components/video-generator/docs/PORTRAIT-DEVELOPMENT-ANIMATION.md)
+- The [Portrait Development Animation](https://github.com/dannygoldfield/HPR-Video-Generator/blob/main/docs/PORTRAIT-DEVELOPMENT-ANIMATION.md)
   creative, computational, parameter, and test specification is now the active
   visual R&D plan.
 - Motion-rhythm, motion-variable, and White Balance-only candidates are retained

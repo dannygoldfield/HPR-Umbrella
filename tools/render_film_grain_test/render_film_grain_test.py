@@ -13,8 +13,12 @@ import sys
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPOSITORY_ROOT / "tools"))
 sys.path.insert(0, str(REPOSITORY_ROOT / "components/registry/src"))
-sys.path.insert(0, str(REPOSITORY_ROOT / "components/video-generator/src"))
+
+from hpr_component_paths import activate_component  # noqa: E402
+
+VIDEO_GENERATOR_ROOT = activate_component("video")
 
 from hpr_registry import (  # noqa: E402
     initialize_registry,
@@ -173,8 +177,7 @@ def main() -> None:
     parser.add_argument(
         "--config",
         type=Path,
-        default=REPOSITORY_ROOT
-        / "components/video-generator/config/film-grain-opacity-recipes.json",
+        default=VIDEO_GENERATOR_ROOT / "config/film-grain-opacity-recipes.json",
     )
     parser.add_argument("--duration", type=int, choices=[11], default=11)
     parser.add_argument("--ffmpeg")

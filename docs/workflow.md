@@ -7,8 +7,8 @@ Requires Python 3.11 or newer and FFmpeg.
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install -e components/audio-generator
-python3 -m pip install -e 'components/video-generator[render]'
+python3 -m pip install -e ../HPR-Audio-Generator
+python3 -m pip install -e '../HPR-Video-Generator[render]'
 python3 -m pip install -e components/candidate-generator
 python3 -m pip install -e components/registry
 python3 -m pip install -e components/review-interface
@@ -19,7 +19,7 @@ python3 -m pip install -e components/review-interface
 The Git repository excludes source and generated media. A production workstation supplies:
 
 ```text
-components/audio-generator/audio/source/
+../HPR-Audio-Generator/audio/source/
   beds/
   gestures/
   music-stems/
@@ -29,7 +29,15 @@ workspace/
   output/
 ```
 
-The audio configuration records the expected paths and metadata for licensed local assets.
+The audio configuration records the expected paths and metadata for licensed
+local assets. Before production, run:
+
+```bash
+python3 tools/verify_production/verify_production.py
+```
+
+This verifies both standalone generator commits and the byte fingerprints of
+the three approved pilot visuals.
 
 ## 3. Inspect and ingest Lightroom exports
 
@@ -224,11 +232,15 @@ hpr-candidate plan \
 ```
 
 The selected audio recipe must have the same duration as the candidate.
-If no audio recipe is supplied, the Candidate Generator chooses the default seamless ambient recipe for 7, 9, or 11 seconds.
+If no audio recipe is supplied, the legacy convenience path chooses the default
+recipe for 7, 9, or 11 seconds from the locked standalone Audio Generator.
 
 ## Legacy generation
 
-After local media is available, replace `plan` with `generate`. For every seed, the Candidate Generator:
+After local media is available, replacing `plan` with `generate` invokes the
+locked standalone generators. This is retained for reproducibility; production
+normally generates and reviews Audio and Video separately before AV assembly.
+For every seed, the legacy path:
 
 1. renders a silent loop-safe portrait video;
 2. generates a matching loop-ready soundtrack;
@@ -252,20 +264,19 @@ Publishing and analytics remain downstream of candidate creation. Observations c
 
 ## Tests
 
-The public test suite synthesizes temporary audio fixtures, so licensed audio is not required:
+The repositories have independent test suites. From HPR Umbrella, first verify
+the locked sources, then run the integration components:
 
 ```bash
-PYTHONPATH=components/audio-generator/src:components/video-generator/src:components/candidate-generator/src \
-  python3 -m unittest discover -s components/audio-generator/tests -v
+python3 tools/verify_production/verify_production.py
 
-PYTHONPATH=components/audio-generator/src:components/video-generator/src:components/candidate-generator/src \
-  python3 -m unittest discover -s components/video-generator/tests -v
-
-PYTHONPATH=components/audio-generator/src:components/video-generator/src:components/candidate-generator/src \
+PYTHONPATH=components/candidate-generator/src \
   python3 -m unittest discover -s components/candidate-generator/tests -v
 
 PYTHONPATH=components/registry/src \
   python3 -m unittest discover -s components/registry/tests -v
 
 python3 -m unittest discover -s tools/inspect_metadata/tests -v
+
+python3 -m unittest discover -s tools/verify_production/tests -v
 ```

@@ -13,8 +13,12 @@ import sys
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPOSITORY_ROOT / "tools"))
 sys.path.insert(0, str(REPOSITORY_ROOT / "components/registry/src"))
-sys.path.insert(0, str(REPOSITORY_ROOT / "components/video-generator/src"))
+
+from hpr_component_paths import activate_component  # noqa: E402
+
+VIDEO_GENERATOR_ROOT = activate_component("video")
 
 from hpr_registry import list_current_portrait_revisions, register_visual_candidate
 from hpr_video_generator.config import load_config
@@ -135,13 +139,12 @@ def main() -> None:
     parser.add_argument(
         "--generator-config",
         type=Path,
-        default=REPOSITORY_ROOT / "components/video-generator/config/generator.xml",
+        default=VIDEO_GENERATOR_ROOT / "config/generator.xml",
     )
     parser.add_argument(
         "--rhythm-config",
         type=Path,
-        default=REPOSITORY_ROOT
-        / "components/video-generator/config/motion-rhythms.json",
+        default=VIDEO_GENERATOR_ROOT / "config/motion-rhythms.json",
     )
     parser.add_argument("--duration", type=int, choices=[7, 9, 11], default=7)
     parser.add_argument("--ffmpeg")

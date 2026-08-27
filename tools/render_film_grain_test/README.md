@@ -19,7 +19,6 @@ frame, deterministic crop position, and output checksum.
 Run from the repository root:
 
 ```sh
-PYTHONPATH=components/video-generator/src:components/registry/src \
 python3 tools/render_film_grain_test/render_film_grain_test.py \
   --grain-root /Users/dannygoldfield/Media/Video \
   --ffmpeg /opt/homebrew/bin/ffmpeg

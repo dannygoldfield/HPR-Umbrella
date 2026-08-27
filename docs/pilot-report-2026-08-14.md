@@ -3,7 +3,7 @@
 > Historical status: this report records the experiments that led to the
 > Portrait Development Animation discovery. Camera-motion and White Balance-only
 > tests are no longer the active HPR visual plan. See
-> [Portrait Development Animation](../components/video-generator/docs/PORTRAIT-DEVELOPMENT-ANIMATION.md).
+> [Portrait Development Animation](https://github.com/dannygoldfield/HPR-Video-Generator/blob/main/docs/PORTRAIT-DEVELOPMENT-ANIMATION.md).
 
 ## Outcome
 
@@ -49,7 +49,7 @@ rhythms for each portrait. Every file was decoded and verified as:
 
 The recipes are smooth baseline, variable speed, brief hold, two-stage with
 near-stillness, and asymmetric approach/return. The exact specification is in
-[Motion Rhythm](../components/video-generator/docs/MOTION-RHYTHM.md).
+[Motion Rhythm](https://github.com/dannygoldfield/HPR-Video-Generator/blob/main/docs/MOTION-RHYTHM.md).
 
 ## JSON manifest contract
 
@@ -158,7 +158,7 @@ The numbers are stable HPR diagnostic deltas, not purported Lightroom units;
 
 All 15 outputs were decoded and verified at 7 seconds, 168 frames, 1080 × 1920,
 and 24 fps. First-to-last-frame PSNR was at least 53.348 dB across the set. The
-complete specification is in [White Balance animation](../components/video-generator/docs/WHITE-BALANCE-ANIMATION.md).
+complete specification is in [White Balance animation](https://github.com/dannygoldfield/HPR-Video-Generator/blob/main/docs/WHITE-BALANCE-ANIMATION.md).
 
 ## Follow-up: extreme White Balance boundary test
 

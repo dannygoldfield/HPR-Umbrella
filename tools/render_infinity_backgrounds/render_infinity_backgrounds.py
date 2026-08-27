@@ -12,8 +12,12 @@ import sys
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPOSITORY_ROOT / "tools"))
 sys.path.insert(0, str(REPOSITORY_ROOT / "components/registry/src"))
-sys.path.insert(0, str(REPOSITORY_ROOT / "components/video-generator/src"))
+
+from hpr_component_paths import activate_component  # noqa: E402
+
+VIDEO_GENERATOR_ROOT = activate_component("video")
 
 from hpr_registry import (
     initialize_registry,
@@ -311,19 +315,18 @@ def main() -> None:
     parser.add_argument(
         "--background-config",
         type=Path,
-        default=REPOSITORY_ROOT
-        / "components/video-generator/config/infinity-background-recipes.json",
+        default=VIDEO_GENERATOR_ROOT / "config/infinity-background-recipes.json",
     )
     parser.add_argument(
         "--development-config",
         type=Path,
-        default=REPOSITORY_ROOT
-        / "components/video-generator/config/portrait-development-settlement-recipes.json",
+        default=VIDEO_GENERATOR_ROOT
+        / "config/portrait-development-settlement-recipes.json",
     )
     parser.add_argument(
         "--generator-config",
         type=Path,
-        default=REPOSITORY_ROOT / "components/video-generator/config/generator.xml",
+        default=VIDEO_GENERATOR_ROOT / "config/generator.xml",
     )
     parser.add_argument(
         "--base-manifest",

@@ -15,8 +15,12 @@ import wave
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPOSITORY_ROOT / "components/audio-generator/src"))
+sys.path.insert(0, str(REPOSITORY_ROOT / "tools"))
 sys.path.insert(0, str(REPOSITORY_ROOT / "components/registry/src"))
+
+from hpr_component_paths import activate_component  # noqa: E402
+
+AUDIO_GENERATOR_ROOT = activate_component("audio")
 
 from hpr_audio_generator.config import Config, load_config  # noqa: E402
 from hpr_audio_generator.generator import generate  # noqa: E402
@@ -427,7 +431,7 @@ def main() -> None:
     parser.add_argument(
         "--config",
         type=Path,
-        default=REPOSITORY_ROOT / "components/audio-generator/config/generator.xml",
+        default=AUDIO_GENERATOR_ROOT / "config/generator.xml",
     )
     parser.add_argument("--asset-root", type=Path, required=True)
     parser.add_argument("--recipe", default=DEFAULT_RECIPE_ID)
