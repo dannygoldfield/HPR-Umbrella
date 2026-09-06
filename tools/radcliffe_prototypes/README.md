@@ -43,3 +43,27 @@ not mathematically identical. Perceptual audio/video loop approval remains human
 Final application files are created only after three explicit soundtrack
 selections and final AV loop review. All private media and provenance stay under
 the existing ignored `workspace/` directory.
+
+
+## Three-pass delivery after creative selection
+
+After the user explicitly chooses one option per portrait, `prepare_selected.py`
+creates 33-second application samples: three exact eleven-second visual passes
+and three exact source-WAV passes encoded together in one continuous AAC stream.
+This avoids a player restart and separate AAC encoder boundaries at 11 and 22
+seconds. It does not modify the native audio family or either generator.
+
+Supply `--review` (the prior review folder), a new `--output` directory, and
+three `--selection PROJECT=OPTION` arguments using the keys `10000`,
+`NYChildren`, and `Infinity`. Options must be the user's explicit choices.
+The command preserves the selected eleven-second references, verifies 792 exact
+video packets and continuous timestamps, checks the exact repeated PCM input,
+measures output level/peaks, and screens decoded audio at both internal joins.
+
+The Registry is backed up before appending creative pair selections. Audio is
+reserved with `reserved_loop_pending`; the three prototype master records use
+`loop_pending` and a null `approved_at`. Prior source approvals and all research
+history are preserved. Technical screening cannot grant human loop approval.
+The resulting review page plays each 33-second file once, without browser looping.
+Use `--no-register` to reproduce deliveries in a new folder without duplicating
+or changing the existing Registry decisions.
