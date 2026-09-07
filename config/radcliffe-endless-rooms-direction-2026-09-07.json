@@ -15,43 +15,48 @@
   "soundBedReductionPercent": 50,
   "colorSpeedChoice": {
     "status": "comparison_choice_locked",
-    "authority": "Explicit user selection in HPR task: Ivory Medium",
-    "chosenAt": "2026-09-07T22:19:59.347016+00:00",
-    "kind": "rooms-ivory-medium",
+    "authority": "Explicit user correction in HPR task: I changed my mind and prefer Ivory Slow",
+    "chosenAt": "2026-09-07T22:34:53.688395+00:00",
+    "kind": "rooms-ivory-slow",
     "family": "Endless Rooms",
     "color": "ivory",
     "colorLabel": "Ivory",
-    "speed": "medium",
-    "speedLabel": "Medium",
-    "title": "Ivory \u00b7 Medium",
-    "depthSpeedRelativeToOriginal": 0.6,
+    "speed": "slow",
+    "speedLabel": "Slow",
+    "title": "Ivory \u00b7 Slow",
+    "depthSpeedRelativeToOriginal": 0.2,
     "developmentPercent": 200,
     "soundBedReductionPercent": 50,
     "nativeDurationSec": 11,
     "comparisonDurationSec": 33,
     "nativeVisual": {
       "component": "video",
-      "path": "media/output/candidates/HPR-Endless-Rooms-20260907/visuals/Infinity-blue-sky-rooms-ivory-medium-200.mp4",
-      "sha256": "e8933b796636cf921e5f8d97e92785f07feeb017210bb6aac631fffb5db800d9"
+      "path": "media/output/candidates/HPR-Endless-Rooms-20260907/visuals/Infinity-blue-sky-rooms-ivory-slow-200.mp4",
+      "sha256": "c60544c883466ea9802bfcc09539c9a4fc2a18a34550bc84a28f1db3331c50d5"
     },
     "visualManifest": {
       "component": "video",
-      "path": "media/output/candidates/HPR-Endless-Rooms-20260907/visuals/Infinity-blue-sky-rooms-ivory-medium-200.json",
-      "sha256": "9ee0abdf6b92bdef336daede6d27937fa39232a12562674dfa5181d7e44583e1"
+      "path": "media/output/candidates/HPR-Endless-Rooms-20260907/visuals/Infinity-blue-sky-rooms-ivory-slow-200.json",
+      "sha256": "de89fb1f0f7b906c8bb141da68f5fae0f70177bd1f6654058683c7a58ee86f8e"
     },
     "reviewVisual": {
       "component": "umbrella",
-      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/visuals/rooms-ivory-medium-33s.mp4",
-      "sha256": "29e526b86403fdfeafbe9593b823f746bc5f421907cd1fe77deed27847608ed5"
+      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/visuals/rooms-ivory-slow-33s.mp4",
+      "sha256": "415f263be8dd33f59148bf88efb7ea9e2294b3fa5df76a86cc13730c8e65c5e3"
     },
     "sourceReviewBeforeSelection": {
       "component": "umbrella",
-      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/provenance/ivory-medium-selection/review.json",
-      "sha256": "cc928e1a7dce404ac26be281a57639337ca4a3420f0b65272fe92a6e22595ba3"
+      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/provenance/ivory-slow-selection/review.json",
+      "sha256": "4fc5f48d719db4458c2cf4f39ab10c1ee683822885a8705f5b2e4d7987433552"
     },
     "humanFinalVisualApproval": null,
     "humanAVLoopApproval": null,
-    "scope": "Confirms the Infinity background, color and speed for the selected comparison; final visual and AV loop approval remain pending."
+    "scope": "Confirms the Infinity background, color and speed for the selected comparison; final visual and AV loop approval remain pending.",
+    "supersedes": {
+      "component": "umbrella",
+      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/provenance/ivory-slow-selection/CHOICE.json",
+      "sha256": "5d5315fd601e74abe8ea02e67f99135a5d92640daa105b1db2825e1f65398b28"
+    }
   },
   "humanFinalVisualApproval": null,
   "humanAVLoopApproval": null,
