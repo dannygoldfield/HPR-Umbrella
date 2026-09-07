@@ -7,7 +7,7 @@
 <main><h1>How People Relate · Next versions</h1>
 <p class="intro">Compare the pictures and sound separately. Each sample plays three eleven-second passes, then stops at 33 seconds. The original samples are preserved.</p>
 <nav class="tabs" aria-label="Comparisons"><button data-tab="develop" class="active">1 · Develop</button><button data-tab="infinity">2 · Infinity</button><button data-tab="sound">3 · Sound</button><button data-tab="choices">Your choices</button></nav>
-<div id="develop"><p>Compare <strong>100%, 125%, and 150%</strong> develop strength. These share the smoother loop timing. “Original” shows the earlier timing, including its brief rest. Picture comparisons are silent.</p><div class="toolbar"><button id="play-develop">Play all three from the start</button><button id="pause-develop">Pause all</button><label>Set all to <select id="all-strength"><option value="125">125%</option><option value="100">100%</option><option value="150">150%</option><option value="original">Original</option></select></label></div><article class="grid" id="develop-grid"></article></div>
+<div id="develop"><p>Compare <strong id="strength-list">the available</strong> develop strength. These share the smoother loop timing. “Original” shows the earlier timing, including its brief rest. Picture comparisons are silent.</p><div class="toolbar"><button id="play-develop">Play all three from the start</button><button id="pause-develop">Pause all</button><label>Set all to <select id="all-strength"></select></label></div><article class="grid" id="develop-grid"></article></div>
 <div id="infinity" class="hidden"><p>All four use <strong>125% development</strong>, the same photograph, and the same digits. Which makes the person feel more present? The number motion is intentionally very small.</p><div class="toolbar"><button id="play-fields">Play all four from the start</button><button id="pause-fields">Pause all</button></div><article class="grid four" id="field-grid"></article><p class="small">The static field is a valid choice. We can apply the chosen motion to your preferred develop strength after this comparison.</p></div>
 <div id="sound" class="hidden"><p>The quieter version reduces <strong>only the continuous bed by 10%</strong>. Events, music, timing, and their levels are preserved. Listen through the joins at 11 and 22 seconds at the same playback volume.</p><article class="grid" id="sound-grid"></article></div>
 <div id="choices" class="hidden"><h2>Your comparison choices</h2><p>Your choices are saved in this browser as a draft. They do not mark files approved or change the production record.</p><div class="note summary" id="summary"></div><div class="buttons"><button id="copy-choices">Copy choices for the HPR chat</button><button id="download-choices">Save choices as a file</button></div><p id="copy-status" role="status"></p></div>
@@ -17,6 +17,7 @@
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const storageKey='hpr-next-20260907';let choices={develop:{},field:null,audio:{}};
 try{choices=JSON.parse(localStorage.getItem(storageKey))||choices}catch{}
+const strengthOptions=(levels,initial)=>levels.map(n=>'<option value="'+n+'"'+(n===initial?' selected':'')+'>'+n+'%</option>').join('')+'<option value="original">Original</option>';
 let report;const labels={static:'Static field',wave:'A · Deflected wave',pressure:'B · Compression and release',flow:'C · Movement around the pose'};
 const pauseAll=()=>document.querySelectorAll('video,audio').forEach(m=>m.pause());
 const save=()=>{localStorage.setItem(storageKey,JSON.stringify(choices));updateSummary()};
@@ -27,9 +28,13 @@ async function playGroup(selector){pauseAll();const media=[...document.querySele
 async function switchDev(p,value){const card=document.querySelector('[data-portrait="'+p.key+'"]'),video=card.querySelector('video');const playing=!video.paused,time=video.currentTime;video.pause();video.src=value==='original'?p.original:p.development.find(v=>String(v.strength)===value).url;await loaded(video);video.currentTime=Math.min(time,32.9);card.querySelector('.variant').textContent=value==='original'?'Original timing':value+'% · continuous timing';if(playing)await video.play()}
 fetch('review.json').then(r=>r.json()).then(data=>{
  report=data;
+ const initial=report.defaultDevelopStrength||125;
+ const common=report.portraits[0].development.map(v=>v.strength).filter(n=>report.portraits.every(p=>p.development.some(v=>v.strength===n))).sort((a,b)=>a-b);
+ document.querySelector('#all-strength').innerHTML=strengthOptions(common,initial);
+ document.querySelector('#strength-list').textContent=common.map(n=>n+'%').join(', ');
  for(const p of report.portraits){
   const card=document.createElement('section');card.dataset.portrait=p.key;
-  card.innerHTML='<h2>'+esc(p.label)+'</h2><p class="variant">125% · continuous timing</p><video controls muted playsinline preload="metadata" src="'+esc(p.development.find(v=>v.strength===125).url)+'"></video><div class="buttons"><label>Preview <select aria-label="'+esc(p.label)+' develop strength"><option value="125">125%</option><option value="100">100%</option><option value="150">150%</option><option value="original">Original</option></select></label></div><button class="choose">Choose this develop setting</button><p class="small picked"></p>';
+  card.innerHTML='<h2>'+esc(p.label)+'</h2><p class="variant">'+initial+'% · continuous timing</p><video controls muted playsinline preload="metadata" src="'+esc(p.development.find(v=>v.strength===initial).url)+'"></video><div class="buttons"><label>Preview <select aria-label="'+esc(p.label)+' develop strength">'+strengthOptions(p.development.map(v=>v.strength).sort((a,b)=>a-b),initial)+'</select></label></div><button class="choose">Choose this develop setting</button><p class="small picked"></p>';
   card.querySelector('select').onchange=e=>switchDev(p,e.target.value);
   const picked=card.querySelector('.picked');picked.textContent=choices.develop[p.key]?'Chosen: '+choices.develop[p.key]:'';
   card.querySelector('.choose').onclick=()=>{let v=card.querySelector('select').value;choices.develop[p.key]=v==='original'?'original':v+'%';picked.textContent='Chosen: '+choices.develop[p.key];save()};

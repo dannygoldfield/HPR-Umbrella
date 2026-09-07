@@ -67,3 +67,42 @@ history are preserved. Technical screening cannot grant human loop approval.
 The resulting review page plays each 33-second file once, without browser looping.
 Use `--no-register` to reproduce deliveries in a new folder without duplicating
 or changing the existing Registry decisions.
+
+
+## Extend an existing development comparison
+
+Keep the existing 100%, 125%, and 150% files, all audio, and all Infinity field
+comparisons. For each original visual manifest in the selected-prototypes
+`selections.json`, independently render 175% and 200% silent candidates in
+HPR Video Generator:
+
+```sh
+python3 tools/prototype_iteration.py --manifest ORIGINAL_VISUAL_MANIFEST \
+  --output media/output/candidates/NEW_EXTENSION/PROJECT-develop-175.mp4 --strength 1.75
+python3 tools/prototype_iteration.py --manifest ORIGINAL_VISUAL_MANIFEST \
+  --output media/output/candidates/NEW_EXTENSION/PROJECT-develop-200.mp4 --strength 2
+```
+
+Use project keys `10000`, `NYChildren`, and `Infinity`. These commands require
+NumPy, Pillow, and FFmpeg. For strengths above 150%, the generator extends the
+same photographic RGB excursion relative to the finished source, before
+Infinity subject compositing. Timing, geometry, alpha, and number field remain
+unchanged. Values are limited only to the physical RGB range; the reveal mask
+is never clipped into a flat hold. Earlier strength output is unchanged.
+
+With the generator commit recorded in the strict component lock, run in Umbrella:
+
+```sh
+python3 tools/radcliffe_prototypes/extend_development_review.py \
+  --review workspace/EXISTING_REVIEW \
+  --visuals ../HPR-Video-Generator/media/output/candidates/NEW_EXTENSION
+```
+
+The extension verifies the complete existing inventory, snapshots the prior
+review documents, checks original-source identity, and adds six continuously
+encoded 33-second silent samples. It tests exact repeated native input frames,
+continuous timestamps, decoded joins, and complete decoding. Existing media is
+fingerprinted again before updating the page. The initial preview becomes 150%;
+no choice or approval is granted, and browser draft choices are retained.
+The Registry and both audio families and audio files remain untouched.
+This append operation deliberately refuses a previously extended folder.
