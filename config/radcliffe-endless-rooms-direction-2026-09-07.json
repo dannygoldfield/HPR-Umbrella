@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "recordedOn": "2026-09-07",
-  "status": "preferred_family_for_further_comparison",
+  "status": "color_speed_comparison_choice_locked",
   "authority": "User: I like Endless Rooms the best and would like to see it in 5 colors and mixed speeds.",
   "preferredFamily": "Endless Rooms",
   "parentReview": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/infinity-blue-sky/review.json",
@@ -13,7 +13,46 @@
   },
   "developmentPercent": 200,
   "soundBedReductionPercent": 50,
-  "colorSpeedChoice": null,
+  "colorSpeedChoice": {
+    "status": "comparison_choice_locked",
+    "authority": "Explicit user selection in HPR task: Ivory Medium",
+    "chosenAt": "2026-09-07T22:19:59.347016+00:00",
+    "kind": "rooms-ivory-medium",
+    "family": "Endless Rooms",
+    "color": "ivory",
+    "colorLabel": "Ivory",
+    "speed": "medium",
+    "speedLabel": "Medium",
+    "title": "Ivory \u00b7 Medium",
+    "depthSpeedRelativeToOriginal": 0.6,
+    "developmentPercent": 200,
+    "soundBedReductionPercent": 50,
+    "nativeDurationSec": 11,
+    "comparisonDurationSec": 33,
+    "nativeVisual": {
+      "component": "video",
+      "path": "media/output/candidates/HPR-Endless-Rooms-20260907/visuals/Infinity-blue-sky-rooms-ivory-medium-200.mp4",
+      "sha256": "e8933b796636cf921e5f8d97e92785f07feeb017210bb6aac631fffb5db800d9"
+    },
+    "visualManifest": {
+      "component": "video",
+      "path": "media/output/candidates/HPR-Endless-Rooms-20260907/visuals/Infinity-blue-sky-rooms-ivory-medium-200.json",
+      "sha256": "9ee0abdf6b92bdef336daede6d27937fa39232a12562674dfa5181d7e44583e1"
+    },
+    "reviewVisual": {
+      "component": "umbrella",
+      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/visuals/rooms-ivory-medium-33s.mp4",
+      "sha256": "29e526b86403fdfeafbe9593b823f746bc5f421907cd1fe77deed27847608ed5"
+    },
+    "sourceReviewBeforeSelection": {
+      "component": "umbrella",
+      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/provenance/ivory-medium-selection/review.json",
+      "sha256": "cc928e1a7dce404ac26be281a57639337ca4a3420f0b65272fe92a6e22595ba3"
+    },
+    "humanFinalVisualApproval": null,
+    "humanAVLoopApproval": null,
+    "scope": "Confirms the Infinity background, color and speed for the selected comparison; final visual and AV loop approval remain pending."
+  },
   "humanFinalVisualApproval": null,
   "humanAVLoopApproval": null,
   "registryModified": false,
