@@ -173,3 +173,36 @@ regression checks, serve an isolated copy on port 18769, then run
 fresh browser context and uses synthetic draft choices. It checks all three
 sections, rapid switching, seeking, reload, choice feedback and preservation,
 Infinity's four players and joins, cancellation, and mobile layout.
+
+
+## Five open-ended Infinity backgrounds
+
+The user requested five wild number-field studies on 7 September 2026. Generate
+the independent silent candidates with Video Generator's `tools/blue_sky.py` and
+`tools/blue_sky_field.cjs`, documented in `tools/BLUE-SKY.md`. Only digit glyphs
+from the same font form the backgrounds; the photograph and selected 200%
+develop setting are preserved. Keep all prior media and selections.
+
+After verifying the new video commit in the strict component lock, build the
+focused large-player review in a new folder:
+
+```sh
+python3 tools/radcliffe_prototypes/build_blue_sky_review.py \
+  --visuals ../HPR-Video-Generator/media/output/candidates/NEW_STUDY/visuals \
+  --output workspace/EXISTING_REVIEW/infinity-blue-sky
+```
+
+This produces five continuously encoded 33-second silent previews plus the
+existing static reference. Source manifests, selected component settings,
+frame-repeat proofs, decoded join checks and checksums accompany the page.
+The selected soundtrack and bed reduction are preserved for subsequent AV
+review; no audio is regenerated or mixed here. Choosing a background saves
+a browser comparison draft only. No Registry or final approval is granted.
+
+Serve the existing review with `serve_review.py` and open `/infinity-blue-sky/`
+on the same origin. The page uses one large video player, selectable studies,
+replay, full screen, visible selection feedback and a copy-choice control.
+`tests/test_blue_sky_browser.cjs` verifies every preview, seeking across the
+11- and 22-second joins, normal completion, choice persistence, rapid switching
+and mobile fit in a fresh isolated browser context. Use an isolated review copy
+with `HPR_REVIEW_TEST_URL` (default port 18769), not the user's browser profile.
