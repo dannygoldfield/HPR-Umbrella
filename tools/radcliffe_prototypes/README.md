@@ -206,3 +206,37 @@ replay, full screen, visible selection feedback and a copy-choice control.
 11- and 22-second joins, normal completion, choice persistence, rapid switching
 and mobile fit in a fresh isolated browser context. Use an isolated review copy
 with `HPR_REVIEW_TEST_URL` (default port 18769), not the user's browser profile.
+
+
+## Endless Rooms: independent color and speed controls
+
+The user preferred Endless Rooms and requested five colors and mixed speeds.
+The preference is recorded in config/radcliffe-endless-rooms-direction-2026-09-07.json;
+color/speed selection and final AV loop approval remain open. Video Generator's
+`tools/endless_rooms.py` builds the fifteen native silent candidates using its
+`config/endless-rooms-color-speed-20260907.json` recipes. See `tools/ENDLESS-ROOMS.md`
+in that independent repository for the loop-safe rate construction.
+
+With the video commit recorded in the strict component lock, run:
+
+```sh
+python3 tools/radcliffe_prototypes/build_endless_rooms_review.py \
+  --visuals ../HPR-Video-Generator/media/output/candidates/NEW_ROUND/visuals \
+  --parent-review workspace/EXISTING_REVIEW/infinity-blue-sky \
+  --output workspace/EXISTING_REVIEW/endless-rooms
+```
+
+Optional `--wait-seconds 2400` allows the assembler to wait a bounded time for
+the independently running generator's completed manifests. Each 33-second
+preview is continuously encoded from three native cycles and checked for
+frame identity of the input repetitions, duration, timestamps and decoded
+joins. The previous Endless Rooms video is preserved as a selectable reference.
+The page presents five colors and three background speeds independently;
+playback rate stays at one and the portrait timing never changes. Browser
+choices are drafts and do not modify Registry records or locked audio choices.
+
+`tests/test_endless_rooms_browser.cjs` tests every color/speed combination in
+a fresh isolated browser context: playback, both joins, normal completion,
+independent controls, restored previews and choices, cross-tab merging, rapid
+switching, the previous reference, and mobile fit. Its default isolated origin
+is port 18769; use `HPR_REVIEW_TEST_URL` to specify another staging origin.

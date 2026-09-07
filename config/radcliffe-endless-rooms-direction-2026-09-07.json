@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0",
+  "recordedOn": "2026-09-07",
+  "status": "preferred_family_for_further_comparison",
+  "authority": "User: I like Endless Rooms the best and would like to see it in 5 colors and mixed speeds.",
+  "preferredFamily": "Endless Rooms",
+  "parentReview": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/infinity-blue-sky/review.json",
+  "parentReviewSha256": "e30ee57fb9405ec2ce6d91fa98217587609ea3f0ff2954dd03eb712caaf3dd4c",
+  "preferredReferenceMedia": {
+    "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/infinity-blue-sky/visuals/Infinity-rooms-33s.mp4",
+    "sha256": "d49d69333784267618641bd88c76d340a33e0a348833b01012fdad5a3b8f30d1",
+    "component": "umbrella"
+  },
+  "developmentPercent": 200,
+  "soundBedReductionPercent": 50,
+  "colorSpeedChoice": null,
+  "humanFinalVisualApproval": null,
+  "humanAVLoopApproval": null,
+  "registryModified": false,
+  "preservedComparisonChoices": "config/radcliffe-comparison-choices-2026-09-07.json"
+}

@@ -13,7 +13,7 @@
     "video": {
       "name": "HPR-Video-Generator",
       "repository": "https://github.com/dannygoldfield/HPR-Video-Generator.git",
-      "commit": "873a47e369d0f2c95d875a038ea6e38e044e65e3",
+      "commit": "42e81e7ebdd97cbdc33b601b22c52d28653a276e",
       "localPath": "../HPR-Video-Generator",
       "environmentVariable": "HPR_VIDEO_GENERATOR_ROOT",
       "packagePath": "src/hpr_video_generator",
