@@ -144,3 +144,32 @@ and unchanged earlier media. The Sound tab lists original, 10%, 25%, and 50%
 bed reductions. Percentages describe amplitude attenuation, not perceived
 loudness. The `#sound` link opens that comparison directly. No Registry records
 or visual choices are changed.
+
+
+## Reliable local review playback
+
+Serve the review with byte-range support so both audio and video can seek,
+load metadata promptly, and switch previews without restarting unexpectedly:
+
+```sh
+python3 tools/radcliffe_prototypes/serve_review.py \
+  --review workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2 --port 8769
+```
+
+The server binds only to `127.0.0.1`. Keep the original host and port to retain
+browser draft choices. It supports partial media requests and revalidation of
+updated pages. The review has an in-page Reload review button; choice buttons
+show their selected state, saved develop previews are restored, and updates
+merge the latest saved draft so another tab's selections are preserved.
+Hidden media waits until its section is opened. Preview switches cancel stale
+loads, group playback can be cancelled, and quick audio changes retain the
+latest requested track.
+
+The server regression test is `tests/test_serve_review.py`. For browser
+regression checks, serve an isolated copy on port 18769, then run
+`tests/test_review_browser.cjs` with Node and Playwright. Set
+`HPR_PLAYWRIGHT_MODULE` to the installed Playwright module when needed and
+`HPR_REVIEW_TEST_URL` to the isolated test origin. The test always creates a
+fresh browser context and uses synthetic draft choices. It checks all three
+sections, rapid switching, seeking, reload, choice feedback and preservation,
+Infinity's four players and joins, cancellation, and mobile layout.
