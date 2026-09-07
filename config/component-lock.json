@@ -4,7 +4,7 @@
     "audio": {
       "name": "HPR-Audio-Generator",
       "repository": "https://github.com/dannygoldfield/HPR-Audio-Generator.git",
-      "commit": "d7a751679ba6a567598af9911ed4f9d2652a5878",
+      "commit": "a012dbc3e8c0cd2a4f808edd24be5358c2d9ba63",
       "localPath": "../HPR-Audio-Generator",
       "environmentVariable": "HPR_AUDIO_GENERATOR_ROOT",
       "packagePath": "src/hpr_audio_generator",

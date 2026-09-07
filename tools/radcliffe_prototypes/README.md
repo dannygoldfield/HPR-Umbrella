@@ -106,3 +106,41 @@ fingerprinted again before updating the page. The initial preview becomes 150%;
 no choice or approval is granted, and browser draft choices are retained.
 The Registry and both audio families and audio files remain untouched.
 This append operation deliberately refuses a previously extended folder.
+
+
+## Compare further bed reductions
+
+The selected native eleven-second compositions can be independently rebuilt by
+Audio Generator with `tools/prototype_bed_reduction.py`. The optional
+`--bed-gain .75` reduces bed amplitude by 25%; `--bed-gain .5` reduces it by 50%.
+The default `.9` retains the earlier 10% behavior and candidate identity.
+For each selected original audio manifest, use a new candidate output folder:
+
+```sh
+PYTHONPATH=src:tools python3 tools/prototype_bed_reduction.py \
+  --source-manifest ORIGINAL_AUDIO_MANIFEST --config config/generator.xml \
+  --output audio/output/candidates/NEW_BED_COMPARISON --bed-gain .75
+```
+
+Repeat for `.5` and each of the three selected soundtracks. Each build must
+reproduce the original raw mix exactly and prove, sample by sample, that the
+foreground residual is unchanged and only the periodic bed was scaled. The
+original master gain is retained; there is no new whole-mix normalization.
+Original waveform and source/configuration/code fingerprints, loudness, peak,
+and loop checks accompany each native candidate. Human approval stays pending.
+
+After updating the strict audio component lock, run in Umbrella:
+
+```sh
+python3 tools/radcliffe_prototypes/extend_audio_review.py \
+  --review workspace/EXISTING_REVIEW \
+  --audio ../HPR-Audio-Generator/audio/output/candidates/NEW_BED_COMPARISON
+```
+
+The extension preserves the existing review and browser storage key, snapshots
+prior review documents, and appends six 33-second WAVs as three exact PCM passes.
+It verifies original-source identity, bed-only proof, peak and join screening,
+and unchanged earlier media. The Sound tab lists original, 10%, 25%, and 50%
+bed reductions. Percentages describe amplitude attenuation, not perceived
+loudness. The `#sound` link opens that comparison directly. No Registry records
+or visual choices are changed.
