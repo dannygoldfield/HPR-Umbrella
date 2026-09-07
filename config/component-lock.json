@@ -4,7 +4,7 @@
     "audio": {
       "name": "HPR-Audio-Generator",
       "repository": "https://github.com/dannygoldfield/HPR-Audio-Generator.git",
-      "commit": "b4661edd080e4053501b4d3e8c15f41786913009",
+      "commit": "d7a751679ba6a567598af9911ed4f9d2652a5878",
       "localPath": "../HPR-Audio-Generator",
       "environmentVariable": "HPR_AUDIO_GENERATOR_ROOT",
       "packagePath": "src/hpr_audio_generator",
@@ -13,7 +13,7 @@
     "video": {
       "name": "HPR-Video-Generator",
       "repository": "https://github.com/dannygoldfield/HPR-Video-Generator.git",
-      "commit": "0d33d1e1fd1b093e04ffb021daa8268dbf873acc",
+      "commit": "4e41a1a274d19b81b88b67ebe2f2925233bc73f7",
       "localPath": "../HPR-Video-Generator",
       "environmentVariable": "HPR_VIDEO_GENERATOR_ROOT",
       "packagePath": "src/hpr_video_generator",
