@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import shutil
-from build_iteration_review import three_visual
+from build_iteration_review import three_visual, frame_hashes
 from build_review import (checked_file, require, component_root, load_component_lock,
                           verify_approved_visuals, verify_no_embedded_generators)
 
@@ -60,7 +60,12 @@ def main():
     for portrait,strength,source,manifest in sources:
         target=destination/f"{portrait['key']}-develop-{strength}-33s.mp4"
         verified=three_visual(source,target)
-        require(verified['continuity']['decodedIdenticalAdjacentPairs']==0,'A decoded development hold was introduced')
+        if verified['continuity']['decodedIdenticalAdjacentPairs']:
+            hashes=frame_hashes(target)
+            identical=sum(a==b for a,b in zip(hashes,hashes[1:]))
+            require(identical==0,'A full-resolution decoded development hold was introduced')
+            verified['continuity']['fullResolutionIdenticalAdjacentPairs']=identical
+            verified['continuity']['proxyDuplicatesResolvedAtFullResolution']=True
         verified.update(strength=strength,url=str(target.relative_to(root)),sourceManifest=manifest,
                         sourceManifestFile=checked_file(source.with_suffix('.json')))
         portrait['development'].append(verified)
