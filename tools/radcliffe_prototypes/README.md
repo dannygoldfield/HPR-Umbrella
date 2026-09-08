@@ -240,3 +240,25 @@ a fresh isolated browser context: playback, both joins, normal completion,
 independent controls, restored previews and choices, cross-tab merging, rapid
 switching, the previous reference, and mobile fit. Its default isolated origin
 is port 18769; use `HPR_REVIEW_TEST_URL` to specify another staging origin.
+
+
+## Export the latest selected prototypes for sharing
+
+`export_selected_prototypes.py` combines the current explicit develop/audio
+choices with the latest explicit Infinity field choice. It preserves the
+verified 33-second video packets, checks the selected audio review against
+three exact native eleven-second PCM cycles, and encodes one continuous
+320 kb/s AAC soundtrack. It applies no audio filters, gain changes or video
+re-encoding, and does not write to either generator or the Registry.
+
+```sh
+python3 tools/radcliffe_prototypes/export_selected_prototypes.py \
+  --output workspace/NEW_SHARING_EXPORT
+```
+
+Use a fresh output name. The folder contains three MP4s, a short viewing note
+and private provenance; a sibling ZIP contains only the three videos and note.
+Source hashes, selected settings, component locks, full decoding, identical
+video packets/timestamps, exact stream synchronization, loudness preservation
+and both internal audio joins are checked. These exports remain working
+prototypes with final human visual and AV loop approval pending.
