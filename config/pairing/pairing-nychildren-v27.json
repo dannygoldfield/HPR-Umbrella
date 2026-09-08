@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0",
+  "experimentId": "pairing-nychildren-v27",
+  "status": "superseded_setup",
+  "supersededReason": "No-stem setup error; replaced by pairing-nychildren-stems-v28",
+  "portraitId": "POR-30FE48FB73CE",
+  "portraitRevisionId": "POR-30FE48FB73CE-R002",
+  "visualId": "VIS-30FE48FB73CE-PDE-002",
+  "audioRecipeId": "AR-010",
+  "durationSec": 11,
+  "nativeDuration": true,
+  "candidateCount": 10,
+  "seedSelection": "Deterministic seeds with unique bed and gesture combinations",
+  "bankPolicy": {
+    "unusedAudio": "banked automatically",
+    "selectedAudio": "retired from future final use",
+    "rejectedPairAudio": "banked unless explicitly retired"
+  },
+  "candidates": [
+    {"optionNumber": 1, "seed": 138636665, "audioId": "AUD-0C027C12CBD3", "pairId": "PAIR-AC7A41A79D49", "bedId": "SA-B-001", "gestureId": "SA-G-001"},
+    {"optionNumber": 2, "seed": 138636666, "audioId": "AUD-4A199B82A468", "pairId": "PAIR-4260804F838A", "bedId": "SA-B-001", "gestureId": "SA-G-007"},
+    {"optionNumber": 3, "seed": 138636667, "audioId": "AUD-037D77E30411", "pairId": "PAIR-9E9E491F056F", "bedId": "SA-B-001", "gestureId": "SA-G-006"},
+    {"optionNumber": 4, "seed": 138636668, "audioId": "AUD-CFC70C2E74AB", "pairId": "PAIR-40B779C522D1", "bedId": "SA-B-002", "gestureId": "SA-G-008"},
+    {"optionNumber": 5, "seed": 138636669, "audioId": "AUD-9200806F762F", "pairId": "PAIR-800F7BE23B98", "bedId": "SA-B-003", "gestureId": "SA-G-002"},
+    {"optionNumber": 6, "seed": 138636670, "audioId": "AUD-2087EC688DD0", "pairId": "PAIR-2ADA2F419215", "bedId": "SA-B-002", "gestureId": "SA-G-005"},
+    {"optionNumber": 7, "seed": 138636671, "audioId": "AUD-FBEEA46F9E7F", "pairId": "PAIR-568119BC877E", "bedId": "SA-B-003", "gestureId": "SA-G-006"},
+    {"optionNumber": 8, "seed": 138636672, "audioId": "AUD-0C1F8D89F665", "pairId": "PAIR-44D4C1914F01", "bedId": "SA-B-002", "gestureId": "SA-G-004"},
+    {"optionNumber": 9, "seed": 138636673, "audioId": "AUD-FC27447811FD", "pairId": "PAIR-87341C22AFC6", "bedId": "SA-B-004", "gestureId": "SA-G-003"},
+    {"optionNumber": 10, "seed": 138636674, "audioId": "AUD-56F80CC28E91", "pairId": "PAIR-AA03B24DBF8D", "bedId": "SA-B-002", "gestureId": "SA-G-007"}
+  ]
+}

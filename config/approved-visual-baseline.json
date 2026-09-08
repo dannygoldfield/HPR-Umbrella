@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0",
+  "recordedAt": "2026-08-26",
+  "purpose": "Byte-for-byte regression baseline for the three five-star production visuals approved on 2026-08-21.",
+  "visuals": [
+    {
+      "project": "NYChildren",
+      "visualId": "VIS-30FE48FB73CE-PDE-002",
+      "mediaPath": "workspace/portrait-development-settlement-v9/israel.batel.oshrat.398/israel.batel.oshrat.398__PDE-002.mp4",
+      "mediaSha256": "38b7661379c7be628f9175a1ade5856c6ca9ebcf53e0ecf5b06f3d4680ee61d0",
+      "manifestPath": "workspace/portrait-development-settlement-v9/israel.batel.oshrat.398/israel.batel.oshrat.398__PDE-002.json",
+      "manifestSha256": "a0cf945a9bd511f9a5a8cf7f09124368a6a2f9410a4f597b4bdc1eebedf76f90"
+    },
+    {
+      "project": "10000",
+      "visualId": "VIS-90500D66EBBF-PDE-002",
+      "mediaPath": "workspace/portrait-development-settlement-v9/new_jersey_m_0180/new_jersey_m_0180__PDE-002.mp4",
+      "mediaSha256": "00a90aceaeb583a50dae98836c0df21b9fc74a3103e86a8ed1dd2a8b13ca454d",
+      "manifestPath": "workspace/portrait-development-settlement-v9/new_jersey_m_0180/new_jersey_m_0180__PDE-002.json",
+      "manifestSha256": "87b32e11cb2fd17e1c6557c19abef4fe2d4f2108a15c0ecd8d3860f3fdad1c12"
+    },
+    {
+      "project": "Infinity",
+      "visualId": "VIS-4DF5D853ACDA-IBN-001",
+      "mediaPath": "workspace/infinity-background-static-production-v26/candidates/26-Sam-359-LAYERS__IBN-001.mp4",
+      "mediaSha256": "d7d44125c87e137bc0c5ed4a45c3f65ccf6877c9e9fe85e023addc1a78f97c1f",
+      "manifestPath": "workspace/infinity-background-static-production-v26/candidates/26-Sam-359-LAYERS__IBN-001.json",
+      "manifestSha256": "05d4204047d3f512aceebfd144db961be8c9d365b4c525ca44251102b11cdb1c"
+    }
+  ]
+}

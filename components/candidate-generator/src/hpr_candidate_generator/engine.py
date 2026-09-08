@@ -11,7 +11,7 @@ from typing import Iterable, Mapping, Sequence
 
 ARCHIVE_DURATIONS = (7, 9, 11)
 DEFAULT_VISUAL_PRESETS = ("VP-022", "VP-023", "VP-024", "VP-030", "VP-031")
-DEFAULT_AUDIO_RECIPES = {7: "AR-008", 9: "AR-009", 11: "AR-010"}
+DEFAULT_AUDIO_RECIPES = {7: "AR-008", 9: "AR-009", 11: "AR-011"}
 
 
 @dataclass(frozen=True)

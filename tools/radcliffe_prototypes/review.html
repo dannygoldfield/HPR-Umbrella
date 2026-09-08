@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HPR · Radcliffe Yard soundtrack review</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#262721;background:#f4f2eb}*{box-sizing:border-box}body{margin:0}main{max-width:1060px;margin:auto;padding:24px}h1{font-size:25px;font-weight:550;margin:0 0 8px}p{color:#606159;line-height:1.5;margin:8px 0}nav{display:flex;gap:8px;margin:22px 0;flex-wrap:wrap}button,select{font:inherit;border:1px solid #c5c7ba;border-radius:6px;background:#fffdf7;padding:10px 14px;color:inherit;cursor:pointer}button[aria-pressed=true]{background:#334235;color:white;border-color:#334235}.review{display:grid;grid-template-columns:minmax(230px,330px) 1fr;gap:32px}video{display:block;width:100%;max-height:65vh;background:#161814;border-radius:3px}h2{font-size:18px;margin:0 0 12px}.options{display:grid;grid-template-columns:1fr 1fr;gap:8px}.options button{text-align:left;display:flex;justify-content:space-between;gap:10px}.stars{font-size:12px;color:#858572}button[aria-pressed=true] .stars{color:#d4d9c7}label{display:block;margin:22px 0 8px}.choices{border-top:1px solid #d4d5c9;margin-top:24px;padding-top:12px}pre{font:inherit;line-height:1.7;white-space:pre-wrap}a{color:#334235}small{color:#696d60}#now{font-size:14px;margin-bottom:14px}@media(max-width:650px){main{padding:16px}.review{grid-template-columns:1fr;gap:20px}video{max-height:55vh}nav button{padding:8px}h1{font-size:21px}}
+</style>
+<main>
+<h1>How People Relate</h1>
+<p>Radcliffe Yard · Choose one soundtrack for each portrait.</p>
+<p>All ten tracks passed independent audio approval. Each plays with the unchanged approved visual for eleven seconds. Let each loop several times before choosing.</p>
+<nav id="portraits" aria-label="Portrait"></nav>
+<div class="review"><div><video id="video" controls loop playsinline preload="metadata"></video><p id="now"></p></div>
+<section><h2>Compare soundtracks</h2><p><small>The option numbers identify the same soundtrack across all three portraits. Stars show your earlier audio ratings.</small></p><div id="options" class="options"></div>
+<label for="choice">My choice for this portrait</label><select id="choice"><option value="">Still comparing</option></select>
+<div class="choices"><h2>Your three choices</h2><pre id="summary"></pre><button id="copy">Copy choices</button><p><small>Send these choices in the HPR task. They are draft choices here; final approval is recorded when you confirm them. Use a different track for each portrait.</small></p><p id="warning" role="status"></p></div>
+<details><summary>Verification and provenance</summary><p>Eleven seconds · 1080 × 1920 · 24 fps · AAC stereo. Audio remains at the approved −22 LUFS level. The video stream is copied exactly; no audio filters or gain changes are applied.</p><p>The source animation states match at the loop boundary. Lossy video encoding introduces small pixel differences; please check the final visible and audible loop during playback.</p><p><a href="provenance.json" target="_blank">Complete source, approval, and technical records</a></p></details>
+</section></div>
+</main><script src="review-data.js"></script><script>
+const data=window.HPR_REVIEW, labels={NYChildren:'NYChildren','10000':'To Live 10,000 Years',Infinity:'1 to Infinity'}, projects=Object.keys(labels), $=id=>document.getElementById(id);
+let project=projects[0],option=1,choices={};
+for(const p of projects){const b=document.createElement('button');b.textContent=labels[p];b.onclick=()=>{project=p;render(false)};$('portraits').append(b)}
+for(const a of data.audio){const b=document.createElement('button');b.innerHTML=`<span>Option ${a.option}</span><span class="stars">${'★'.repeat(a.rating||0)}</span>`;b.onclick=()=>{option=a.option;render(true)};$('options').append(b);const o=document.createElement('option');o.value=a.option;o.textContent=`Option ${a.option}`;$('choice').append(o)}
+function summary(){return projects.map(p=>`${labels[p]}: ${choices[p]?'Option '+choices[p]:'still comparing'}`).join('\n')}
+function render(play){$('video').pause();const pair=data.pairs.find(p=>p.project===project&&p.option===option);$('video').src=pair.relativePath;$('video').load();$('now').textContent=`${labels[project]} · Option ${option}`;[...$('portraits').children].forEach((b,i)=>b.setAttribute('aria-pressed',projects[i]===project));[...$('options').children].forEach((b,i)=>b.setAttribute('aria-pressed',i+1===option));$('choice').value=choices[project]||'';$('summary').textContent=summary();if(play)$('video').play().catch(()=>{})}
+$('choice').onchange=()=>{choices[project]=Number($('choice').value)||null;$('summary').textContent=summary();const values=Object.values(choices).filter(Boolean);$('warning').textContent=new Set(values).size!==values.length?'This track is chosen for more than one portrait. Please choose three different tracks.':''};
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(summary());$('copy').textContent='Copied'}catch{$('warning').textContent='Select and copy the three lines above.'}};render(false);
+</script></html>

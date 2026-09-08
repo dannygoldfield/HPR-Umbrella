@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0",
+  "recordedOn": "2026-09-07",
+  "status": "color_speed_comparison_choice_locked",
+  "authority": "User: I like Endless Rooms the best and would like to see it in 5 colors and mixed speeds.",
+  "preferredFamily": "Endless Rooms",
+  "parentReview": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/infinity-blue-sky/review.json",
+  "parentReviewSha256": "e30ee57fb9405ec2ce6d91fa98217587609ea3f0ff2954dd03eb712caaf3dd4c",
+  "preferredReferenceMedia": {
+    "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/infinity-blue-sky/visuals/Infinity-rooms-33s.mp4",
+    "sha256": "d49d69333784267618641bd88c76d340a33e0a348833b01012fdad5a3b8f30d1",
+    "component": "umbrella"
+  },
+  "developmentPercent": 200,
+  "soundBedReductionPercent": 50,
+  "colorSpeedChoice": {
+    "status": "comparison_choice_locked",
+    "authority": "Explicit user correction in HPR task: I changed my mind and prefer Ivory Slow",
+    "chosenAt": "2026-09-07T22:34:53.688395+00:00",
+    "kind": "rooms-ivory-slow",
+    "family": "Endless Rooms",
+    "color": "ivory",
+    "colorLabel": "Ivory",
+    "speed": "slow",
+    "speedLabel": "Slow",
+    "title": "Ivory \u00b7 Slow",
+    "depthSpeedRelativeToOriginal": 0.2,
+    "developmentPercent": 200,
+    "soundBedReductionPercent": 50,
+    "nativeDurationSec": 11,
+    "comparisonDurationSec": 33,
+    "nativeVisual": {
+      "component": "video",
+      "path": "media/output/candidates/HPR-Endless-Rooms-20260907/visuals/Infinity-blue-sky-rooms-ivory-slow-200.mp4",
+      "sha256": "c60544c883466ea9802bfcc09539c9a4fc2a18a34550bc84a28f1db3331c50d5"
+    },
+    "visualManifest": {
+      "component": "video",
+      "path": "media/output/candidates/HPR-Endless-Rooms-20260907/visuals/Infinity-blue-sky-rooms-ivory-slow-200.json",
+      "sha256": "de89fb1f0f7b906c8bb141da68f5fae0f70177bd1f6654058683c7a58ee86f8e"
+    },
+    "reviewVisual": {
+      "component": "umbrella",
+      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/visuals/rooms-ivory-slow-33s.mp4",
+      "sha256": "415f263be8dd33f59148bf88efb7ea9e2294b3fa5df76a86cc13730c8e65c5e3"
+    },
+    "sourceReviewBeforeSelection": {
+      "component": "umbrella",
+      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/provenance/ivory-slow-selection/review.json",
+      "sha256": "4fc5f48d719db4458c2cf4f39ab10c1ee683822885a8705f5b2e4d7987433552"
+    },
+    "humanFinalVisualApproval": null,
+    "humanAVLoopApproval": null,
+    "scope": "Confirms the Infinity background, color and speed for the selected comparison; final visual and AV loop approval remain pending.",
+    "supersedes": {
+      "component": "umbrella",
+      "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/endless-rooms/provenance/ivory-slow-selection/CHOICE.json",
+      "sha256": "5d5315fd601e74abe8ea02e67f99135a5d92640daa105b1db2825e1f65398b28"
+    }
+  },
+  "humanFinalVisualApproval": null,
+  "humanAVLoopApproval": null,
+  "registryModified": false,
+  "preservedComparisonChoices": "config/radcliffe-comparison-choices-2026-09-07.json"
+}

@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "1.0",
+  "selectionId": "HPR-COMPARISON-20260907-1628",
+  "recordedAt": "2026-09-07T20:28:46Z",
+  "status": "comparison_choices_locked",
+  "authority": "Explicit user choices in HPR task on 2026-09-07; reviewed in Chrome.",
+  "sourceReview": {
+    "component": "umbrella",
+    "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/review.json",
+    "sha256": "fa27672a17a9582dfc049b78213731dfdbc70f59b8f17d8c06ac371286ba3bd8"
+  },
+  "componentLockAtSelection": {
+    "schemaVersion": "1.0",
+    "components": {
+      "audio": {
+        "name": "HPR-Audio-Generator",
+        "repository": "https://github.com/dannygoldfield/HPR-Audio-Generator.git",
+        "commit": "a012dbc3e8c0cd2a4f808edd24be5358c2d9ba63",
+        "localPath": "../HPR-Audio-Generator",
+        "environmentVariable": "HPR_AUDIO_GENERATOR_ROOT",
+        "packagePath": "src/hpr_audio_generator",
+        "productionConfig": "config/generator.xml"
+      },
+      "video": {
+        "name": "HPR-Video-Generator",
+        "repository": "https://github.com/dannygoldfield/HPR-Video-Generator.git",
+        "commit": "a3f8c0720a98e7a4fa311abde9a35cdfaecef43b",
+        "localPath": "../HPR-Video-Generator",
+        "environmentVariable": "HPR_VIDEO_GENERATOR_ROOT",
+        "packagePath": "src/hpr_video_generator",
+        "productionConfig": "config/production-visual-policy.json"
+      }
+    }
+  },
+  "scope": "Lock develop strength and bed attenuation for the next comparison. This is not final component, AV, loop, or application-delivery approval.",
+  "audioPolicy": "Bed amplitude only; distinctive foreground events, their timing, source master gain, native eleven-second family, and composition are preserved. No whole-mix renormalization.",
+  "nativeDurationSec": 11,
+  "comparisonDurationSec": 33,
+  "cycles": 3,
+  "humanAudioLoopApproval": null,
+  "humanVisualLoopApproval": null,
+  "humanAVLoopApproval": null,
+  "registryModified": false,
+  "portraits": [
+    {
+      "project": "10000",
+      "label": "To Live 10,000 Years",
+      "developPercent": 150,
+      "bedReductionPercent": 25,
+      "bedLinearGain": 0.75,
+      "soundtrackOption": 1,
+      "sourceAudioId": "AUD-11S-0B9B7E0164",
+      "audioCandidateId": "AUD-BED75-D1ACD7A3E0",
+      "nativeVisual": {
+        "component": "video",
+        "path": "media/output/candidates/HPR-next-iteration-20260907-lossless/10000-develop-150.mp4",
+        "sha256": "dbe59579f185b19c660bbfc06be5916af6129eb5d2793786038c6394e8747464"
+      },
+      "visualManifest": {
+        "component": "video",
+        "path": "media/output/candidates/HPR-next-iteration-20260907-lossless/10000-develop-150.json",
+        "sha256": "b5bae0e91507e9da1ef8cf218336e3e729688e4c4430a15dd2e3165a894b5656"
+      },
+      "nativeAudio": {
+        "component": "audio",
+        "path": "audio/output/candidates/HPR-bed-comparison-20260907/AUD-BED75-D1ACD7A3E0/AUD-BED75-D1ACD7A3E0.wav",
+        "sha256": "b0102c82fac33c2c81d3c097ac04e7f7a31fd4127bdac9f7ba4a12e04ae9fbea"
+      },
+      "audioManifest": {
+        "component": "audio",
+        "path": "audio/output/candidates/HPR-bed-comparison-20260907/AUD-BED75-D1ACD7A3E0/AUD-BED75-D1ACD7A3E0.json",
+        "sha256": "96bd739b2deb1bccafafa376619d00afe9bc33cac6127b12bd1e7273d7223858"
+      },
+      "reviewVisual": {
+        "component": "umbrella",
+        "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/visuals/10000-develop-150-33s.mp4",
+        "sha256": "2daa0b18a39053746e59693d0ac6f3e9da2d916c0781710c0f1cace5503e37a1"
+      },
+      "reviewAudio": {
+        "component": "umbrella",
+        "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/audio/bed-25-50/10000-bed75-33s.wav",
+        "sha256": "17053ebd9112ad0b1a3b3e063d21f1cbad89c7e5f6ce819edac0a85bce6ae778"
+      },
+      "visualRole": "selected_comparison_visual"
+    },
+    {
+      "project": "NYChildren",
+      "label": "NYChildren",
+      "developPercent": 150,
+      "bedReductionPercent": 50,
+      "bedLinearGain": 0.5,
+      "soundtrackOption": 10,
+      "sourceAudioId": "AUD-11S-80917D8B1D",
+      "audioCandidateId": "AUD-BED50-9383CA5295",
+      "nativeVisual": {
+        "component": "video",
+        "path": "media/output/candidates/HPR-next-iteration-20260907-lossless/NYChildren-develop-150.mp4",
+        "sha256": "5db2dd3ea5757a41b9b1820ffbef31f07a0f999cf02092451e561d28be112626"
+      },
+      "visualManifest": {
+        "component": "video",
+        "path": "media/output/candidates/HPR-next-iteration-20260907-lossless/NYChildren-develop-150.json",
+        "sha256": "264731c4bbb6ffcafac620c420c1e55b9adca42ce5e129c48af20a6354ee424f"
+      },
+      "nativeAudio": {
+        "component": "audio",
+        "path": "audio/output/candidates/HPR-bed-comparison-20260907/AUD-BED50-9383CA5295/AUD-BED50-9383CA5295.wav",
+        "sha256": "0b0962a9b911275f0002057affff2ed5b26c1e5d8dab8a21b658496dcdc844e9"
+      },
+      "audioManifest": {
+        "component": "audio",
+        "path": "audio/output/candidates/HPR-bed-comparison-20260907/AUD-BED50-9383CA5295/AUD-BED50-9383CA5295.json",
+        "sha256": "d5c8ffd640228009a38baafa4ce8e011f9dfd839074cf3ba9d2baf48e368163d"
+      },
+      "reviewVisual": {
+        "component": "umbrella",
+        "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/visuals/NYChildren-develop-150-33s.mp4",
+        "sha256": "03ffa62d7bf067bae41148455e4b0ef45c538d06479dcbf67c0bb3785f534c4e"
+      },
+      "reviewAudio": {
+        "component": "umbrella",
+        "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/audio/bed-25-50/NYChildren-bed50-33s.wav",
+        "sha256": "9a0fb18112e29faa1d2b53db98da8985ad6e470fc810a4122b2280bdc99e46b7"
+      },
+      "visualRole": "selected_comparison_visual"
+    },
+    {
+      "project": "Infinity",
+      "label": "1 to Infinity",
+      "developPercent": 200,
+      "bedReductionPercent": 50,
+      "bedLinearGain": 0.5,
+      "soundtrackOption": 7,
+      "sourceAudioId": "AUD-11S-E060F315B3",
+      "audioCandidateId": "AUD-BED50-7BD77BCD5E",
+      "nativeVisual": {
+        "component": "video",
+        "path": "media/output/candidates/HPR-develop-extension-20260907/Infinity-develop-200.mp4",
+        "sha256": "ea9bea8aa3cc93c92ff7f1d664278c694358c4c503f737e542831d91833ec9ab"
+      },
+      "visualManifest": {
+        "component": "video",
+        "path": "media/output/candidates/HPR-develop-extension-20260907/Infinity-develop-200.json",
+        "sha256": "b351375a67005c15ed894a817914ec1fb3e602dda94d7e3a918e29ef51b26a71"
+      },
+      "nativeAudio": {
+        "component": "audio",
+        "path": "audio/output/candidates/HPR-bed-comparison-20260907/AUD-BED50-7BD77BCD5E/AUD-BED50-7BD77BCD5E.wav",
+        "sha256": "2d9ce0384a23225066509cf6dd28497fb4aeb0020b4f039c2c267bbd4a7e5821"
+      },
+      "audioManifest": {
+        "component": "audio",
+        "path": "audio/output/candidates/HPR-bed-comparison-20260907/AUD-BED50-7BD77BCD5E/AUD-BED50-7BD77BCD5E.json",
+        "sha256": "b40704d513d68fd80592a25eed34a4e0442119c5d9b09522c314d4272806487a"
+      },
+      "reviewVisual": {
+        "component": "umbrella",
+        "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/visuals/develop-175-200/Infinity-develop-200-33s.mp4",
+        "sha256": "8134b1d7d871ffba6d4c6fbf77b8f4207f8e51cd66120d6c338fd5a9a93edb98"
+      },
+      "reviewAudio": {
+        "component": "umbrella",
+        "path": "workspace/Radcliffe-Yard-HPR-Next-Iteration-2026-09-07-v2/audio/bed-25-50/Infinity-bed50-33s.wav",
+        "sha256": "26bf5c43daed657746973a89902ee970a227e3b1d389807753b27934e33a9d73"
+      },
+      "visualRole": "develop_reference_only_field_undecided"
+    }
+  ],
+  "infinityField": {
+    "choice": null,
+    "status": "not_chosen",
+    "userObservation": "I did not see any animation of the background in any of the Infinity options.",
+    "comparisonDevelopmentPercent": 125,
+    "nextComparisonDevelopmentPercent": 200,
+    "automaticStaticFallbackAllowed": false,
+    "nextStep": "Calibrate motion visibility using the current digit field and separate subject layer; keep the existing image, full-body framing, palette, typography and silhouette. A rebuild is not required by the pipeline diagnosis."
+  }
+}

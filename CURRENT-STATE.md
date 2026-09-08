@@ -1,24 +1,267 @@
 # Current State
 
-Updated: 2026-08-06
+Updated: 2026-08-26
 
 ## Permanent decisions
 
-- The Candidate Engine is the architectural center of HPR Umbrella.
+- The SQLite HPR Registry is the authoritative operational record.
+- Portrait identity is permanent; episode number is deferred release order.
+- The final custom sequence is chosen only after completed visual-and-audio masters can be reviewed.
 - Archive production is the current focus; Now mode is deferred.
-- Audio, Video, and future Text are plugins coordinated by the engine.
-- The production target is 120 archive videos: 40 each at 7, 9, and 11 seconds.
-- Each portrait receives five restrained visual candidates; noticeable motion is a failure mode.
+- Audio and Video are canonical standalone repositories coordinated by
+  Umbrella; future Text remains a downstream component.
+- The production target is 120 archive videos: 40 portraits of people age 100 or older, 40 portraits of people age 12 or younger, and 40 mixed-age portraits involving the number prop.
+- The active visual direction is Portrait Development Animation: fixed geometry
+  with evolving tone, skin color, surface detail, and restrained texture.
+- Camera movement, Ken Burns-style motion, warping, displacement, and facial
+  deformation are outside the active testing plan.
+- The settled soft sweep `PDE-002` is the portrait-surface baseline: it received
+  a five-star rating for 10000, NYChildren, and Infinity. Motion-picture grain
+  was tested and rejected as a production layer.
+- The official production name is Portrait Development Animation, or
+  Development Animation for short. “Adjustment Animation” is avoided because
+  it suggests a software demonstration rather than a living portrait surface.
+- Infinity uses the selected five-star `IBN-001` composite: `PDE-002` plus a
+  completely static field of Brandon Grotesque Bold numbers in `#edeae3` on
+  `#f7f5ef`. Blobs and number motion are rejected. Deterministic digit layouts
+  vary by portrait.
+- Each portrait initially receives five constrained development candidates;
+  visible mechanism or novelty is a failure mode.
 - The audio bank contains 150 unique tracks: 50 per duration.
 - A selected visual receives 10 audio pairing options.
 - Every final video uses a unique audio track, retired after selection.
 - Visual, Audio, Pair, and Publishing banks remain separate.
 - Human judgment is recorded, never inferred. A bad pair does not invalidate its components.
-- Photo exports can be replaced without losing motion, audio, text, or publication decisions.
+- Photo exports can be replaced without losing visual
+  recipe, audio, text, or publication decisions.
 - Text is optional, nondestructive, and considered after the audio-video master is ready.
 - Preserve metadata for every candidate; permanently retain selected masters and banked assets, while disposable renders may be regenerated.
+- Lightroom Classic remains authoritative for source-photo edits and source metadata.
+- The finished Lightroom export is the authoritative maximum. The active pilot
+  creates a deliberately under-resolved surrogate and only reveals toward the
+  untouched finished pixels; it never claims to recover information absent
+  from the source or to reproduce Lightroom controls.
+- Intake JPEGs retain their original filenames; numbered names are created only at release.
 
-## Implemented in this session
+## Implemented system and research history
+
+- Reusable JPEG/TIFF inspector for EXIF, IPTC, and XMP with Markdown and JSON output.
+- Three-portrait Lightroom metadata survival report and final metadata contract.
+- SQLite Registry schema and CLI for source projects, portraits, revisions,
+  candidate/review records, final masters, deferred sequences, and publication records.
+- Idempotent metadata-report ingestion with per-revision provenance manifests.
+- Three pilot portraits ingested as revision 1 with no episode numbers.
+- Versioned draft sequencing that assigns episode numbers only when a complete sequence locks.
+- Five versioned, loop-safe motion-rhythm recipes with exact frame timelines.
+- Fifteen seven-second pilot MP4s rendered and registered: three portraits by
+  five rhythms, all 1080 × 1920, 24 fps, 168 frames, and without grain or audio.
+- Reproducible JSON provenance beside every pilot render.
+- Functional local visual-review screen writing 1–5 ratings, rejection, notes,
+  and selection directly to the Registry while preserving review history.
+- First rhythm review completed: MR-005 selected for `bahamas.210` and
+  `26-Sam-135-Edit`; MR-004 selected for `new_jersey_m_0180`.
+- Motion-variable round 2 adds 12 registered candidates while retaining the
+  three selected originals as references. It isolates lower scale amplitude,
+  higher scale amplitude, horizontal micro-movement, and vertical
+  micro-movement.
+- Registry experiment and parent-candidate provenance, plus selectable review
+  sets in the local interface.
+- White Balance round 3 adds 15 image-only candidates: a neutral reference and
+  four Temperature/Tint adjustment behaviors for each pilot portrait. No
+  Lightroom controls, geometric movement, audio, or grain appear in the video.
+- The review interface displays separate read-only Temperature and Tint sliders
+  synchronized to the exact rendered frame. These are HPR diagnostic deltas,
+  not Lightroom units; `0` means the approved Lightroom JPEG export.
+- White Balance extreme test adds 15 separately versioned candidates with an
+  intentionally obvious `-100` to `+100` diagnostic range. The earlier round
+  remains unchanged for comparison.
+- The review screen now uses a compact, mobile-first portrait preview: up to
+  300 pixels wide on larger screens and 280 pixels wide on phones.
+- The [Portrait Development Animation](https://github.com/dannygoldfield/HPR-Video-Generator/blob/main/docs/PORTRAIT-DEVELOPMENT-ANIMATION.md)
+  creative, computational, parameter, and test specification is now the active
+  visual R&D plan.
+- Motion-rhythm, motion-variable, and White Balance-only candidates are retained
+  as reproducible research history. They are no longer the active visual test.
+- Portrait Development round 1 adds 15 registered image-only candidates: a
+  static final reference plus global development, broad sparse activation,
+  overlapping swells, and a soft diagonal sweep for each pilot portrait.
+- Every round-1 development candidate is fixed-geometry, one-direction
+  surrogate-to-final, silent, without grain or text, 1080 × 1920, 24 fps,
+  seven seconds, and 168 frames. The Registry now contains 72 visuals.
+- The review interface shows a synchronized percentage of the untouched final
+  portrait revealed, including the local spatial range, outside the video.
+- The film-grain source is recorded for later testing but intentionally omitted
+  until the development behavior is evaluated.
+- The second Portrait Development intake uses native 16-bit TIFFs for
+  NYChildren, 10000, and Infinity. All 11 tested Lightroom metadata fields
+  survive in every file. The 10000 TIFF is revision 2 of its existing portrait;
+  the new NYChildren and Infinity photographs have new portrait identities.
+- Portrait Development TIFF round 2 adds 15 registered image-only candidates:
+  a finished TIFF reference, global development with a long finished rest,
+  slow sparse activation, faster overlapping swells, and an unhurried soft
+  sweep for each portrait.
+- Every round-2 candidate is 11 seconds, 1080 × 1920, 24 fps, and 264 frames.
+  The source is transformed from embedded ProPhoto RGB into sRGB in native
+  16-bit precision, the compositor stays 16-bit until delivery conversion, and
+  the H.264 output carries complete BT.709 characteristics. Grain, audio, text,
+  and Infinity background separation remain deferred. The Registry now
+  contains 87 visual candidates.
+- The round-2 review favored sparse activation and the soft sweep. The fully
+  finished pause felt too long; the approved refinement is 40% of the prior
+  pause, or about 1.4 seconds total around the 11-second loop boundary.
+- The possible-finals intake replaces NYChildren with
+  `israel.batel.oshrat.398.tif`, whose eyes are sharp, and records the adjusted
+  full-resolution Infinity edit as revision 2. 10000 remains unchanged as its
+  revision 2 control. Every finalist source meets or exceeds 1080 × 1920.
+- Portrait Development possible-finals round adds nine registered candidates:
+  refined sparse activation, refined soft sweep, and an intentionally
+  assertive sparse boundary test for each portrait. All remain fixed-geometry,
+  11 seconds, 24 fps, 264 frames, 16-bit through compositing, H.264/BT.709,
+  silent, and without grain or text. The Registry now contains 96 visual
+  candidates. Infinity background ideation remains a separate later decision.
+- The visibility-boundary round records the exposure-corrected NYChildren TIFF
+  as revision 2 and adds nine deliberately noticeable candidates. Daring sparse
+  activation and daring sweep retain only a 25% finished-image floor; the
+  deliberate ceiling test reaches the full under-resolved state. Pauses shorten
+  again and feathering is reduced. All three portraits receive the same hard
+  push. The Registry now contains 105 visual candidates.
+- All nine visibility-boundary candidates received a latest rating of 4. The
+  settlement round therefore interpolates every continuous parameter in each
+  matching recipe 65% of the way from the possible-finals round toward the
+  visibility-boundary round. The first two recipes now retain a 40.75%
+  finished-image floor; the activation ceiling retains 17.5%. Integer patch
+  counts use the nearest practical whole number. Nine registered `PDE`
+  candidates passed 11-second, 264-frame, BT.709, fixed-geometry, and decoded
+  loop-closure audits. The Registry now contains 114 visual candidates.
+- Every development candidate remains available in its original review set.
+  The review interface now displays saved minimum-final, finished-pause, speed,
+  feather, and patch values beside the synchronized diagnostic so an eventual
+  setting can be chosen numerically between rounds.
+- Infinity layered-background round v10 uses the supplied 153 MB Photoshop TIFF:
+  2104 × 3740, 16-bit, ProPhoto RGB, with separate `Subject` and `Background`
+  layers. Seven background-only concepts are registered: momentum wake,
+  photographic emulsion bloom, floating photographic print, negative-space
+  aperture, residual gesture, incomplete geometry, and borrowed-color field.
+  Each holds `PDE-002` and subject geometry constant, begins and ends on the
+  supplied light background, and omits grain, audio, and text. All seven passed
+  11-second, 264-frame, BT.709, provenance, fixed-geometry, and decoded
+  loop-closure audits. The Registry now contains 121 visual candidates.
+- Human review found the seven v10 backgrounds indistinguishable at the
+  mobile-sized preview. Measurement confirmed that several delivered effects
+  averaged only one or two 8-bit display-code changes. The former unit check
+  proved only non-identical pixels and was not a valid perceptual acceptance
+  test; v10 is retained as failed research evidence.
+- Infinity visibility-calibration round v11 preserves the same seven concepts
+  under `IBV-001`–`IBV-007`, increases their contrast, coverage, displacement,
+  or graphic weight, and may deliberately go too far. Every recipe declares
+  minimum mean, 95th-percentile, and active-area visibility values measured in
+  8-bit display-code terms. Rendering stops when a minimum is missed. All seven
+  passed those gates plus the 11-second, 264-frame, BT.709, fixed-geometry, and
+  decoded loop-closure audits. The Registry now contains 128 visuals.
+- Human review found the v11 visibility-calibration round creatively
+  unsuccessful: only one of seven effects was visible, and that one was weak.
+  The metrics proved pixel change but not a recognizable visual event. V11 is
+  retained unchanged as failed research evidence.
+- Infinity sketch-directed round v12 translates Danny's reference sketches into
+  seven different spatial constructions: three Brandon Grotesque number fields,
+  a moving gradient curtain, a sliding panel, a hinged perspective door, and a
+  number doorway. All hold `PDE-002`, the isolated subject, and the supplied
+  light background constant. The seven 11-second candidates are registered as
+  `IBC-001`–`IBC-007`; the Registry now contains 135 visual candidates.
+- V12 review established that the numbers must remain two-dimensional; z-axis
+  travel is rejected. The v13 response round adds two dense flat number fields
+  (varied fixed sizes and one uniform size), an orderly lateral-separation
+  field, a visibly stronger gradient, a full-width sliding panel, an
+  eleven-second one-way door, and a dense number wipe. No digit is coordinated
+  with the `26` prop. `IBF-006` and `IBF-007` intentionally reset abruptly at
+  replay; the other five are continuous. The Registry now contains 142 visuals.
+- V13 review rejected `IBF-003` without a repair direction and expanded the
+  requested response beyond seven options. The v14 directed-variation round
+  therefore registers eleven candidates as `IBR-001`–`IBR-011`: three bold
+  fixed-size number fields with coordinated motion, three gradient direction or
+  palette studies, two one-way panel lightness pairs, an accelerating hinged
+  door, and static-versus-moving accelerating number wipes. `IBR-001` uses 420
+  balanced single digits and measures 57.2% active background in the finished
+  render. `IBR-007`–`IBR-011` intentionally cut back to their first frame;
+  `IBR-001`–`IBR-006` close continuously. All values are deterministic and
+  recorded. The Registry now contains 153 visuals.
+- V14 review repeatedly requested lower contrast and established an exact
+  background palette: `#f0eee9` and `#f7f5ef`. V15 registers eleven corrected
+  candidates as `IBP-001`–`IBP-011` and permits no other graphic neutral.
+  Columns are slower and bleed beyond the frame, panels compare two accelerating
+  rhythms, the door edge is substantially softer, wipe digits abandon visible
+  rows and columns, and `IBP-011` moves its irregular number field opposite the
+  wipe. All eleven are rendered and registered; the Registry now contains 164
+  visuals.
+- Mobile review found all eleven v15 backgrounds indistinguishable. The palette
+  differs by only seven, seven, and six 8-bit RGB codes, and the generator's
+  normal half-strength mix ceiling reduced the delivered signal again. V16 is a
+  six-candidate contrast-survival calibration rather than another eleven-effect
+  creative round. `IBK-001`–`IBK-006` compare `#edeae3`, `#e8e4dc`, and
+  `#e2ddd4` against fixed `#f7f5ef`, each in matched thin-number and broad-panel
+  constructions at an explicitly recorded full color mix. All six are rendered
+  and registered; the Registry now contains 170 visuals.
+- V16 review selected `IBK-001`'s subtle number contrast and found both the
+  middle and stronger broad panels successful, confirming that crisp local
+  edges need less contrast than a broad uniform field. V17 deliberately stops
+  expanding the effect menu. `IBL-001`–`IBL-003` combine the accepted subtle
+  planar number field with one, two, or three nested soft-edged organic blobs
+  moving behind it. Deterministic periodic paths and shape changes close
+  exactly; shared seeds keep number and blob geometry constant while blob count
+  changes. All three are rendered and registered; the Registry now contains 173
+  visuals.
+- V17 review established a motion-separation rule: moving numbers and moving
+  blobs must not coexist in production. The two possible systems are static
+  numbers with moving blobs, or gently moving numbers with no blobs. V18
+  registers `IBS-001`–`IBS-003`, which reproduce the exact v17 number layout and
+  one-, two-, and three-blob paths while holding every digit completely still.
+  All three close exactly and are rendered; the Registry now contains 176
+  visuals. `IBK-001` remains the no-blob moving-number control.
+- Final review rejected all blob variants and locked the no-blob `IBK-001`
+  system. A portrait-specific `numberSeed` changes the digit arrangement and a
+  portrait-specific `phaseOffset` changes only the starting point on the shared
+  closed path. This keeps future grid playback at one tempo without lockstep.
+  No three-video grid preview is required.
+- Four locally managed TDCatTech/LightKino grain plates are now verified as
+  matched 4096 × 2160, 10-bit ProRes, 24-fps, 15-second sources: 35mm Light,
+  Super 35 Light, 16mm Light, and Super 35 Heavy. The provider page states that
+  the plates are free to download and use as desired. Raw plates remain local
+  and outside Git; provenance records the page, observed permission wording,
+  filenames, and checksums.
+- Film-grain character/strength round v19 added seven 10000 candidates. A
+  temporary seven-candidate v20 diagnostic removed Development Animation to
+  isolate a reported impression of camera drift; it is retained as superseded
+  research and is not the creative decision set.
+- Film-grain composite round v21 adds 21 registered candidates under
+  `FGC-001`–`FGC-007`: the same seven grain choices for NYChildren, 10000, and
+  Infinity. NYChildren and 10000 use their locked five-star `PDE-002` visuals;
+  Infinity uses the complete selected `PDE-002 + IBK-001` moving-number
+  composite. Grain is downstream and luma-only. A decoded five-frame audit of
+  each representative medium-grain output measured exactly zero horizontal or
+  vertical displacement from its parent. All candidates pass 1080 × 1920,
+  24-fps, 11-second, 264-frame, and complete limited-range BT.709 audits.
+- Human review found no visible grain difference in v21. At the 280-pixel-wide
+  review size, the strongest candidate changed the image by only 0.726 display
+  codes on average and no pixels by more than four codes. V21 is retained as a
+  failed visibility test, not a grain choice.
+- Film-grain visibility round v22 adds seven 10000 candidates under
+  `FGV-001`–`FGV-007`. It keeps the selected `PDE-002` Development Animation
+  and fixed camera while progressively increasing grain mix, signal gain, and
+  texture scale. The intentionally excessive boundary reaches 12.436 average
+  display-code change at review size, with 73.62% of pixels changing by more
+  than four codes. All seven pass the locked 1080 × 1920, 24-fps, 11-second,
+  264-frame, and BT.709 delivery audits. The Registry now contains 218 visuals,
+  including retained research history.
+- V22 review found `FGV-002` closest and `FGV-003` through `FGV-007` too strong.
+  V23 registers seven slow-swim candidates under `FGS-001`–`FGS-007`.
+  `FGS-002` is byte-for-byte identical to `FGV-002`; later candidates average
+  overlapping groups of three, five, or seven film frames to increase temporal
+  correlation from 0.473 to as much as 0.884. Mix rises only to the requested
+  67% and grain size only to 1.25×. The grain signal is centered on the scan's
+  neutral value so smoothing cannot darken the portrait. All seven pass the
+  locked delivery audit. The Registry now contains 225 visuals.
+
+## Earlier implemented work
 
 - Archive production planner and domain records.
 - Deterministic 120-episode / 600-visual / 150-audio dry run.
@@ -29,8 +272,23 @@ Updated: 2026-08-06
 
 ## Next production work
 
-1. Supply the authoritative CSV of 120 selected archive portraits.
-2. Run and inspect the production dry run.
-3. Add bank persistence commands for recording reviews and selections.
-4. Connect the plan to queued batch rendering in the Video and Audio plugins.
-5. Run a small end-to-end pilot before rendering all 600 visual candidates and 150 audio tracks.
+1. Treat `PDE-002` as locked for 10000 and NYChildren and the combined
+   `PDE-002` + `IBK-001` composite as locked for Infinity. These are approved
+   silent visual components, not yet registered final audio-video masters.
+2. Continue using embedded-profile 16-bit TIFF as the preferred portrait
+   source. Seven Lightroom stage exports remain an optional calibration
+   experiment, not a requirement for every portrait or video.
+3. Review the seven-candidate v23 slow-swim refinement. Use the result to define
+   a narrow cross-portrait confirmation on NYChildren and the complete Infinity
+   composite before locking production grain.
+4. Connect the locked visuals to selected Audio
+   Generator tracks and complete pair review.
+5. Render, verify, and register final masters only after grain and audio pairing
+   decisions are approved.
+6. Test one completed master on both the visible and structured-data development
+   site pages, then schedule one clearly labeled disposable test post through
+   Buffer. Do not begin those external publication steps before a visual/audio
+   pair is approved.
+7. Replace the legacy early `EpisodeRecord` planner with Registry-backed portrait work records.
+8. Add a friendly completed-master sequence view or Lightroom interchange and
+   test it before planning the full 120-portrait production run.

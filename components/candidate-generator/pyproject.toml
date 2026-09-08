@@ -15,5 +15,5 @@ hpr-candidate = "hpr_candidate_generator.cli:main"
 where = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src", "../audio-generator/src", "../video-generator/src"]
+pythonpath = ["src"]
 testpaths = ["tests"]

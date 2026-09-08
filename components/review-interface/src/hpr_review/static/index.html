@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HPR Review</title>
+  <style>
+    :root { color-scheme:dark; --ink:#f5f1e9; --muted:#aaa59c; --panel:#1d1c1a; --line:#3b3935; --accent:#e9a85d; --ok:#7ac99a; --danger:#ea847d; }
+    * { box-sizing:border-box; }
+    html,body { height:100%; }
+    body { margin:0; overflow:hidden; background:#11110f; color:var(--ink); font:16px/1.42 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    header { min-height:58px; display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:.65rem 1rem; border-bottom:1px solid var(--line); background:#11110ff2; }
+    .header-controls { min-width:0; display:flex; gap:.8rem; align-items:center; }
+    .ingredient-link { color:var(--ok); text-decoration:none; white-space:nowrap; }
+    .ingredient-link:hover { text-decoration:underline; }
+    select { max-width:min(48vw,30rem); background:#292824; color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.55rem .7rem; font:inherit; }
+    h1 { margin:0; white-space:nowrap; font-size:1.1rem; letter-spacing:.02em; }
+    main { height:calc(100dvh - 58px); display:grid; grid-template-columns:minmax(270px,340px) minmax(430px,1fr); gap:1rem; max-width:1180px; margin:0 auto; padding:1rem; overflow:hidden; }
+    video { display:block; width:min(100%,300px); max-height:calc(100dvh - 90px); margin:0 auto; background:#000; border-radius:10px; box-shadow:0 14px 44px #0008; }
+    .visual-column { min-height:0; width:100%; max-width:350px; justify-self:center; overflow-y:auto; padding-right:.25rem; scrollbar-gutter:stable; }
+    summary { cursor:pointer; font-weight:650; }
+    .diagnostics { margin-top:.8rem; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
+    .diagnostics>summary { padding:.8rem 1rem; }
+    .diagnostics>.diagnostic-section { padding:0 1rem 1rem; }
+    .diagnostics h3 { margin:0 0 .2rem; font-size:1rem; }
+    .slider-row { display:grid; grid-template-columns:7rem 1fr 3.8rem; gap:.7rem; align-items:center; margin-top:.8rem; }
+    .slider-row output { text-align:right; font-variant-numeric:tabular-nums; }
+    .diagnostics input[type="range"] { width:100%; pointer-events:none; opacity:1; }
+    .diagnostics input.temp { accent-color:#e9a85d; }
+    .diagnostics input.tint { accent-color:#d982ca; }
+    .diagnostics input.development { accent-color:#7ac99a; }
+    .diagnostic-section + .diagnostic-section { margin-top:0; padding-top:1rem; border-top:1px solid var(--line); }
+    .settings-grid { grid-template-columns:8rem 1fr; margin:.7rem 0 0; gap:.25rem .7rem; font-size:.9rem; }
+    .panel { min-height:0; height:100%; overflow-y:auto; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1rem 1.15rem; scrollbar-gutter:stable; }
+    .eyebrow,.muted { color:var(--muted); }
+    .eyebrow { text-transform:uppercase; letter-spacing:.1em; font-size:.75rem; }
+    h2 { margin:.2rem 0 .1rem; font-size:1.35rem; }
+    dl { display:grid; grid-template-columns:8.5rem 1fr; margin:.8rem 0 0; gap:.28rem .7rem; }
+    dt { color:var(--muted); } dd { margin:0; overflow-wrap:anywhere; }
+    .candidate-details { margin:.85rem 0 0; padding:.7rem .8rem; border:1px solid var(--line); border-radius:8px; background:#181714; }
+    .candidate-details dl { font-size:.9rem; }
+    fieldset { border:0; padding:0; margin:1rem 0; }
+    legend { margin-bottom:.55rem; font-weight:650; }
+    button,.toggle { border:1px solid var(--line); background:#292824; color:var(--ink); border-radius:7px; padding:.65rem .85rem; cursor:pointer; }
+    button:hover,.toggle:hover { border-color:var(--accent); }
+    button.active { background:var(--accent); color:#17120c; border-color:var(--accent); font-weight:700; }
+    .ratings,.actions,.navigation { display:flex; flex-wrap:wrap; gap:.5rem; }
+    .ratings button { min-width:2.8rem; }
+    .toggle input { margin-right:.45rem; }
+    .toggle.reject.active { border-color:var(--danger); color:var(--danger); }
+    .toggle.reject.bank.active { border-color:var(--ok); color:var(--ok); }
+    .toggle.select.active { border-color:var(--ok); color:var(--ok); }
+    .toggle.retire.active { border-color:var(--danger); color:var(--danger); }
+    .bank-status { margin:.75rem 0; padding:.65rem .75rem; border:1px solid var(--line); border-radius:7px; background:#171714; }
+    .bank-status strong { color:var(--ok); }
+    textarea { width:100%; min-height:10rem; max-height:34vh; resize:vertical; background:#121210; color:var(--ink); border:1px solid var(--line); border-radius:7px; padding:.7rem; font:inherit; }
+    .navigation { justify-content:space-between; margin-top:.75rem; }
+    .navigation button { min-width:7.5rem; }
+    .status { min-height:1.25rem; color:var(--ok); margin:.35rem 0 0; }
+    .provenance { color:var(--accent); }
+    kbd { border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:.05rem .3rem; color:var(--muted); }
+    @media (max-height:760px) and (min-width:901px) { video { width:min(100%,250px); } textarea { min-height:7rem; } .panel { font-size:.94rem; } }
+    @media (max-width:900px) { html,body { height:auto; } body { overflow:auto; } header { position:sticky; top:0; z-index:2; padding:.7rem .8rem; flex-wrap:wrap; } .header-controls { width:100%; justify-content:space-between; } select { max-width:78vw; } main { height:auto; min-height:calc(100dvh - 96px); grid-template-columns:1fr; padding:.8rem; overflow:visible; } .visual-column,.panel { height:auto; overflow:visible; } video { width:min(76vw,280px); max-height:58vh; } dl { grid-template-columns:7rem 1fr; } }
+  </style>
+</head>
+<body>
+  <header><h1>HPR Review</h1><div class="header-controls"><a class="ingredient-link" href="http://127.0.0.1:8766/">Ingredient Audit</a><select id="experiment" aria-label="Review set"></select><div id="counter" class="muted">Loading…</div></div></header>
+  <main id="app" hidden>
+    <section class="visual-column">
+      <video id="video" muted loop autoplay playsinline controls></video>
+      <details id="diagnostics" class="diagnostics" hidden>
+        <summary>Effect settings</summary>
+        <div id="whiteBalanceDiagnostics" class="diagnostic-section" hidden>
+          <h3>White-balance reference</h3>
+          <div class="muted">Synchronized HPR deltas. The approved Lightroom export is 0; these are not Lightroom slider units.</div>
+          <div class="slider-row"><label for="temperatureSlider">Temperature</label><input id="temperatureSlider" class="temp" type="range" min="-10" max="10" step="0.01" value="0" aria-disabled="true" tabindex="-1"><output id="temperatureValue">0.00</output></div>
+          <div class="slider-row"><label for="tintSlider">Tint</label><input id="tintSlider" class="tint" type="range" min="-10" max="10" step="0.01" value="0" aria-disabled="true" tabindex="-1"><output id="tintValue">0.00</output></div>
+        </div>
+        <div id="developmentDiagnostics" class="diagnostic-section" hidden>
+          <h3>Portrait-development reference</h3>
+          <div class="muted">How much of the untouched finished portrait is visible. This reference stays outside the video.</div>
+          <div class="slider-row"><label for="developmentSlider">Finished image</label><input id="developmentSlider" class="development" type="range" min="0" max="100" step="0.1" value="100" aria-disabled="true" tabindex="-1"><output id="developmentValue">100%</output></div>
+          <div id="developmentRange" class="muted">Local range: 100–100%</div>
+        </div>
+        <div id="developmentSettings" class="diagnostic-section" hidden>
+          <h3>Saved animation settings</h3>
+          <div class="muted">Exact values for this candidate. Use these to choose a point between rounds.</div>
+          <dl class="settings-grid">
+            <dt>Minimum final</dt><dd id="settingMinimumFinal">—</dd>
+            <dt>Finished pause</dt><dd id="settingFinishedPause">—</dd>
+            <dt>Speed</dt><dd id="settingSpeed">—</dd>
+            <dt>Feather</dt><dd id="settingFeather">—</dd>
+            <dt>Patches</dt><dd id="settingPatches">—</dd>
+          </dl>
+        </div>
+        <div id="backgroundSettings" class="diagnostic-section" hidden>
+          <h3>Infinity background treatment</h3>
+          <div id="backgroundIntent" class="muted"></div>
+          <dl class="settings-grid">
+            <dt>Effect</dt><dd id="backgroundEffect">—</dd>
+            <dt>Strength</dt><dd id="backgroundStrength">—</dd>
+            <dt>Speed</dt><dd id="backgroundSpeed">—</dd>
+            <dt>Visibility boost</dt><dd id="backgroundVisibilityBoost">—</dd>
+            <dt>Peak mean change</dt><dd id="backgroundMeanDelta">—</dd>
+            <dt>Active background</dt><dd id="backgroundActiveArea">—</dd>
+            <dt>Typography</dt><dd id="backgroundTypography">—</dd>
+            <dt>Loop</dt><dd id="backgroundLoop">—</dd>
+            <dt>Subject</dt><dd id="backgroundSubjectTreatment">PDE-002 unchanged</dd>
+          </dl>
+        </div>
+        <div id="filmGrainSettings" class="diagnostic-section" hidden>
+          <h3>Film-grain treatment</h3>
+          <div class="muted">The locked Development Animation remains active and the camera is fixed. Signal gain means contrast within the grain pattern—not portrait brightness. Motion smoothing correlates neighboring grain frames to create a calmer swim. These settings stay outside the video.</div>
+          <dl class="settings-grid">
+            <dt>Film format</dt><dd id="grainFilmFormat">—</dd>
+            <dt>Source plate</dt><dd id="grainSourceStrength">—</dd>
+            <dt>Mix</dt><dd id="grainOpacity">—</dd>
+            <dt>Signal gain</dt><dd id="grainSignalGain">—</dd>
+            <dt>Grain size</dt><dd id="grainTextureScale">—</dd>
+            <dt>Motion smoothing</dt><dd id="grainTemporalSmooth">—</dd>
+            <dt>Loop blend</dt><dd id="grainLoopBlend">—</dd>
+            <dt>Plate file</dt><dd id="grainPlateFilename">—</dd>
+            <dt>Starting frame</dt><dd id="grainStartFrame">—</dd>
+            <dt>Color</dt><dd>Luma only</dd>
+            <dt>Parent visual</dt><dd id="grainParentVisual">—</dd>
+          </dl>
+        </div>
+      </details>
+    </section>
+    <section class="panel">
+      <div class="eyebrow" id="source"></div>
+      <h2 id="portrait"></h2>
+      <div class="muted" id="recipe"></div>
+      <details class="candidate-details">
+        <summary>Candidate details and provenance</summary>
+        <dl>
+          <dt>Episode</dt><dd>Not assigned — sequencing happens after final masters</dd>
+          <dt>Portrait ID</dt><dd id="portraitId"></dd>
+          <dt>Revision</dt><dd id="revisionId"></dd>
+          <dt id="candidateLabel">Candidate</dt><dd id="visualId"></dd>
+          <dt id="pairIdLabel" hidden>Pair ID</dt><dd id="pairId" hidden></dd>
+          <dt id="audioIdLabel" hidden>Audio ID</dt><dd id="audioId" hidden></dd>
+          <dt>Comparison</dt><dd id="comparison"></dd>
+          <dt>Render</dt><dd id="renderStatus"></dd>
+          <dt>Review</dt><dd id="reviewStatus"></dd>
+          <dt>Provenance</dt><dd><a id="manifest" class="provenance" target="_blank">Open JSON manifest</a></dd>
+        </dl>
+      </details>
+      <fieldset id="audioRatingField" hidden><legend>Audio rating</legend><div id="audioRatings" class="ratings"></div></fieldset>
+      <fieldset><legend><span id="ratingLabel">Rating</span> <span class="muted">(<kbd>1</kbd>–<kbd>5</kbd>)</span></legend><div id="ratings" class="ratings"></div></fieldset>
+      <fieldset><legend>Decision</legend><div class="actions">
+        <label id="rejectLabel" class="toggle reject"><input id="reject" type="checkbox"><span id="rejectText">Reject</span> <kbd id="rejectShortcut">R</kbd></label>
+        <label id="selectLabel" class="toggle select"><input id="select" type="checkbox"><span id="selectText">Select visual</span> <kbd>S</kbd></label>
+        <label id="retireLabel" class="toggle retire" hidden><input id="retire" type="checkbox"><span id="retireText">Reject audio</span> <kbd>R</kbd></label>
+      </div></fieldset>
+      <div id="bankStatus" class="bank-status" hidden></div>
+      <label for="notes"><strong>Notes</strong></label>
+      <textarea id="notes" placeholder="What works or does not work?"></textarea>
+      <div id="saveStatus" class="status"></div>
+      <div class="navigation"><button id="previous">← Previous</button><button id="next">Next →</button></div>
+      <p class="muted"><kbd>←</kbd>/<kbd>→</kbd> navigate · <kbd>Space</kbd> play/pause · notes save automatically</p>
+    </section>
+  </main>
+  <script>
+    let allCandidates=[], allPairs=[], candidates=[], position=0, saveTimer=null, saveSequence=0, dirty=false, telemetry=null, telemetryToken=0, reviewMode='visual';
+    const productionVisualIds=['VIS-30FE48FB73CE-PDE-002','VIS-90500D66EBBF-PDE-002','VIS-4DF5D853ACDA-IBN-001'];
+    const $=id=>document.getElementById(id);
+    function current(){ return candidates[position]; }
+    function reviewStatus(c){
+      if(c.selected)return 'selected pair';
+      if(reviewMode==='pair'&&c.retire_audio)return 'audio rejected';
+      if(reviewMode==='pair'&&c.rejected)return 'audio banked';
+      return c.rejected?'rejected':(c.rating!==null||c.notes)?'reviewed':'unreviewed';
+    }
+    function render(){
+      const c=current(); if(!c) return;
+      $('counter').textContent=`${position+1} of ${candidates.length}`;
+      $('video').muted=reviewMode!=='pair'; $('video').src=c.media_url;
+      if(reviewMode==='visual')$('video').play().catch(()=>{});
+      loadTelemetry(c);
+      $('source').textContent=`${c.source_project_display_name} · ${c.portrait_group.replaceAll('_',' ')}`;
+      $('portrait').textContent=c.revision_filename || c.intake_filename;
+      $('recipe').textContent=reviewMode==='pair'
+        ? `${c.audio_recipe_id} · Audio option ${position+1} of ${candidates.length} · ${c.duration_sec} native seconds · press Play to hear`
+        : `${c.motion_recipe_id} · ${c.motion_recipe_name || recipeName(c.motion_recipe_id)} · ${c.duration_sec} seconds`;
+      $('portraitId').textContent=c.portrait_id; $('revisionId').textContent=c.revision_id;
+      $('visualId').textContent=c.visual_id;
+      $('candidateLabel').textContent=reviewMode==='pair'?'Visual ID':'Candidate';
+      $('pairIdLabel').hidden=reviewMode!=='pair'; $('pairId').hidden=reviewMode!=='pair';
+      $('audioIdLabel').hidden=reviewMode!=='pair'; $('audioId').hidden=reviewMode!=='pair';
+      $('pairId').textContent=c.pair_id||''; $('audioId').textContent=c.audio_id||'';
+      $('comparison').textContent=c.comparison_label || experimentName(c.experiment_id);
+      $('renderStatus').textContent=c.render_status; $('reviewStatus').textContent=reviewStatus(c);
+      $('manifest').href=c.manifest_url;
+      $('audioRatingField').hidden=reviewMode!=='pair'; $('ratingLabel').textContent=reviewMode==='pair'?'Complete pair rating':'Rating';
+      $('rejectText').textContent=reviewMode==='pair'?'Bank audio':'Reject'; $('rejectShortcut').textContent=reviewMode==='pair'?'B':'R';
+      $('rejectLabel').classList.toggle('bank',reviewMode==='pair');
+      $('selectText').textContent=reviewMode==='pair'?'Select pair':'Select visual'; $('retireText').textContent='Reject audio';
+      $('retireLabel').hidden=reviewMode!=='pair'; $('bankStatus').hidden=reviewMode!=='pair';
+      renderControls();
+      $('previous').disabled=position===0; $('next').disabled=position===candidates.length-1; $('saveStatus').textContent=''; dirty=false;
+    }
+    function recipeName(id){
+      const original=({'MR-001':'Smooth baseline','MR-002':'Variable speed','MR-003':'Brief hold','MR-004':'Two stage with near-stillness','MR-005':'Asymmetric approach and return'})[id];
+      if(original)return original;
+      if(id.endsWith('LOW-SCALE'))return 'Lower scale amplitude';
+      if(id.endsWith('HIGH-SCALE'))return 'Higher scale amplitude';
+      if(id.endsWith('HORIZONTAL'))return 'Horizontal micro-movement only';
+      if(id.endsWith('VERTICAL'))return 'Vertical micro-movement only';
+      const whiteBalance=({'WBP-001':'Accurate export reference','WBP-002':'Temperature search','WBP-003':'Tint search','WBP-004':'Sequential temperature then tint correction','WBP-005':'Coupled white-balance fine-tuning'})[id];
+      if(whiteBalance)return whiteBalance;
+      const extreme=({'WBE-001':'Accurate export reference','WBE-002':'Extreme temperature search','WBE-003':'Extreme tint search','WBE-004':'Extreme sequential temperature then tint','WBE-005':'Extreme coupled white-balance search'})[id];
+      if(extreme)return extreme;
+      const development=({'PDA-001':'Static finished portrait','PDA-002':'Global development','PDA-003':'Broad sparse activation','PDA-004':'Overlapping swells','PDA-005':'Soft diagonal sweep'})[id];
+      if(development)return development;
+      const tiffDevelopment=({'PDB-001':'Finished TIFF reference','PDB-002':'Global development — long finished rest','PDB-003':'Sparse activation — slow ease','PDB-004':'Overlapping swells — flowing ease','PDB-005':'Soft sweep — unhurried ease'})[id];
+      if(tiffDevelopment)return tiffDevelopment;
+      const finalist=({'PDC-001':'Refined sparse activation — short swing pause','PDC-002':'Refined soft sweep — short swing pause','PDC-003':'Assertive sparse activation — boundary test'})[id];
+      if(finalist)return finalist;
+      const visibility=({'PDD-001':'Daring sparse activation','PDD-002':'Daring soft sweep','PDD-003':'Full-range activation — deliberate ceiling'})[id];
+      if(visibility)return visibility;
+      const settlement=({'PDE-001':'Settled sparse activation — 65% toward visible','PDE-002':'Settled soft sweep — 65% toward visible','PDE-003':'Settled activation ceiling — 65% toward visible'})[id];
+      if(settlement)return settlement;
+      const infinityBackground=({'INF-001':'Momentum wake','INF-002':'Photographic emulsion bloom','INF-003':'Floating photographic print','INF-004':'Negative-space aperture','INF-005':'Residual gesture','INF-006':'Incomplete geometry','INF-007':'Borrowed-color field'})[id];
+      if(infinityBackground)return infinityBackground;
+      const infinityVisibility=({'IBV-001':'Visible momentum wake','IBV-002':'Visible emulsion bloom','IBV-003':'Visible floating print','IBV-004':'Visible negative-space aperture','IBV-005':'Visible residual gesture','IBV-006':'Visible incomplete geometry','IBV-007':'Visible borrowed-color field'})[id];
+      if(infinityVisibility)return infinityVisibility;
+      const infinityConcept=({'IBC-001':'Deep number field','IBC-002':'Side-entering numbers','IBC-003':'Evasive number corridor','IBC-004':'Moving gradient curtain','IBC-005':'Sliding panel','IBC-006':'Hinged perspective door','IBC-007':'Number doorway'})[id];
+      if(infinityConcept)return infinityConcept;
+      const infinityFlat=({'IBF-001':'Dense varied-size 2D drift','IBF-002':'Dense same-size 2D plane','IBF-003':'Orderly 2D separation field','IBF-004':'Visible 2D gradient curtain','IBF-005':'Full-width sliding panel','IBF-006':'Eleven-second hinged door','IBF-007':'Dense 2D number wipe'})[id];
+      if(infinityFlat)return infinityFlat;
+      const infinityDirected=({'IBR-001':'Dense overlapping number loop','IBR-002':'Coordinated slow number columns','IBR-003':'Coordinated columns — reversed palette','IBR-004':'Gradient curtain — reversed colors','IBR-005':'Gradient curtain — top to bottom','IBR-006':'Gradient curtain — fixed 31-degree angle','IBR-007':'One-way panel — light warm pair','IBR-008':'One-way panel — quiet neutral pair','IBR-009':'Accelerating hinged door','IBR-010':'Static-number accelerating wipe','IBR-011':'Moving-number accelerating wipe'})[id];
+      if(infinityDirected)return infinityDirected;
+      const infinityPalette=({'IBP-001':'Dense overlapping loop — fixed palette','IBP-002':'Extra-slow columns with edge bleed','IBP-003':'Extra-slow columns — palette reversed','IBP-004':'Reversed curtain — fixed palette','IBP-005':'Top-to-bottom curtain — fixed palette','IBP-006':'31-degree curtain — fixed palette','IBP-007':'One-way panel — gentle acceleration','IBP-008':'One-way panel — stronger acceleration','IBP-009':'Soft-edge accelerating door','IBP-010':'Irregular static-number wipe','IBP-011':'Opposing irregular number wipe'})[id];
+      if(infinityPalette)return infinityPalette;
+      const infinityContrast=({'IBK-001':'Thin numbers — subtle contrast','IBK-002':'Broad panel — subtle contrast','IBK-003':'Thin numbers — middle contrast','IBK-004':'Broad panel — middle contrast','IBK-005':'Thin numbers — stronger contrast','IBK-006':'Broad panel — stronger contrast'})[id];
+      if(infinityContrast)return infinityContrast;
+      if(id==='IBN-001')return 'Static portrait-unique number field';
+      const infinityBlobs=({'IBL-001':'Subtle numbers + one looping blob','IBL-002':'Subtle numbers + two looping blobs','IBL-003':'Subtle numbers + three looping blobs'})[id];
+      if(infinityBlobs)return infinityBlobs;
+      const infinityStaticBlobs=({'IBS-001':'Static numbers + one looping blob','IBS-002':'Static numbers + two looping blobs','IBS-003':'Static numbers + three looping blobs'})[id];
+      if(infinityStaticBlobs)return infinityStaticBlobs;
+      const filmGrain=({'FGT-001':'No-grain transcode control','FGT-002':'Super 35 Light — subtle','FGT-003':'35mm Light — medium','FGT-004':'Super 35 Light — medium','FGT-005':'16mm Light — medium','FGT-006':'Super 35 Heavy — medium','FGT-007':'Super 35 Light — strong'})[id];
+      if(filmGrain)return filmGrain;
+      const filmGrainIsolation=({'FGI-001':'Static portrait — no-grain control','FGI-002':'Super 35 Light — subtle','FGI-003':'35mm Light — medium','FGI-004':'Super 35 Light — medium','FGI-005':'16mm Light — medium','FGI-006':'Super 35 Heavy — medium','FGI-007':'Super 35 Light — strong'})[id];
+      if(filmGrainIsolation)return filmGrainIsolation;
+      const filmGrainComposite=({'FGC-001':'No-grain composite control','FGC-002':'Super 35 Light — subtle','FGC-003':'35mm Light — medium','FGC-004':'Super 35 Light — medium','FGC-005':'16mm Light — medium','FGC-006':'Super 35 Heavy — medium','FGC-007':'Super 35 Light — strong'})[id];
+      if(filmGrainComposite)return filmGrainComposite;
+      const filmGrainVisibility=({'FGV-001':'No-grain composite control','FGV-002':'Native grain — 50%','FGV-003':'Native grain — 100%','FGV-004':'1.5× grain — 65%','FGV-005':'2× grain — 65%','FGV-006':'2× grain — strong','FGV-007':'2.5× grain — excessive boundary'})[id];
+      if(filmGrainVisibility)return filmGrainVisibility;
+      const filmGrainSlowSwim=({'FGS-001':'No-grain composite control','FGS-002':'FGV-002 reference — native motion','FGS-003':'Same grain — gently slowed','FGS-004':'Same grain — calmer swim','FGS-005':'Calmer swim — 60% mix','FGS-006':'Calmer swim — 1.15× grain','FGS-007':'Slowest swim — 67% and 1.25×'})[id];
+      if(filmGrainSlowSwim)return filmGrainSlowSwim;
+      const filmGrainDecision=({'FGD-001':'No-grain control','FGD-002':'Super 35 Light — moderate gentle swim','FGD-003':'Super 35 Light — clear calm swim','FGD-004':'Super 35 Light — bold slowest swim','FGD-005':'35mm Light — moderate gentle swim','FGD-006':'35mm Light — clear calm swim','FGD-007':'35mm Light — bold slowest swim','FGD-008':'16mm Light — moderate gentle swim','FGD-009':'16mm Light — clear calm swim','FGD-010':'16mm Light — bold slowest swim','FGD-011':'Super 35 Heavy — moderate gentle swim','FGD-012':'Super 35 Heavy — clear calm swim','FGD-013':'Super 35 Heavy — bold slowest swim'})[id];
+      if(filmGrainDecision)return filmGrainDecision;
+      const opacityMatch=id.match(/^FGO-(\d{3})$/);
+      if(opacityMatch){const opacity=7.5+Number(opacityMatch[1])*2.5;return `Super 35 Light — ${Number.isInteger(opacity)?opacity:opacity.toFixed(1)}% opacity`;}
+      return id;
+    }
+    function experimentName(id){ return ({'production-visuals-no-grain':'Production visuals — no film grain','motion-rhythm-pilot-v1':'Original rhythm pilot','motion-variable-pilot-v2':'Motion variables — round 2','white-balance-pilot-v3':'White Balance — round 3','white-balance-extreme-v4':'White Balance — extreme test','portrait-development-pilot-v5':'Portrait Development — round 1','portrait-development-tiff-v6':'Portrait Development — 11-second TIFF round','portrait-development-finalist-v7':'Portrait Development — possible finals','portrait-development-visibility-v8':'Portrait Development — visibility boundary','portrait-development-settlement-v9':'Portrait Development — 65% landing','infinity-background-v10':'Infinity Backgrounds — subtle concepts','infinity-background-visibility-v11':'Infinity Backgrounds — visible calibration','infinity-background-concepts-v12':'Infinity Backgrounds — sketch directions','infinity-background-flat-fields-v13':'Infinity Backgrounds — flat fields','infinity-background-directed-variations-v14':'Infinity Backgrounds — directed variations','infinity-background-fixed-palette-v15':'Infinity Backgrounds — fixed palette','infinity-background-contrast-calibration-v16':'Infinity Backgrounds — contrast calibration','infinity-background-number-blobs-v17':'Infinity Backgrounds — number and blob system','infinity-background-static-number-blobs-v18':'Infinity Backgrounds — static numbers and blobs','infinity-background-static-production-v26':'Infinity Background — static production','film-grain-character-strength-v19':'Film Grain — 10000 composite test','film-grain-isolation-v20':'Film Grain — grain-only diagnostic (superseded)','film-grain-composite-v21':'Film Grain — all three locked visuals (failed visibility)','film-grain-visibility-v22':'Film Grain — visibility calibration','film-grain-slow-swim-v23':'Film Grain — slow-swim refinement','film-grain-decision-v24':'Film Grain — final keep-or-drop comparison','film-grain-opacity-v25':'Film Grain — opacity-only comparison'})[id]||id; }
+    async function loadTelemetry(c){
+      const token=++telemetryToken; telemetry=null; $('diagnostics').hidden=true; $('whiteBalanceDiagnostics').hidden=true; $('developmentDiagnostics').hidden=true; $('developmentSettings').hidden=true; $('backgroundSettings').hidden=true; $('filmGrainSettings').hidden=true;
+      $('temperatureSlider').value=0; $('tintSlider').value=0; $('temperatureValue').textContent='0.00'; $('tintValue').textContent='0.00';
+      $('developmentSlider').value=100; $('developmentValue').textContent='100%'; $('developmentRange').textContent='Local range: 100–100%';
+      try {
+        const response=await fetch(c.manifest_url); if(!response.ok)throw new Error('Manifest unavailable'); const manifest=await response.json();
+        if(token!==telemetryToken)return;
+        if(manifest.diagnosticSliders?.visibleInReviewInterface){
+          telemetry={type:'whiteBalance',...manifest.diagnosticSliders,fps:manifest.fps};
+          for(const [id,key] of [['temperatureSlider','temperature'],['tintSlider','tint']]){
+            $(id).min=telemetry[key].minimum; $(id).max=telemetry[key].maximum; $(id).step=(telemetry[key].maximum-telemetry[key].minimum)>20?'0.1':'0.01';
+          }
+          $('whiteBalanceDiagnostics').hidden=false; $('diagnostics').hidden=false;
+        } else if(manifest.developmentTelemetry?.visibleInReviewInterface){
+          telemetry={type:'development',...manifest.developmentTelemetry,fps:manifest.fps};
+          const field=manifest.field||{}, pausePercent=Number(field.finishedHold||0)*100, pauseSeconds=Number(field.finishedHold||0)*Number(manifest.durationSec||0);
+          $('settingMinimumFinal').textContent=`${(Number(field.baseFinalMix||0)*100).toFixed(1)}%`;
+          $('settingFinishedPause').textContent=`${pauseSeconds.toFixed(2)} seconds (${pausePercent.toFixed(1)}%)`;
+          $('settingSpeed').textContent=Number(field.speed||0).toFixed(2);
+          $('settingFeather').textContent=Number(field.feather||0).toFixed(2);
+          $('settingPatches').textContent=String(field.patchCount??0);
+          $('developmentDiagnostics').hidden=false; $('developmentSettings').hidden=false; $('diagnostics').hidden=false;
+        }
+        if(manifest.candidateType==='visual_infinity_layered_background'){
+          $('backgroundEffect').textContent=manifest.backgroundRecipeName||manifest.backgroundEffect||'—';
+          $('backgroundIntent').textContent=manifest.backgroundDescription||'';
+          $('backgroundStrength').textContent=Number(manifest.backgroundStrength||0).toFixed(3);
+          $('backgroundSpeed').textContent=Number(manifest.backgroundSpeed||0).toFixed(2);
+          $('backgroundVisibilityBoost').textContent=Number(manifest.backgroundVisibilityBoost||1).toFixed(2);
+          const visibility=manifest.backgroundTelemetry?.perceptualVisibility||{};
+          $('backgroundMeanDelta').textContent=visibility.meanDelta8Bit===undefined?'—':`${Number(visibility.meanDelta8Bit).toFixed(1)} of 255`;
+          $('backgroundActiveArea').textContent=visibility.activePixelsAbove3Percent===undefined?'—':`${Number(visibility.activePixelsAbove3Percent).toFixed(1)}%`;
+          const type=manifest.backgroundTypography; $('backgroundTypography').textContent=type?`${type.family} ${type.style}`:'None';
+          const loop=manifest.backgroundLoopBehavior||manifest.backgroundTelemetry?.loopBehavior||'continuous'; $('backgroundLoop').textContent=loop==='intentional_hard_reset'?'Intentional abrupt reset':'Continuous';
+          $('backgroundSubjectTreatment').textContent=`${manifest.basePortraitTreatment?.developmentRecipeId||'PDE-002'} unchanged`;
+          $('backgroundSettings').hidden=false; $('diagnostics').hidden=false;
+        }
+        if(manifest.candidateType==='visual_film_grain_test'){
+          const grain=manifest.grainTreatment||{};
+          $('grainFilmFormat').textContent=grain.filmFormat||'None';
+          $('grainSourceStrength').textContent=grain.sourceStrength||'Control';
+          const opacityPercent=Number(grain.opacity||0)*100;
+          $('grainOpacity').textContent=`${Number.isInteger(opacityPercent)?opacityPercent.toFixed(0):opacityPercent.toFixed(1)}%`;
+          $('grainSignalGain').textContent=`${Number(grain.signalGain||1).toFixed(1)}×`;
+          $('grainTextureScale').textContent=`${Number(grain.textureScale||1).toFixed(2)}×`;
+          $('grainTemporalSmooth').textContent=`${Number(grain.temporalSmoothFrames||1)} frame${Number(grain.temporalSmoothFrames||1)===1?'':'s'}`;
+          $('grainLoopBlend').textContent=Number(grain.loopCrossfadeFrames||0)?`${(Number(grain.loopCrossfadeFrames)/Number(manifest.fps||24)).toFixed(1)} seconds`:'None';
+          $('grainPlateFilename').textContent=grain.plateFilename||'None';
+          $('grainStartFrame').textContent=grain.plateFilename?String(grain.startFrame??0):'Not applicable';
+          $('grainParentVisual').textContent=manifest.parentVisualId||'—';
+          $('filmGrainSettings').hidden=false; $('diagnostics').hidden=false;
+        }
+      } catch(error) { if(token===telemetryToken)telemetry=null; }
+    }
+    function updateTelemetry(){
+      if(telemetry?.frameTimeline?.length){
+        const frame=Math.min(telemetry.frameTimeline.length-1,Math.max(0,Math.round($('video').currentTime*telemetry.fps)));
+        const state=telemetry.frameTimeline[frame];
+        if(telemetry.type==='development'){
+          const mean=Number(state.meanFinalMix)*100, minimum=Number(state.minimumFinalMix)*100, maximum=Number(state.maximumFinalMix)*100;
+          $('developmentSlider').value=mean; $('developmentValue').textContent=`${mean.toFixed(1)}%`;
+          $('developmentRange').textContent=`Local range: ${minimum.toFixed(1)}–${maximum.toFixed(1)}%`;
+        } else {
+          const temperature=Number(state.temperatureDelta), tint=Number(state.tintDelta);
+          $('temperatureSlider').value=temperature; $('tintSlider').value=tint;
+          $('temperatureValue').textContent=`${temperature>0?'+':''}${temperature.toFixed(2)}`;
+          $('tintValue').textContent=`${tint>0?'+':''}${tint.toFixed(2)}`;
+        }
+      }
+      requestAnimationFrame(updateTelemetry);
+    }
+    function setReviewSet(value){
+      reviewMode=value.startsWith('pairing-')?'pair':'visual';
+      if(reviewMode==='pair'){
+        candidates=allPairs.filter(c=>c.experiment_id===value);
+        candidates.forEach(c=>c.comparison_label='Locked selected visual + native 11-second audio');
+      } else if(value==='production-visuals-no-grain'){
+        candidates=productionVisualIds.map(id=>allCandidates.find(c=>c.visual_id===id)).filter(Boolean);
+        candidates.forEach(c=>c.comparison_label='Shippable visual — film grain disabled');
+      } else if(value==='motion-variable-pilot-v2'){
+        const variants=allCandidates.filter(c=>c.experiment_id===value), parentIds=new Set(variants.map(c=>c.parent_visual_id));
+        const variableOrder={'LOW-SCALE':1,'HIGH-SCALE':2,'HORIZONTAL':3,'VERTICAL':4};
+        candidates=[];
+        [...new Set(variants.map(c=>c.portrait_id))].forEach(portraitId=>{
+          const reference=allCandidates.find(c=>c.portrait_id===portraitId&&parentIds.has(c.visual_id));
+          if(reference){reference.comparison_label='Selected V1 reference';candidates.push(reference);}
+          const probes=variants.filter(c=>c.portrait_id===portraitId).sort((a,b)=>{
+            const aKey=Object.keys(variableOrder).find(key=>a.motion_recipe_id.endsWith(key));
+            const bKey=Object.keys(variableOrder).find(key=>b.motion_recipe_id.endsWith(key));
+            return variableOrder[aKey]-variableOrder[bKey];
+          });
+          probes.forEach(c=>c.comparison_label='New one-variable probe'); candidates.push(...probes);
+        });
+      } else if(value==='all') { allCandidates.forEach(c=>c.comparison_label=experimentName(c.experiment_id)); candidates=allCandidates; }
+      else { candidates=allCandidates.filter(c=>c.experiment_id===value); candidates.forEach(c=>c.comparison_label=experimentName(c.experiment_id)); }
+      position=0; render();
+    }
+    async function save(){
+      clearTimeout(saveTimer); dirty=false; const c=current(), sequence=++saveSequence; $('saveStatus').textContent='Saving…';
+      const endpoint=reviewMode==='pair'?`/api/pair-reviews/${encodeURIComponent(c.pair_id)}`:`/api/reviews/${encodeURIComponent(c.visual_id)}`;
+      const payload=reviewMode==='pair'?{pair_rating:c.rating,audio_rating:c.audio_rating,rejected:c.rejected,selected:c.selected,retire_audio:c.retire_audio,notes:c.notes}:{rating:c.rating,rejected:c.rejected,selected:c.selected,notes:c.notes};
+      try { const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); if(!response.ok) throw new Error((await response.json()).error); if(sequence===saveSequence) $('saveStatus').textContent='Saved'; }
+      catch(error){ $('saveStatus').textContent=`Not saved: ${error.message}`; }
+      $('reviewStatus').textContent=reviewStatus(c);
+    }
+    function queueSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(save,600); }
+    function setRating(rating){ const c=current(); c.rating=c.rating===rating?null:rating; renderControls(); save(); }
+    function setAudioRating(rating){ const c=current(); c.audio_rating=c.audio_rating===rating?null:rating; renderControls(); save(); }
+    function renderControls(){
+      const c=current();
+      [...$('ratings').children].forEach((b,i)=>b.classList.toggle('active',c.rating===i+1));
+      [...$('audioRatings').children].forEach((b,i)=>b.classList.toggle('active',c.audio_rating===i+1));
+      const bankedHere=reviewMode==='pair'&&c.rejected&&!c.retire_audio;
+      $('reject').checked=reviewMode==='pair'?bankedHere:c.rejected; $('select').checked=c.selected; $('retire').checked=Boolean(c.retire_audio); $('notes').value=c.notes;
+      $('rejectLabel').classList.toggle('active',reviewMode==='pair'?bankedHere:c.rejected); $('selectLabel').classList.toggle('active',c.selected); $('retireLabel').classList.toggle('active',Boolean(c.retire_audio));
+      if(reviewMode==='pair'){
+        const message=c.audio_status==='retired_selected'?'<strong>Selected final audio</strong> — assigned to this portrait and unavailable to later portraits.':c.audio_status==='retired'?'<strong style="color:var(--danger)">Audio rejected</strong> — bad mix removed from the reusable bank.':c.audio_status==='ready_for_review'?'<strong>New technically screened audio</strong> — choose Select pair, Bank audio, or Reject audio.':c.audio_status==='superseded_setup'?'<strong>Superseded setup</strong> — retained for audit only; this audio is not in the bank.':'<strong>Available in audio bank</strong> — approved or preserved for a later portrait.';
+        $('bankStatus').innerHTML=message;
+      }
+      $('reviewStatus').textContent=reviewStatus(c);
+    }
+    function navigate(delta){ const next=Math.max(0,Math.min(candidates.length-1,position+delta)); if(next!==position){ clearTimeout(saveTimer); current().notes=$('notes').value; if(dirty)save(); position=next; render(); } }
+    for(let i=1;i<=5;i++){ const b=document.createElement('button'); b.textContent=i; b.onclick=()=>setRating(i); $('ratings').appendChild(b); }
+    for(let i=1;i<=5;i++){ const b=document.createElement('button'); b.textContent=i; b.onclick=()=>setAudioRating(i); $('audioRatings').appendChild(b); }
+    $('reject').onchange=()=>{ const c=current(); c.rejected=$('reject').checked; if(reviewMode==='pair')c.retire_audio=false; if(c.rejected){c.selected=false;if(reviewMode==='pair')c.audio_status='banked';} renderControls(); save(); };
+    $('select').onchange=()=>{ const c=current(); c.selected=$('select').checked; if(c.selected){c.rejected=false;c.retire_audio=false;const pool=reviewMode==='pair'?allPairs:allCandidates;pool.filter(other=>other.portrait_id===c.portrait_id&&(reviewMode==='pair'?other.pair_id!==c.pair_id:other.visual_id!==c.visual_id)).forEach(other=>{other.selected=false;if(reviewMode==='pair'&&other.audio_status==='retired_selected')other.audio_status='banked';});if(reviewMode==='pair')c.audio_status='retired_selected';}else if(reviewMode==='pair'&&c.audio_status==='retired_selected')c.audio_status='banked'; renderControls(); save(); };
+    $('retire').onchange=()=>{ const c=current(); c.retire_audio=$('retire').checked; if(c.retire_audio){c.selected=false;c.rejected=true;c.audio_status='retired';}else{c.rejected=false;c.audio_status='banked';} renderControls(); save(); };
+    $('notes').oninput=()=>{ current().notes=$('notes').value; dirty=true; queueSave(); };
+    $('previous').onclick=()=>navigate(-1); $('next').onclick=()=>navigate(1);
+    $('experiment').onchange=()=>setReviewSet($('experiment').value);
+    document.addEventListener('keydown',event=>{ if(event.target.matches('textarea,input'))return; if(event.key>='1'&&event.key<='5')setRating(Number(event.key)); else if(event.key.toLowerCase()==='b'&&reviewMode==='pair'){$('reject').click();} else if(event.key.toLowerCase()==='r'){reviewMode==='pair'?$('retire').click():$('reject').click();} else if(event.key.toLowerCase()==='s'){$('select').click();} else if(event.key==='ArrowLeft')navigate(-1); else if(event.key==='ArrowRight')navigate(1); else if(event.key===' '){event.preventDefault(); const v=$('video'); v.paused?v.play():v.pause();} });
+    Promise.all([fetch('/api/candidates').then(r=>r.json()),fetch('/api/pairs').then(r=>r.json())]).then(([visualData,pairData])=>{
+      allCandidates=visualData.candidates; allPairs=pairData.candidates.filter(c=>!['superseded','superseded_setup'].includes(c.render_status)).map(c=>({...c,rating:c.pair_rating,rejected:c.pair_rejected,selected:c.pair_selected,notes:c.pair_notes,retire_audio:c.audio_status==='retired'}));
+      if(!allCandidates.length&&!allPairs.length)throw new Error('No candidates are registered.');
+      const experiments=[...new Set(allCandidates.map(c=>c.experiment_id))];
+      const choices=[];
+      const pairExperiments=[...new Set(allPairs.map(c=>c.experiment_id))];
+      if(pairExperiments.includes('pairing-nychildren-rolling-v29'))choices.push(['pairing-nychildren-rolling-v29','Pair Review — NYChildren rolling pool (10 options)']);
+      if(pairExperiments.includes('pairing-nychildren-stems-v28'))choices.push(['pairing-nychildren-stems-v28','Pair Review — NYChildren stems (10 native 11-second options)']);
+      if(pairExperiments.includes('pairing-nychildren-v27'))choices.push(['pairing-nychildren-v27','Superseded — NYChildren no-stem setup error']);
+      pairExperiments.filter(id=>!['pairing-nychildren-rolling-v29','pairing-nychildren-stems-v28','pairing-nychildren-v27'].includes(id)).forEach(id=>choices.push([id,`Pair Review — ${id}`]));
+      if(productionVisualIds.every(id=>allCandidates.some(c=>c.visual_id===id)))choices.push(['production-visuals-no-grain','Production visuals — no film grain']);
+      if(experiments.includes('infinity-background-static-production-v26'))choices.push(['infinity-background-static-production-v26','Infinity Background — static production']);
+      if(experiments.includes('film-grain-opacity-v25'))choices.push(['film-grain-opacity-v25','Film Grain — opacity-only comparison']);
+      if(experiments.includes('film-grain-decision-v24'))choices.push(['film-grain-decision-v24','Film Grain — final keep-or-drop comparison']);
+      if(experiments.includes('film-grain-slow-swim-v23'))choices.push(['film-grain-slow-swim-v23','Film Grain — slow-swim refinement']);
+      if(experiments.includes('infinity-background-static-number-blobs-v18'))choices.push(['infinity-background-static-number-blobs-v18','Infinity Backgrounds — static numbers and blobs']);
+      if(experiments.includes('infinity-background-number-blobs-v17'))choices.push(['infinity-background-number-blobs-v17','Infinity Backgrounds — number and blob system']);
+      if(experiments.includes('infinity-background-contrast-calibration-v16'))choices.push(['infinity-background-contrast-calibration-v16','Infinity Backgrounds — contrast calibration']);
+      if(experiments.includes('infinity-background-fixed-palette-v15'))choices.push(['infinity-background-fixed-palette-v15','Infinity Backgrounds — fixed palette']);
+      if(experiments.includes('infinity-background-directed-variations-v14'))choices.push(['infinity-background-directed-variations-v14','Infinity Backgrounds — directed variations']);
+      if(experiments.includes('infinity-background-flat-fields-v13'))choices.push(['infinity-background-flat-fields-v13','Infinity Backgrounds — flat fields']);
+      if(experiments.includes('infinity-background-concepts-v12'))choices.push(['infinity-background-concepts-v12','Infinity Backgrounds — sketch directions']);
+      if(experiments.includes('infinity-background-visibility-v11'))choices.push(['infinity-background-visibility-v11','Infinity Backgrounds — visible calibration']);
+      if(experiments.includes('infinity-background-v10'))choices.push(['infinity-background-v10','Infinity Backgrounds — subtle concepts']);
+      if(experiments.includes('portrait-development-settlement-v9'))choices.push(['portrait-development-settlement-v9','Portrait Development — 65% landing']);
+      if(experiments.includes('portrait-development-visibility-v8'))choices.push(['portrait-development-visibility-v8','Portrait Development — visibility boundary']);
+      if(experiments.includes('portrait-development-finalist-v7'))choices.push(['portrait-development-finalist-v7','Portrait Development — possible finals']);
+      if(experiments.includes('portrait-development-tiff-v6'))choices.push(['portrait-development-tiff-v6','Portrait Development — 11-second TIFF round']);
+      if(experiments.includes('portrait-development-pilot-v5'))choices.push(['portrait-development-pilot-v5','Portrait Development — round 1']);
+      if(experiments.includes('white-balance-extreme-v4'))choices.push(['white-balance-extreme-v4','White Balance — extreme test']);
+      if(experiments.includes('white-balance-pilot-v3'))choices.push(['white-balance-pilot-v3','White Balance — round 3']);
+      if(experiments.includes('motion-variable-pilot-v2'))choices.push(['motion-variable-pilot-v2','Motion variables — round 2']);
+      if(experiments.includes('motion-rhythm-pilot-v1'))choices.push(['motion-rhythm-pilot-v1','Original rhythm pilot']);
+      choices.push(['all','All candidates']);
+      choices.forEach(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;$('experiment').appendChild(option);});
+      $('app').hidden=false; setReviewSet(choices[0][0]); requestAnimationFrame(updateTelemetry);
+    }).catch(error=>{$('counter').textContent=error.message;});
+  </script>
+</body>
+</html>

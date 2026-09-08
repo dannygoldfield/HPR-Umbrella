@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HPR · Next versions</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f2eb;color:#292d25;font:16px system-ui,sans-serif}main{max-width:1160px;margin:auto;padding:28px 30px 60px}h1{font-size:30px;font-weight:550;margin:0 0 10px}h2{font-size:19px;font-weight:600}p{line-height:1.5;color:#626559}.intro{max-width:790px}.tabs,.buttons{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}button,select{font:inherit;color:inherit;border:1px solid #c6cabc;background:#faf9f5;border-radius:5px;padding:9px 13px;cursor:pointer}button[aria-pressed=true],button.active{background:#344a38;color:white;border-color:#344a38}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #9eae83;outline-offset:3px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px}.four{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}video{aspect-ratio:9/16;display:block;width:100%;max-height:60vh;object-fit:contain;background:#20231e}audio{width:100%;margin:12px 0}section{border-top:1px solid #d8dbcf;padding-top:10px}.small{font-size:14px;line-height:1.5}.variant{font-size:14px;margin:0 0 10px}.choose{width:100%;margin-top:12px}.note{background:#e7eadf;padding:12px 16px;border-radius:5px}.hidden{display:none!important}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.summary{white-space:pre-line;line-height:1.7}.summary:empty{display:none}a{color:#3b563e}footer{margin-top:35px;border-top:1px solid #d8dbcf;padding-top:18px}@media(max-width:760px){main{padding:20px 17px}.grid,.four{grid-template-columns:1fr}video{max-height:68vh}.tabs button{flex-grow:1}}
+button:disabled{cursor:wait;opacity:.65}.notice{padding:10px 14px;background:#e7eadf;border-radius:5px}.notice.error{background:#f4e0d8}.notice:empty{display:none}
+</style>
+<main><h1>How People Relate · Next versions</h1>
+<p class="intro">Compare the pictures and sound separately. Each sample plays three eleven-second passes, then stops at 33 seconds. The original samples are preserved.</p>
+<nav class="tabs" aria-label="Comparisons"><button data-tab="develop" class="active">1 · Develop</button><button data-tab="infinity">2 · Infinity</button><button data-tab="sound">3 · Sound</button><button data-tab="choices">Your choices</button><button id="reload-review">Reload review</button></nav><p id="review-status" class="notice" role="status" aria-live="polite"></p>
+<div id="develop"><p>Compare <strong id="strength-list">the available</strong> develop strength. These share the smoother loop timing. “Original” shows the earlier timing, including its brief rest. Picture comparisons are silent.</p><div class="toolbar"><button id="play-develop">Play all three from the start</button><button id="pause-develop">Pause all</button><label>Set all to <select id="all-strength"></select></label></div><article class="grid" id="develop-grid"></article></div>
+<div id="infinity" class="hidden"><p>All four use <strong>125% development</strong>, the same photograph, and the same digits. Which makes the person feel more present? The number motion is intentionally very small.</p><div class="toolbar"><button id="play-fields">Play all four from the start</button><button id="pause-fields">Pause all</button></div><article class="grid four" id="field-grid"></article><p class="small">The static field is a valid choice. We can apply the chosen motion to your preferred develop strength after this comparison.</p></div>
+<div id="sound" class="hidden"><p>Compare the <strong>original bed</strong> with <strong id="bed-reductions">the available reductions</strong>. Only the background bed’s level changes; events, music, timing, and their levels are preserved. Keep your listening volume fixed. Listen through the joins at 11 and 22 seconds.</p><article class="grid" id="sound-grid"></article></div>
+<div id="choices" class="hidden"><h2>Your comparison choices</h2><p>Your choices are saved in this browser as a draft. They do not mark files approved or change the production record.</p><div class="note summary" id="summary"></div><div class="buttons"><button id="copy-choices">Copy choices for the HPR chat</button><button id="download-choices">Save choices as a file</button></div><p id="copy-status" role="status"></p></div>
+<footer><p class="small">Next: confirm the selected pictures and audio, then assemble the three final 33-second comparisons and check their loops together. <a href="STATUS.md">Status</a> · <a href="review.json">Provenance and checks</a></p></footer>
+</main>
+<script>
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const storageKey='hpr-next-20260907';
+const emptyChoices=()=>({develop:{},field:null,audio:{}});
+function readChoices(){
+ const raw=localStorage.getItem(storageKey);if(!raw)return emptyChoices();
+ const value=JSON.parse(raw);
+ if(!value||typeof value!=='object'||Array.isArray(value))throw Error('Invalid saved choices');
+ return {...value,develop:{...(value.develop||{})},audio:{...(value.audio||{})},field:value.field||null};
+}
+let choices=emptyChoices(),report,activeTab='develop',playVersion=0;
+const labels={static:'Static field',wave:'A · Deflected wave',pressure:'B · Compression and release',flow:'C · Movement around the pose'};
+const strengthOptions=(levels,initial)=>levels.map(n=>'<option value="'+n+'"'+(String(n)===String(initial)?' selected':'')+'>'+n+'%</option>').join('')+'<option value="original"'+(initial==='original'?' selected':'')+'>Original</option>';
+const audioName=a=>a.kind==='original'?'Original bed':'Bed '+(a.bedReductionPercent??Math.round(100*(1-a.sourceManifest.bedLinearGain)))+'% quieter';
+const notice=(message='',error=false)=>{const node=document.querySelector('#review-status');node.textContent=message;node.classList.toggle('error',error)};
+try{choices=readChoices()}catch{notice('Saved choices could not be read. They have been left untouched.',true)}
+const previewJobs=new WeakMap();let audioToKeep=null,audioFrame=0;
+function stopAll(){
+ ++playVersion;audioToKeep=null;if(audioFrame)cancelAnimationFrame(audioFrame);audioFrame=0;
+ document.querySelectorAll('video,audio').forEach(m=>m.pause());
+ document.querySelectorAll('[data-play-label]').forEach(b=>{b.disabled=false;b.textContent=b.dataset.playLabel;b.setAttribute('aria-busy','false')});
+}
+function waitForMedia(media,signal){
+ if(signal?.aborted)return Promise.reject(new DOMException('Cancelled','AbortError'));
+ if(media.error)return Promise.reject(Error('Media load failed'));
+ if(media.readyState>=2)return Promise.resolve();
+ return new Promise((resolve,reject)=>{
+  const cleanup=()=>{clearTimeout(timer);for(const e of ['loadeddata','canplay'])media.removeEventListener(e,ready);media.removeEventListener('error',failed);signal?.removeEventListener('abort',aborted)};
+  const finish=(error)=>{cleanup();error?reject(error):resolve()};
+  const ready=()=>{if(media.readyState>=2)finish()};
+  const failed=()=>finish(Error('Media load failed'));
+  const aborted=()=>finish(new DOMException('Cancelled','AbortError'));
+  const timer=setTimeout(()=>finish(Error('Media load timed out')),15000);
+  for(const e of ['loadeddata','canplay'])media.addEventListener(e,ready);
+  media.addEventListener('error',failed);signal?.addEventListener('abort',aborted,{once:true});ready();
+ });
+}
+function warmMedia(media){
+ media.preload=media.tagName==='VIDEO'?'auto':'metadata';
+ if(media.networkState===0||(media.readyState===0&&media.networkState!==2))media.load();
+}
+function summary(){return report.portraits.map(p=>p.label+': develop '+(choices.develop[p.key]||'not chosen')+'; sound '+(choices.audio[p.key]||'not chosen')).join('\n')+'\n1 to Infinity field: '+(labels[choices.field]||'not chosen')+'\n\nThese are comparison choices. Final AV loop review is still needed.'}
+function updateChoices(){
+ if(!report)return;
+ document.querySelector('#summary').textContent=summary();
+ for(const p of report.portraits){
+  const card=document.querySelector('[data-portrait="'+p.key+'"]');
+  const preview=card.querySelector('select').value;const value=preview==='original'?'original':preview+'%';
+  const chosen=choices.develop[p.key]===value;const button=card.querySelector('.choose');
+  button.setAttribute('aria-pressed',String(chosen));button.textContent=chosen?'✓ Chosen: '+value:'Choose this develop setting';
+  button.disabled=card.querySelector('video').readyState<2||card.dataset.loading==='true';
+  card.querySelector('.picked').textContent=choices.develop[p.key]?'Chosen: '+choices.develop[p.key]:'';
+  const sound=document.querySelector('[data-sound="'+p.key+'"]');
+  sound.querySelectorAll('button[data-choice]').forEach(b=>{const selected=choices.audio[p.key]===b.dataset.choice;b.setAttribute('aria-pressed',String(selected));b.textContent=selected?'✓ Chosen: '+b.dataset.choice:'Choose '+b.dataset.choice.toLowerCase()});
+  sound.querySelector('.picked').textContent=choices.audio[p.key]?'Chosen: '+choices.audio[p.key]:'';
+ }
+ document.querySelectorAll('#field-grid button[data-field]').forEach(b=>{const selected=choices.field===b.dataset.field;b.setAttribute('aria-pressed',String(selected));b.textContent=selected?'✓ Chosen field':'Choose this field'});
+}
+function choose(section,key,value){
+ try{
+  const latest=readChoices();
+  if(section==='field')latest.field=value;else latest[section][key]=value;
+  localStorage.setItem(storageKey,JSON.stringify(latest));choices=latest;updateChoices();notice('Choice saved.');
+ }catch{notice('Your choice could not be saved. Existing saved choices have been left untouched.',true)}
+}
+window.addEventListener('storage',e=>{if(e.key===storageKey){try{choices=readChoices();updateChoices()}catch{notice('Saved choices could not be read. They have been left untouched.',true)}}});
+function updateAllStrength(){
+ const values=[...document.querySelectorAll('#develop-grid select')].map(s=>s.value);
+ document.querySelector('#all-strength').value=values.every(v=>v===values[0])?values[0]:'';
+}
+function labelPreview(card,value,loading=false){card.querySelector('.variant').textContent=(value==='original'?'Original timing':value+'% · continuous timing')+(loading?' · Loading…':'')}
+async function switchDev(p,value){
+ const card=document.querySelector('[data-portrait="'+p.key+'"]'),video=card.querySelector('video');
+ const previous=previewJobs.get(video);const wasPlaying=!video.paused||(previous?.resume&&previous.version===playVersion);
+ const time=video.ended?0:video.currentTime,version=playVersion;previous?.controller.abort();
+ const controller=new AbortController();const job={controller,resume:wasPlaying,version,promise:null};previewJobs.set(video,job);
+ card.querySelector('select').value=value;card.dataset.loading='true';labelPreview(card,value,true);updateChoices();updateAllStrength();
+ video.pause();video.preload='auto';video.src=value==='original'?p.original:p.development.find(v=>String(v.strength)===value).url;video.load();
+ job.promise=(async()=>{
+  try{
+   await waitForMedia(video,controller.signal);if(previewJobs.get(video)!==job)return;
+   const target=Math.min(time,Math.max(0,video.duration-1/24));if(Math.abs(video.currentTime-target)>.001)video.currentTime=target;
+   card.dataset.loading='false';labelPreview(card,value);updateChoices();
+   if(wasPlaying&&version===playVersion&&activeTab==='develop')await video.play();
+  }catch(e){
+   if(previewJobs.get(video)!==job||e.name==='AbortError'||version!==playVersion)return;
+   card.dataset.loading='false';labelPreview(card,value);updateChoices();notice('A preview could not finish loading. Try Play again or use Reload review.',true);
+  }finally{if(previewJobs.get(video)===job)previewJobs.delete(video)}
+ })();
+ return job.promise;
+}
+async function playGroup(selector,button){
+ stopAll();const version=playVersion;const media=[...document.querySelectorAll(selector)];
+ button.dataset.run=String(version);button.disabled=true;button.setAttribute('aria-busy','true');button.textContent='Loading previews…';notice();
+ try{
+  await Promise.all(media.map(m=>previewJobs.get(m)?.promise));if(version!==playVersion)return;
+  media.forEach(warmMedia);await Promise.all(media.map(m=>waitForMedia(m)));if(version!==playVersion)return;
+  media.forEach(m=>m.currentTime=0);await Promise.all(media.map(m=>m.play()));
+ }catch(e){if(version===playVersion){stopAll();notice('Playback could not start. Please try Play again or use Reload review.',true)}}
+ finally{if(button.dataset.run===String(version)){button.disabled=false;button.setAttribute('aria-busy','false');button.textContent=button.dataset.playLabel}}
+}
+function selectTab(id){
+ if(!['develop','infinity','sound','choices'].includes(id))id='develop';
+ stopAll();activeTab=id;notice();
+ document.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===id;b.classList.toggle('active',active);b.setAttribute('aria-current',active?'page':'false')});
+ for(const tab of ['develop','infinity','sound','choices'])document.getElementById(tab).classList.toggle('hidden',tab!==id);
+ history.replaceState(null,'','#'+id);document.querySelectorAll('#'+id+' video,#'+id+' audio').forEach(warmMedia);updateChoices();
+}
+fetch('review.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Review load failed');return r.json()}).then(data=>{
+ report=data;
+ const reductions=[...new Set(report.portraits.flatMap(p=>p.audio.filter(a=>a.kind!=='original').map(a=>a.bedReductionPercent??Math.round(100*(1-a.sourceManifest.bedLinearGain)))))].sort((a,b)=>a-b);
+ document.querySelector('#bed-reductions').textContent=reductions.map(n=>n+'%').join(', ')+' reductions';
+ const common=report.portraits[0].development.map(v=>v.strength).filter(n=>report.portraits.every(p=>p.development.some(v=>v.strength===n))).sort((a,b)=>a-b);
+ document.querySelector('#all-strength').innerHTML='<option value="" disabled>Mixed previews</option>'+strengthOptions(common,report.defaultDevelopStrength||125);
+ document.querySelector('#strength-list').textContent=common.map(n=>n+'%').join(', ');
+ for(const p of report.portraits){
+  const levels=p.development.map(v=>v.strength).sort((a,b)=>a-b),saved=choices.develop[p.key];
+  const initial=saved==='original'?'original':levels.includes(Number.parseFloat(saved))?Number.parseFloat(saved):(report.defaultDevelopStrength||125);
+  const source=initial==='original'?p.original:p.development.find(v=>v.strength===initial).url;
+  const card=document.createElement('section');card.dataset.portrait=p.key;
+  card.innerHTML='<h2>'+esc(p.label)+'</h2><p class="variant"></p><video controls muted playsinline preload="none" src="'+esc(source)+'"></video><div class="buttons"><label>Preview <select aria-label="'+esc(p.label)+' develop strength">'+strengthOptions(levels,initial)+'</select></label></div><button class="choose" disabled>Choose this develop setting</button><p class="small picked"></p>';
+  labelPreview(card,String(initial));for(const event of ['loadeddata','canplay','seeked'])card.querySelector('video').addEventListener(event,updateChoices);
+  card.querySelector('select').onchange=e=>{void switchDev(p,e.target.value)};
+  card.querySelector('.choose').onclick=()=>{const value=card.querySelector('select').value;choose('develop',p.key,value==='original'?'original':value+'%')};
+  document.querySelector('#develop-grid').append(card);
+  const sound=document.createElement('section');sound.dataset.sound=p.key;sound.innerHTML='<h2>'+esc(p.label)+'</h2><p class="small">Selected soundtrack: option '+p.soundtrackOption+'</p>';
+  for(const a of p.audio){const row=document.createElement('div'),name=audioName(a);row.innerHTML='<p>'+esc(name)+'</p><audio controls preload="none" src="'+esc(a.url)+'"></audio><button class="choose" data-choice="'+esc(name)+'">Choose '+esc(name.toLowerCase())+'</button>';row.querySelector('button').onclick=()=>choose('audio',p.key,name);sound.append(row)}
+  const picked=document.createElement('p');picked.className='small picked';sound.append(picked);document.querySelector('#sound-grid').append(sound);
+ }
+ for(const f of report.fields){const card=document.createElement('section');card.innerHTML='<h2>'+labels[f.kind]+'</h2><video controls muted playsinline preload="none" src="'+esc(f.url)+'"></video><button class="choose" data-field="'+f.kind+'">Choose this field</button>';card.querySelector('button').onclick=()=>choose('field',null,f.kind);document.querySelector('#field-grid').append(card)}
+ document.querySelectorAll('audio').forEach(audio=>audio.addEventListener('play',()=>{
+  audioToKeep=audio;if(audioFrame)return;
+  audioFrame=requestAnimationFrame(()=>{audioFrame=0;const selected=audioToKeep;if(selected&&!selected.paused)document.querySelectorAll('audio').forEach(other=>{if(other!==selected)other.pause()})});
+ }));
+ document.querySelector('#all-strength').onchange=e=>{const value=e.target.value;void Promise.all(report.portraits.map(p=>switchDev(p,value)))};
+ for(const [id,selector] of [['play-develop','#develop-grid video'],['play-fields','#field-grid video']]){const button=document.getElementById(id);button.dataset.playLabel=button.textContent;button.onclick=()=>{void playGroup(selector,button)}}
+ document.querySelector('#pause-develop').onclick=stopAll;document.querySelector('#pause-fields').onclick=stopAll;
+ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>selectTab(b.dataset.tab));
+ document.querySelector('#reload-review').onclick=()=>{stopAll();location.reload()};
+ document.querySelector('#copy-choices').onclick=async()=>{try{await navigator.clipboard.writeText(summary());document.querySelector('#copy-status').textContent='Copied. Paste these choices into the HPR chat.'}catch{document.querySelector('#copy-status').textContent='Select and copy the choices above, or save them as a file.'}};
+ document.querySelector('#download-choices').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({status:'draft',choices},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='HPR-next-iteration-choices.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+ window.addEventListener('hashchange',()=>selectTab(location.hash.slice(1)));updateAllStrength();selectTab(location.hash.slice(1));
+}).catch(()=>notice('The comparison could not load. Use Reload review to try again.',true));
+document.querySelector('#reload-review').onclick=()=>location.reload();
+
+</script></html>

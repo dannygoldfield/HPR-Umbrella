@@ -4,13 +4,8 @@ from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
-
-from hpr_audio_generator.config import load_config as load_audio_config
-from hpr_audio_generator.generator import generate as generate_audio
-from hpr_video_generator.config import load_config as load_video_config
-from hpr_video_generator.generator import Candidate as VideoCandidate
-from hpr_video_generator.generator import find_ffmpeg, generate as generate_video
 
 
 SUPPORTED_DURATIONS = {7, 9, 11}
@@ -39,6 +34,19 @@ class CandidateResult:
     audio_bed_id: str
     audio_gesture_id: str
     audio_music_stem_id: str | None
+
+
+def find_ffmpeg() -> str:
+    """Locate FFmpeg without importing either media generator."""
+    direct = shutil.which("ffmpeg")
+    if direct:
+        return direct
+    try:
+        import imageio_ffmpeg
+
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except ImportError as exc:
+        raise RuntimeError("FFmpeg is required for AV assembly") from exc
 
 
 def _safe_name(value: str) -> str:
@@ -111,6 +119,15 @@ def generate_candidate(
     video_config_path: Path,
     audio_config_path: Path,
 ) -> CandidateResult:
+    # This legacy convenience path intentionally imports the canonical,
+    # separately installed generator packages only when invoked. Production
+    # pairing normally consumes already-reviewed silent video and audio files.
+    from hpr_audio_generator.config import load_config as load_audio_config
+    from hpr_audio_generator.generator import generate as generate_audio
+    from hpr_video_generator.config import load_config as load_video_config
+    from hpr_video_generator.generator import Candidate as VideoCandidate
+    from hpr_video_generator.generator import generate as generate_video
+
     video_config = load_video_config(video_config_path)
     if plan.video_preset not in video_config.presets:
         raise ValueError(f"Unknown video preset: {plan.video_preset}")

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "experimentId": "pairing-nychildren-stems-v28",
+  "status": "ready_for_review",
+  "portraitId": "POR-30FE48FB73CE",
+  "portraitRevisionId": "POR-30FE48FB73CE-R002",
+  "visualId": "VIS-30FE48FB73CE-PDE-002",
+  "audioRecipeId": "AR-011",
+  "durationSec": 11,
+  "nativeDuration": true,
+  "candidateCount": 10,
+  "sourceRound": "AR-007 seven-second stem experiment",
+  "loopTreatment": {
+    "sourceExcerpt": "lowest normalized head-to-continuation discontinuity at 0.25-second search steps",
+    "crossfadeSec": 2.0,
+    "crossfadeCurve": "equalPower"
+  },
+  "bankPolicy": {
+    "unusedAudio": "banked automatically",
+    "selectedAudio": "retired from future final use",
+    "rejectedPairAudio": "banked unless explicitly retired"
+  },
+  "candidates": [
+    {"optionNumber": 1, "seed": 2026073001, "audioId": "AUD-DA04AF22CE0E", "pairId": "PAIR-EB4C1E28677E", "bedId": "SA-B-004", "gestureId": "SA-G-032", "musicStemId": "SA-M-001"},
+    {"optionNumber": 2, "seed": 2026073002, "audioId": "AUD-EC326B91FB38", "pairId": "PAIR-9850A9760920", "bedId": "SA-B-009", "gestureId": "SA-G-038", "musicStemId": "SA-M-011"},
+    {"optionNumber": 3, "seed": 2026073003, "audioId": "AUD-876286B6887F", "pairId": "PAIR-CB9BE48BA563", "bedId": "SA-B-021", "gestureId": "SA-G-032", "musicStemId": "SA-M-010"},
+    {"optionNumber": 4, "seed": 2026073004, "audioId": "AUD-E502B257BE27", "pairId": "PAIR-52CB7C39E6A5", "bedId": "SA-B-009", "gestureId": "SA-G-019", "musicStemId": "SA-M-016"},
+    {"optionNumber": 5, "seed": 2026073005, "audioId": "AUD-E5BB45D52514", "pairId": "PAIR-77385E18EFE3", "bedId": "SA-B-005", "gestureId": "SA-G-020", "musicStemId": "SA-M-003"},
+    {"optionNumber": 6, "seed": 2026073006, "audioId": "AUD-63CD5DBB76B6", "pairId": "PAIR-1F09D12BD823", "bedId": "SA-B-002", "gestureId": "SA-G-047", "musicStemId": "SA-M-005"},
+    {"optionNumber": 7, "seed": 2026073007, "audioId": "AUD-BD68E43BE6FF", "pairId": "PAIR-1BF5DF6E7093", "bedId": "SA-B-008", "gestureId": "SA-G-005", "musicStemId": "SA-M-010"},
+    {"optionNumber": 8, "seed": 2026073008, "audioId": "AUD-3140D5C13253", "pairId": "PAIR-939634307A25", "bedId": "SA-B-006", "gestureId": "SA-G-047", "musicStemId": "SA-M-014"},
+    {"optionNumber": 9, "seed": 2026073009, "audioId": "AUD-D42BA93B0DD8", "pairId": "PAIR-F69971BD5BE0", "bedId": "SA-B-006", "gestureId": "SA-G-001", "musicStemId": "SA-M-008"},
+    {"optionNumber": 10, "seed": 2026073010, "audioId": "AUD-F5F4DCC63218", "pairId": "PAIR-4DC3C7289E15", "bedId": "SA-B-019", "gestureId": "SA-G-023", "musicStemId": "SA-M-010"}
+  ]
+}

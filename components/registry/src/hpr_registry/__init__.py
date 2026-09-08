@@ -1,0 +1,41 @@
+"""HPR SQLite Registry."""
+
+from .registry import (
+    create_sequence,
+    ingest_metadata_report,
+    initialize_registry,
+    list_current_portrait_revisions,
+    list_audio_candidates_for_review,
+    list_portraits,
+    list_pair_candidates_for_review,
+    list_visual_candidates_for_review,
+    lock_sequence,
+    register_audio_candidate,
+    register_final_master,
+    register_pair_candidate,
+    register_visual_candidate,
+    save_candidate_review,
+    save_pair_review,
+    set_sequence_order,
+    supersede_pair_experiment,
+)
+
+__all__ = [
+    "create_sequence",
+    "ingest_metadata_report",
+    "initialize_registry",
+    "list_current_portrait_revisions",
+    "list_audio_candidates_for_review",
+    "list_portraits",
+    "list_pair_candidates_for_review",
+    "list_visual_candidates_for_review",
+    "lock_sequence",
+    "register_audio_candidate",
+    "register_final_master",
+    "register_pair_candidate",
+    "register_visual_candidate",
+    "save_candidate_review",
+    "save_pair_review",
+    "set_sequence_order",
+    "supersede_pair_experiment",
+]

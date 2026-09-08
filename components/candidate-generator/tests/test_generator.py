@@ -10,7 +10,7 @@ from hpr_candidate_generator.cli import DEFAULT_AUDIO_RECIPES
 class CandidatePlanTests(unittest.TestCase):
     def test_every_supported_duration_has_a_seamless_default_recipe(self) -> None:
         self.assertEqual(
-            {7: "AR-008", 9: "AR-009", 11: "AR-010"},
+            {7: "AR-008", 9: "AR-009", 11: "AR-011"},
             DEFAULT_AUDIO_RECIPES,
         )
 

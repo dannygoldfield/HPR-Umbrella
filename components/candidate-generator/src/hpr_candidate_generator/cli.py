@@ -4,6 +4,7 @@ import argparse
 import json
 from dataclasses import asdict
 from pathlib import Path
+import sys
 
 from .generator import build_plan, generate_candidate
 from .engine import (
@@ -16,7 +17,12 @@ from .engine import (
 
 
 ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_AUDIO_RECIPES = {7: "AR-008", 9: "AR-009", 11: "AR-010"}
+sys.path.insert(0, str(ROOT / "tools"))
+
+from hpr_component_paths import activate_component  # noqa: E402
+
+
+DEFAULT_AUDIO_RECIPES = {7: "AR-008", 9: "AR-009", 11: "AR-011"}
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -44,12 +50,12 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--video-config",
         type=Path,
-        default=ROOT / "components/video-generator/config/generator.xml",
+        help="defaults to the locked standalone Video Generator configuration",
     )
     parser.add_argument(
         "--audio-config",
         type=Path,
-        default=ROOT / "components/audio-generator/config/generator.xml",
+        help="defaults to the locked standalone Audio Generator configuration",
     )
     return parser
 
@@ -92,7 +98,11 @@ def main() -> None:
             }
             print(json.dumps(payload, indent=2))
         else:
-            result = generate_candidate(plan, args.video_config, args.audio_config)
+            video_root = activate_component("video")
+            audio_root = activate_component("audio")
+            video_config = args.video_config or video_root / "config/generator.xml"
+            audio_config = args.audio_config or audio_root / "config/generator.xml"
+            result = generate_candidate(plan, video_config, audio_config)
             print(result.plan.final_video)
 
 

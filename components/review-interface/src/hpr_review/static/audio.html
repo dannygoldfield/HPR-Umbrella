@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>HPR Audio Review</title>
+  <style>
+    :root { color-scheme:dark; --page:#0d0d0c; --card:#1b1a17; --line:#393731; --text:#f3f0e9; --muted:#b7b2a9; --accent:#7bc99c; --danger:#e28b80; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--page); color:var(--text); font:16px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    header { min-height:64px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.75rem 1.25rem; }
+    h1 { font-size:1.12rem; margin:0; }
+    .header-title { display:flex; align-items:baseline; flex-wrap:wrap; gap:.45rem .8rem; }
+    .bank-progress { color:var(--accent); font-size:.9rem; font-weight:650; }
+    select,button,textarea { font:inherit; color:var(--text); background:#292824; border:1px solid var(--line); border-radius:8px; }
+    select { max-width:31rem; padding:.55rem .7rem; }
+    main { width:min(920px,calc(100% - 2rem)); margin:1.25rem auto; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:1.15rem; }
+    .top { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(17rem,.8fr); gap:1.25rem; align-items:start; }
+    .eyebrow { color:var(--muted); font-size:.82rem; letter-spacing:.03em; text-transform:uppercase; }
+    h2 { margin:.2rem 0 .25rem; font-size:1.35rem; }
+    .muted { color:var(--muted); }
+    .player { display:flex; align-items:center; gap:.85rem; margin:1rem 0 .55rem; padding:.75rem; border:1px solid var(--line); border-radius:10px; background:#121210; }
+    .player button { min-width:7.5rem; }
+    .player button.playing { background:var(--accent); color:#102116; border-color:var(--accent); font-weight:700; }
+    .player-status { min-width:0; }
+    .player-status strong,.player-status span { display:block; }
+    .player-status span { color:var(--muted); font-size:.88rem; margin-top:.12rem; }
+    .loop-note { display:flex; align-items:center; gap:.5rem; color:var(--muted); font-size:.92rem; }
+    .loop-dot { width:.65rem; height:.65rem; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px #7bc99c22; }
+    dl { display:grid; grid-template-columns:9rem 1fr; gap:.45rem .7rem; margin:0; font-size:.92rem; }
+    dt { color:var(--muted); }
+    dd { margin:0; overflow-wrap:anywhere; }
+    a { color:#f1b35e; }
+    hr { border:0; border-top:1px solid var(--line); margin:1.1rem 0; }
+    .label { font-weight:650; margin:.8rem 0 .45rem; }
+    .ratings,.decisions,.navigation { display:flex; flex-wrap:wrap; gap:.48rem; }
+    button { min-width:2.8rem; padding:.6rem .78rem; cursor:pointer; }
+    button.active { background:var(--accent); color:#102116; border-color:var(--accent); font-weight:700; }
+    label.choice { display:flex; align-items:center; gap:.48rem; padding:.62rem .72rem; border:1px solid var(--line); border-radius:8px; cursor:pointer; background:#25241f; }
+    label.choice.active.approve { border-color:var(--accent); color:var(--accent); }
+    label.choice.active.reject { border-color:var(--danger); color:var(--danger); }
+    textarea { width:100%; min-height:7rem; resize:vertical; padding:.7rem; }
+    .navigation { align-items:center; justify-content:space-between; margin-top:1rem; }
+    .save { color:var(--muted); min-height:1.3rem; text-align:center; }
+    .shortcut { color:var(--muted); font-size:.85rem; margin-top:.65rem; }
+    details { border:1px solid var(--line); border-radius:8px; margin-top:1rem; }
+    summary { padding:.65rem .75rem; cursor:pointer; font-weight:600; }
+    details dl { padding:0 .75rem .75rem; }
+    @media (max-width:720px) {
+      header { align-items:flex-start; flex-direction:column; }
+      select { width:100%; max-width:none; }
+      .top { grid-template-columns:1fr; }
+      main { width:min(100% - 1rem,920px); margin:.5rem auto; }
+      .card { padding:.85rem; border-radius:10px; }
+      dl { grid-template-columns:7.5rem 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-title">
+      <h1>HPR Audio Review</h1>
+      <span class="bank-progress" id="bankProgress"></span>
+    </div>
+    <select id="batch" aria-label="Audio review batch"></select>
+  </header>
+  <main>
+    <section class="card" id="app" hidden>
+      <div class="top">
+        <div>
+          <div class="eyebrow" id="counter"></div>
+          <h2 id="title"></h2>
+          <div class="muted" id="instruction">Listen without video. Let playback cross the loop boundary at least twice.</div>
+          <div class="player">
+            <button id="play" disabled>Loading…</button>
+            <div class="player-status" aria-live="polite">
+              <strong id="playStatus">Preloading audio for gapless playback…</strong>
+              <span id="playClock">0:00 / 0:11</span>
+            </div>
+          </div>
+          <div class="loop-note"><span class="loop-dot"></span>Sample-accurate continuous loop playback is on</div>
+        </div>
+        <dl>
+          <dt>Duration</dt><dd id="duration"></dd>
+          <dt>Playback level</dt><dd id="level"></dd>
+          <dt>Recipe</dt><dd id="recipe"></dd>
+          <dt>Seed</dt><dd id="seed"></dd>
+          <dt>Status</dt><dd id="status"></dd>
+          <dt>Provenance</dt><dd><a id="manifest" target="_blank">Open record</a></dd>
+        </dl>
+      </div>
+      <hr>
+      <div class="label">Audio rating</div>
+      <div class="ratings" id="ratings"></div>
+      <div class="label">Decision</div>
+      <div class="decisions">
+        <label class="choice approve" id="approveLabel"><input id="approve" type="checkbox"> Approve for audio bank</label>
+        <label class="choice reject" id="rejectLabel"><input id="reject" type="checkbox"> Reject audio</label>
+      </div>
+      <div class="label">Notes</div>
+      <textarea id="notes" placeholder="Does the sound work? Is the loop boundary invisible?"></textarea>
+      <div class="navigation">
+        <button id="previous">← Previous</button>
+        <div class="save" id="saveStatus"></div>
+        <button id="next">Next →</button>
+      </div>
+      <div class="shortcut">←/→ navigate · Space play/pause · 1–5 rate · A approve · R reject · notes save automatically</div>
+      <details>
+        <summary>Candidate identity</summary>
+        <dl>
+          <dt>Audio ID</dt><dd id="audioId"></dd>
+          <dt>Batch</dt><dd id="batchId"></dd>
+          <dt>Generator</dt><dd id="generator"></dd>
+          <dt>Technical loop check</dt><dd id="loopCheck"></dd>
+        </dl>
+      </details>
+    </section>
+    <section class="card" id="error" hidden></section>
+  </main>
+  <script>
+    const $=id=>document.getElementById(id);
+    const PENDING_ELEVEN='__pending_eleven__', BANK_TARGET=40;
+    let registered=[], all=[], pendingEleven=[], candidates=[], currentBatch='', position=0, saveTimer=null, saveSequence=0, dirty=false;
+    let audioContext=null, audioBuffer=null, audioSource=null, playbackOffset=0, playbackStartedAt=0, playbackActive=false, loadSequence=0, clockFrame=null;
+    const current=()=>candidates[position];
+
+    const formatTime=seconds=>{
+      const value=Math.max(0,Number(seconds)||0), minutes=Math.floor(value/60), remainder=Math.floor(value%60);
+      return `${minutes}:${String(remainder).padStart(2,'0')}`;
+    };
+    function ensureAudioContext(){
+      if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();
+      return audioContext;
+    }
+    function currentLoopTime(){
+      if(!audioBuffer)return 0;
+      const elapsed=playbackActive?audioContext.currentTime-playbackStartedAt:0;
+      return (playbackOffset+elapsed)%audioBuffer.duration;
+    }
+    function updateClock(){
+      if(!audioBuffer)return;
+      $('playClock').textContent=`${formatTime(currentLoopTime())} / ${formatTime(Math.round(audioBuffer.duration))}`;
+      if(playbackActive)clockFrame=requestAnimationFrame(updateClock);
+    }
+    function stopPlayback({preserveOffset=false}={}){
+      if(playbackActive&&preserveOffset)playbackOffset=currentLoopTime();
+      if(audioSource){
+        audioSource.onended=null;
+        try{audioSource.stop();}catch(error){}
+        audioSource.disconnect(); audioSource=null;
+      }
+      playbackActive=false;
+      if(clockFrame)cancelAnimationFrame(clockFrame);
+      clockFrame=null;
+      $('play').classList.remove('playing');
+      $('play').textContent=audioBuffer?'Play loop':'Loading…';
+      updateClock();
+    }
+    async function loadAudio(url){
+      const sequence=++loadSequence;
+      stopPlayback(); audioBuffer=null; playbackOffset=0;
+      $('play').disabled=true; $('play').textContent='Loading…';
+      $('playStatus').textContent='Preloading audio for gapless playback…';
+      $('playClock').textContent='0:00';
+      try{
+        const response=await fetch(url);
+        if(!response.ok)throw new Error(`Audio request failed (${response.status})`);
+        const encoded=await response.arrayBuffer();
+        const decoded=await ensureAudioContext().decodeAudioData(encoded);
+        if(sequence!==loadSequence)return;
+        audioBuffer=decoded; $('play').disabled=false; $('play').textContent='Play loop';
+        $('playStatus').textContent='Ready — the complete WAV is held in memory';
+        updateClock();
+      }catch(error){
+        if(sequence!==loadSequence)return;
+        $('playStatus').textContent=`Could not load audio: ${error.message}`;
+      }
+    }
+    async function togglePlayback(){
+      if(!audioBuffer)return;
+      if(playbackActive){
+        stopPlayback({preserveOffset:true});
+        $('playStatus').textContent='Paused';
+        return;
+      }
+      const context=ensureAudioContext(); await context.resume();
+      audioSource=context.createBufferSource(); audioSource.buffer=audioBuffer;
+      audioSource.loop=true; audioSource.loopStart=0; audioSource.loopEnd=audioBuffer.duration;
+      audioSource.connect(context.destination); playbackStartedAt=context.currentTime;
+      audioSource.start(0,playbackOffset); playbackActive=true;
+      $('play').classList.add('playing'); $('play').textContent='Pause';
+      $('playStatus').textContent='Playing sample-accurate loop'; updateClock();
+    }
+
+    function reviewStatus(c){
+      if(c.selected)return 'Approved for audio bank';
+      if(c.rejected)return 'Rejected';
+      if(c.rating||c.notes)return 'Reviewed — decision open';
+      return 'Awaiting review';
+    }
+    function updateBankProgress(){
+      const count=registered.filter(candidate=>Number(candidate.duration_sec)===11&&candidate.render_status==='banked').length;
+      $('bankProgress').textContent=`11-second bank: ${count} of ${BANK_TARGET}`;
+    }
+    function renderControls(){
+      const c=current();
+      [...$('ratings').children].forEach((button,index)=>button.classList.toggle('active',c.rating===index+1));
+      $('approve').checked=c.selected; $('reject').checked=c.rejected;
+      $('approveLabel').classList.toggle('active',c.selected);
+      $('rejectLabel').classList.toggle('active',c.rejected);
+      $('notes').value=c.notes||''; $('status').textContent=reviewStatus(c);
+    }
+    function render(){
+      const c=current(); if(!c)return;
+      $('counter').textContent=`Candidate ${position+1} of ${candidates.length}`;
+      const optionNumber=currentBatch===PENDING_ELEVEN?position+1:c.review_position||position+1;
+      $('title').textContent=currentBatch===PENDING_ELEVEN?`Audio option ${String(optionNumber).padStart(2,'0')}`:c.comparison_name||`Audio option ${String(optionNumber).padStart(2,'0')}`;
+      $('instruction').textContent=currentBatch===PENDING_ELEVEN?'Approve only if you like the mix and can close your eyes without hearing the transition from end to start. Automated checks are only a prefilter.':c.recipe_id==='AR-012-ROOM-TONE-BALANCE'?'Only the continuous water ambience changes. The stem and short effect remain at their original levels; the displayed overall LUFS falls honestly with the room tone.':c.recipe_id==='AR-012-BED-BALANCE'?'Superseded calibration setup.':c.recipe_id==='AR-012'?'These are new eleven-second compositions, not extensions of seven-second tracks. Judge the sound and the loop independently, and let playback cross the boundary at least twice.':c.recipe_id.includes('LOOP-NATIVE')?'Listen in order: A tests ambience, B adds the gesture, and C adds music. Note the first layer where the loop becomes audible.':c.recipe_id.includes('LOOP-REPAIR')?'The sound design is locked. Judge only whether the boundary disappears during continuous playback.':'Listen without video. Let playback cross the loop boundary at least twice.';
+      loadAudio(c.media_url);
+      $('duration').textContent=`${Number(c.duration_sec).toFixed(0)} native seconds`;
+      const playbackLufs=c.delivered_lufs??c.target_lufs;
+      $('level').textContent=playbackLufs==null?'—':`${Number(playbackLufs).toFixed(1)} LUFS`;
+      $('recipe').textContent=c.recipe_id; $('seed').textContent=c.seed;
+      $('manifest').href=c.manifest_url; $('audioId').textContent=c.audio_id;
+      $('batchId').textContent=c.batch_id; $('generator').textContent=c.generator_version;
+      $('loopCheck').textContent=c.loop_click_check===true?'Passed — human listening still required':'Human listening required';
+      $('previous').disabled=position===0; $('next').disabled=position===candidates.length-1;
+      $('saveStatus').textContent=''; dirty=false; renderControls();
+    }
+    function chooseBatch(batchId){
+      currentBatch=batchId;
+      candidates=(batchId===PENDING_ELEVEN?pendingEleven:all.filter(candidate=>candidate.batch_id===batchId)).sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||'')||(a.review_position||0)-(b.review_position||0));
+      position=0; render();
+    }
+    function navigate(delta){
+      const next=Math.max(0,Math.min(candidates.length-1,position+delta));
+      if(next===position)return;
+      clearTimeout(saveTimer); current().notes=$('notes').value; if(dirty)save(); position=next; render();
+    }
+    async function save(){
+      clearTimeout(saveTimer); dirty=false; const c=current(), sequence=++saveSequence; $('saveStatus').textContent='Saving…';
+      try {
+        const response=await fetch(`/api/audio-reviews/${encodeURIComponent(c.audio_id)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rating:c.rating,rejected:c.rejected,selected:c.selected,notes:c.notes||''})});
+        if(!response.ok)throw new Error((await response.json()).error||'Save failed');
+        c.render_status=c.rejected?'retired':c.selected?'banked':'ready_for_review';
+        updateBankProgress();
+        if(sequence===saveSequence)$('saveStatus').textContent='Saved';
+      } catch(error){ $('saveStatus').textContent=`Not saved: ${error.message}`; }
+      $('status').textContent=reviewStatus(c);
+    }
+    function queueSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(save,600); }
+    function setRating(value){ const c=current(); c.rating=c.rating===value?null:value; renderControls(); save(); }
+    for(let value=1;value<=5;value++){ const button=document.createElement('button'); button.textContent=value; button.onclick=()=>setRating(value); $('ratings').appendChild(button); }
+    $('approve').onchange=()=>{ const c=current(); c.selected=$('approve').checked; if(c.selected)c.rejected=false; renderControls(); save(); };
+    $('reject').onchange=()=>{ const c=current(); c.rejected=$('reject').checked; if(c.rejected)c.selected=false; renderControls(); save(); };
+    $('notes').oninput=()=>{ current().notes=$('notes').value; dirty=true; queueSave(); };
+    $('play').onclick=togglePlayback;
+    $('previous').onclick=()=>navigate(-1); $('next').onclick=()=>navigate(1);
+    $('batch').onchange=()=>chooseBatch($('batch').value);
+    document.addEventListener('keydown',event=>{
+      if(event.target.matches('textarea,input,select'))return;
+      if(event.key>='1'&&event.key<='5')setRating(Number(event.key));
+      else if(event.key.toLowerCase()==='a')$('approve').click();
+      else if(event.key.toLowerCase()==='r')$('reject').click();
+      else if(event.key==='ArrowLeft')navigate(-1);
+      else if(event.key==='ArrowRight')navigate(1);
+      else if(event.key===' '){ event.preventDefault(); togglePlayback(); }
+    });
+    fetch('/api/audio-candidates').then(response=>response.json()).then(data=>{
+      registered=data.candidates;
+      all=registered.filter(candidate=>['ready_for_review','banked'].includes(candidate.render_status));
+      if(!all.length)throw new Error('No standalone audio candidates are registered.');
+      pendingEleven=registered.filter(candidate=>Number(candidate.duration_sec)===11&&candidate.render_status==='ready_for_review').sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
+      updateBankProgress();
+      const batches=[...new Set(all.map(candidate=>candidate.batch_id))];
+      const newest=batchId=>all.filter(candidate=>candidate.batch_id===batchId).reduce((latest,candidate)=>candidate.created_at>latest?candidate.created_at:latest,'');
+      batches.sort((a,b)=>newest(b).localeCompare(newest(a)));
+      if(pendingEleven.length){
+        const option=document.createElement('option'); option.value=PENDING_ELEVEN;
+        option.textContent=`Next 11-second audio review — ${pendingEleven.length} awaiting decisions`;
+        $('batch').appendChild(option);
+      }
+      for(const batchId of batches){
+        const count=all.filter(candidate=>candidate.batch_id===batchId).length;
+        const option=document.createElement('option'); option.value=batchId;
+        option.textContent=batchId.includes('room-tone-balance')?`Corrected room-tone balance — ${count} levels`:batchId.includes('bed-balance')?`Room-tone balance calibration — ${count} levels`:batchId.includes('fresh-eleven')?`Fresh native eleven-second batch — ${count} candidates`:batchId==='AB-20260731-003'?`Approved seven-second bank — ${count} tracks`:batchId.includes('loop-native')?`Loop-native diagnosis — ${count} layers`:batchId.includes('loop-repair')?`Loop repair — ${count} versions of audio option 02`:batchId==='AB-20260824-004'?`Eleven-second recovery — ${count} audio-only candidates`:`${batchId} — ${count} candidates`;
+        $('batch').appendChild(option);
+      }
+      $('app').hidden=false; chooseBatch(pendingEleven.length?PENDING_ELEVEN:batches[0]);
+    }).catch(error=>{ $('error').hidden=false; $('error').textContent=error.message; });
+  </script>
+</body>
+</html>

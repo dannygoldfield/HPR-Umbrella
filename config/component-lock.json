@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "components": {
+    "audio": {
+      "name": "HPR-Audio-Generator",
+      "repository": "https://github.com/dannygoldfield/HPR-Audio-Generator.git",
+      "commit": "a012dbc3e8c0cd2a4f808edd24be5358c2d9ba63",
+      "localPath": "../HPR-Audio-Generator",
+      "environmentVariable": "HPR_AUDIO_GENERATOR_ROOT",
+      "packagePath": "src/hpr_audio_generator",
+      "productionConfig": "config/generator.xml"
+    },
+    "video": {
+      "name": "HPR-Video-Generator",
+      "repository": "https://github.com/dannygoldfield/HPR-Video-Generator.git",
+      "commit": "42e81e7ebdd97cbdc33b601b22c52d28653a276e",
+      "localPath": "../HPR-Video-Generator",
+      "environmentVariable": "HPR_VIDEO_GENERATOR_ROOT",
+      "packagePath": "src/hpr_video_generator",
+      "productionConfig": "config/production-visual-policy.json"
+    }
+  }
+}
